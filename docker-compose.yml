@@ -19,14 +19,14 @@ services:
     container_name: stock-insight-backend
     ports:
       - "5001:5000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/stock_insight_db
-      - SECRET_KEY=99cf0cb0afe6c423edad1923b6c5a9a8cbad26176cde6344009929f086acbd0b
-      - FLASK_APP=run.py
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=stock_insight_db
-      - FERNET_KEY=DsBlbaBwjjtJ6md_lU3ipzHN0aoePRrtkd298vo5PCk=
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_APP=${FLASK_APP}
+      - FERNET_KEY=${FERNET_KEY}
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -40,12 +40,14 @@ services:
     container_name: stock-insight-db
     ports:
       - "5433:5432"
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=stock_insight_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d stock_insight_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
     volumes:
       - db_data:/var/lib/postgresql/data

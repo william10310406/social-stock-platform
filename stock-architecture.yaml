@@ -110,7 +110,7 @@ components:
     tables:
       users:
         columns:
-            - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
           - username: VARCHAR(80) UNIQUE NOT NULL
           - email: VARCHAR(120) UNIQUE NOT NULL
           - password_hash: VARCHAR(256) NOT NULL

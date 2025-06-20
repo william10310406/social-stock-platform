@@ -141,6 +141,14 @@
 - 數據完整性檢查
 - Flask-Migrate 版本控制
 
+**🔒 安全性特性**
+- 環境變數管理（.env 文件）
+- JWT Token 認證
+- 密碼哈希加密
+- SQL 注入防護
+- CORS 保護
+- 輸入驗證與清理
+
 ## 📁 專案結構
 
 ```
@@ -179,14 +187,28 @@ test/
 
 1. **克隆專案**
    ```bash
-   git clone <repository-url>
-   cd test
+   git clone https://github.com/william10310406/social-stock-platform.git
+   cd social-stock-platform
    ```
 
-2. **啟動所有服務**
+2. **設置環境變數**
    ```bash
-   docker-compose up --build
+   # 複製環境變數範例文件
+   cp .env.example .env
+   
+   # 編輯 .env 文件，設置您的配置
+   # 至少需要設置：SECRET_KEY, FERNET_KEY, 數據庫密碼等
    ```
+   
+   ⚠️ **重要**：請務必修改 `.env` 文件中的敏感資訊，特別是：
+   - `SECRET_KEY` - 使用隨機字符串
+   - `FERNET_KEY` - 用於數據加密
+   - `POSTGRES_PASSWORD` - 設置強密碼
+
+3. **啟動所有服務**
+    ```bash
+    docker-compose up --build
+    ```
 
 3. **訪問應用**
    - **前端**: `http://localhost:5173`
