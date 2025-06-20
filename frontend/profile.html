@@ -1,94 +1,153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Profile - Stock Insight Platform</title>
     <!-- Removed inline script as we handle protection in profile.js -->
-    <link rel="stylesheet" href="/src/css/style.css">
-</head>
-<body class="bg-gray-100">
+    <link rel="stylesheet" href="/src/css/style.css" />
+  </head>
+  <body class="bg-gray-100">
     <nav class="bg-white shadow-sm">
-        <!-- Authenticated User Nav -->
-        <div id="nav-links-user" class="">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
-                        <a href="/dashboard.html" class="flex-shrink-0 flex items-center text-xl font-bold">StockInsight</a>
-                        <div class="ml-6 flex space-x-8">
-                            <a href="/dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
-                            <a href="/profile.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Profile</a>
-                            <a href="/friends.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Friends</a>
-                            <a href="/chat.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Chat</a>
-                        </div>
-                    </div>
-                    <div class="flex items-center ml-6">
-                        <button id="logout-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Logout</button>
-                    </div>
-                </div>
+      <!-- Authenticated User Nav -->
+      <div id="nav-links-user" class="">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex">
+              <a href="/dashboard.html" class="flex-shrink-0 flex items-center text-xl font-bold"
+                >StockInsight</a
+              >
+              <div class="ml-6 flex space-x-8">
+                <a
+                  href="/dashboard.html"
+                  class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >Dashboard</a
+                >
+                <a
+                  href="/profile.html"
+                  class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >Profile</a
+                >
+                <a
+                  href="/friends.html"
+                  class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >Friends</a
+                >
+                <a
+                  href="/chat.html"
+                  class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >Chat</a
+                >
+              </div>
             </div>
+            <div class="flex items-center ml-6">
+              <button
+                id="logout-button"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Guest Nav -->
-        <div id="nav-links-guest" class="hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <a href="/" class="flex items-center text-xl font-bold">StockInsight</a>
-                    <div class="flex items-center">
-                        <a href="/login.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mr-2">Login</a>
-                        <a href="/register.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Register</a>
-                    </div>
-                </div>
+      <!-- Guest Nav -->
+      <div id="nav-links-guest" class="hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <a href="/" class="flex items-center text-xl font-bold">StockInsight</a>
+            <div class="flex items-center">
+              <a
+                href="/login.html"
+                class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+                >Login</a
+              >
+              <a
+                href="/register.html"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+                >Register</a
+              >
             </div>
+          </div>
         </div>
+      </div>
     </nav>
 
     <div class="container mx-auto mt-10 p-4">
-        <div id="profile-container" class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-            
-            <!-- View Profile Section -->
-            <div id="view-profile-section">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold">Your Profile</h2>
-                    <button id="edit-profile-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm font-semibold">Edit Profile</button>
-                </div>
-                <div id="profile-data-container" class="space-y-4">
-                    <!-- Profile data will be loaded here -->
-                    <p>Loading profile...</p>
-                </div>
-            </div>
-
-            <!-- Edit Profile Section (hidden by default) -->
-            <div id="edit-profile-section" class="hidden">
-                <h2 class="text-2xl font-bold mb-6">Edit Your Profile</h2>
-                <form id="edit-profile-form" class="space-y-6">
-                    <div>
-                        <label for="edit-username" class="block text-sm font-medium text-gray-700">Username</label>
-                        <input type="text" id="edit-username" name="username" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="edit-bio" class="block text-sm font-medium text-gray-700">Bio</label>
-                        <textarea id="edit-bio" name="bio" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Tell us about yourself..."></textarea>
-                    </div>
-                    <div class="flex items-center justify-end space-x-4">
-                        <button type="button" id="cancel-edit-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
-                        <button type="submit" id="save-profile-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-
+      <div id="profile-container" class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+        <!-- View Profile Section -->
+        <div id="view-profile-section">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold">Your Profile</h2>
+            <button
+              id="edit-profile-btn"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm font-semibold"
+            >
+              Edit Profile
+            </button>
+          </div>
+          <div id="profile-data-container" class="space-y-4">
+            <!-- Profile data will be loaded here -->
+            <p>Loading profile...</p>
+          </div>
         </div>
 
-        <!-- My Posts Section -->
-        <div class="max-w-xl mx-auto bg-white rounded-lg shadow-md p-8 mt-8">
-            <h2 class="text-2xl font-bold mb-6">My Posts</h2>
-            <div id="my-posts-container" class="space-y-4">
-                <!-- User's posts will be loaded here -->
-                <p>Loading posts...</p>
+        <!-- Edit Profile Section (hidden by default) -->
+        <div id="edit-profile-section" class="hidden">
+          <h2 class="text-2xl font-bold mb-6">Edit Your Profile</h2>
+          <form id="edit-profile-form" class="space-y-6">
+            <div>
+              <label for="edit-username" class="block text-sm font-medium text-gray-700"
+                >Username</label
+              >
+              <input
+                type="text"
+                id="edit-username"
+                name="username"
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
             </div>
+            <div>
+              <label for="edit-bio" class="block text-sm font-medium text-gray-700">Bio</label>
+              <textarea
+                id="edit-bio"
+                name="bio"
+                rows="4"
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Tell us about yourself..."
+              ></textarea>
+            </div>
+            <div class="flex items-center justify-end space-x-4">
+              <button
+                type="button"
+                id="cancel-edit-btn"
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="save-profile-btn"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
+
+      <!-- My Posts Section -->
+      <div class="max-w-xl mx-auto bg-white rounded-lg shadow-md p-8 mt-8">
+        <h2 class="text-2xl font-bold mb-6">My Posts</h2>
+        <div id="my-posts-container" class="space-y-4">
+          <!-- User's posts will be loaded here -->
+          <p>Loading posts...</p>
+        </div>
+      </div>
     </div>
-    
+
     <script type="module" src="/src/js/profile.js"></script>
-</body>
-</html> 
+  </body>
+</html>

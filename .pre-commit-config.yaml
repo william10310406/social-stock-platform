@@ -1,0 +1,44 @@
+# Pre-commit hooks configuration for Stock Insight Platform
+# See https://pre-commit.com for more information
+
+repos:
+  # General hooks for all file types
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '.md$'
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: 'stock-architecture.yaml'  # Skip complex YAML file
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python code formatting and linting (basic)
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+        files: '^backend/.*\.py$'
+        args: ['--line-length=100']
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        files: '^backend/.*\.py$'
+        args: ['--profile=black', '--line-length=100']
+
+  # JavaScript/Frontend formatting (basic)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        files: '^frontend/.*\.(js|json|css)$'
+        exclude: '^frontend/(node_modules|dist)/'
+        args: ['--write', '--print-width=100', '--single-quote']

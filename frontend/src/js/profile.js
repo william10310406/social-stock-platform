@@ -21,44 +21,46 @@ const myPostsContainer = document.getElementById('my-posts-container');
 // --- Functions ---
 
 const handleLikePost = async (event) => {
-    // This function is duplicated from dashboard.js/post.js, in a real large app, this would be in a shared module.
-    const button = event.currentTarget;
-    const postId = button.dataset.postId;
-    const token = localStorage.getItem('token');
-    const isLiked = button.classList.contains('text-red-500');
-    const method = isLiked ? 'DELETE' : 'POST';
+  // This function is duplicated from dashboard.js/post.js, in a real large app, this would be in a shared module.
+  const button = event.currentTarget;
+  const postId = button.dataset.postId;
+  const token = localStorage.getItem('token');
+  const isLiked = button.classList.contains('text-red-500');
+  const method = isLiked ? 'DELETE' : 'POST';
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
-            method: method,
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-            const likeCountSpan = button.querySelector('.like-count');
-            let likeCount = parseInt(likeCountSpan.textContent);
-            if (isLiked) {
-                button.classList.remove('text-red-500');
-                likeCount--;
-            } else {
-                button.classList.add('text-red-500');
-                likeCount++;
-            }
-            likeCountSpan.textContent = likeCount;
-        }
-    } catch (error) {
-        console.error('Like/Unlike error:', error);
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+      method: method,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.ok) {
+      const likeCountSpan = button.querySelector('.like-count');
+      let likeCount = parseInt(likeCountSpan.textContent);
+      if (isLiked) {
+        button.classList.remove('text-red-500');
+        likeCount--;
+      } else {
+        button.classList.add('text-red-500');
+        likeCount++;
+      }
+      likeCountSpan.textContent = likeCount;
     }
+  } catch (error) {
+    console.error('Like/Unlike error:', error);
+  }
 };
 
 const displayPosts = (posts) => {
-    if (!myPostsContainer) return;
+  if (!myPostsContainer) return;
 
-    if (posts.length === 0) {
-        myPostsContainer.innerHTML = '<p class="text-gray-500">You have not created any posts yet.</p>';
-        return;
-    }
+  if (posts.length === 0) {
+    myPostsContainer.innerHTML = '<p class="text-gray-500">You have not created any posts yet.</p>';
+    return;
+  }
 
-    myPostsContainer.innerHTML = posts.map(post => `
+  myPostsContainer.innerHTML = posts
+    .map(
+      (post) => `
         <div class="border-b pb-4 mb-4" id="post-${post.id}">
             <div class="flex justify-between items-start mb-2">
                 <a href="/post.html?id=${post.id}" class="text-lg font-semibold text-gray-800 hover:underline">${post.title}</a>
@@ -77,72 +79,75 @@ const displayPosts = (posts) => {
                 </div>
             </div>
         </div>
-    `).join('');
+    `,
+    )
+    .join('');
 
-    // Add event listeners to all delete and like buttons
-    document.querySelectorAll('.delete-post-btn').forEach(button => {
-        button.addEventListener('click', handleDeletePost);
-    });
-    document.querySelectorAll('.like-btn').forEach(button => {
-        button.addEventListener('click', handleLikePost);
-    });
+  // Add event listeners to all delete and like buttons
+  document.querySelectorAll('.delete-post-btn').forEach((button) => {
+    button.addEventListener('click', handleDeletePost);
+  });
+  document.querySelectorAll('.like-btn').forEach((button) => {
+    button.addEventListener('click', handleLikePost);
+  });
 };
 
 const handleDeletePost = async (event) => {
-    const postId = event.target.dataset.postId;
-    if (!confirm(`Are you sure you want to delete this post?`)) {
-        return;
-    }
+  const postId = event.target.dataset.postId;
+  if (!confirm(`Are you sure you want to delete this post?`)) {
+    return;
+  }
 
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        if (response.ok) {
-            alert('Post deleted successfully!');
-            // Remove the post element from the DOM
-            document.getElementById(`post-${postId}`).remove();
-        } else {
-            const result = await response.json();
-            alert(`Failed to delete post: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Error deleting post:', error);
-        alert('An error occurred while deleting the post.');
+    if (response.ok) {
+      alert('Post deleted successfully!');
+      // Remove the post element from the DOM
+      document.getElementById(`post-${postId}`).remove();
+    } else {
+      const result = await response.json();
+      alert(`Failed to delete post: ${result.message}`);
     }
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    alert('An error occurred while deleting the post.');
+  }
 };
 
 const fetchMyPosts = async () => {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${API_BASE_URL}/posts/myposts`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-            const posts = await response.json();
-            displayPosts(posts);
-        } else {
-            myPostsContainer.innerHTML = '<p class="text-red-500">Failed to load posts.</p>';
-        }
-    } catch (error) {
-        console.error('Error fetching my posts:', error);
-        myPostsContainer.innerHTML = '<p class="text-red-500">An error occurred while loading posts.</p>';
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/myposts`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.ok) {
+      const posts = await response.json();
+      displayPosts(posts);
+    } else {
+      myPostsContainer.innerHTML = '<p class="text-red-500">Failed to load posts.</p>';
     }
+  } catch (error) {
+    console.error('Error fetching my posts:', error);
+    myPostsContainer.innerHTML =
+      '<p class="text-red-500">An error occurred while loading posts.</p>';
+  }
 };
 
 const displayProfile = (userData) => {
-    console.log('displayProfile() called with userData:', userData);
-    console.log('profileContainer element:', profileContainer);
-    
-    if (!profileContainer) {
-        console.error('profileContainer element not found!');
-        return;
-    }
-    
-    profileContainer.innerHTML = `
+  console.log('displayProfile() called with userData:', userData);
+  console.log('profileContainer element:', profileContainer);
+
+  if (!profileContainer) {
+    console.error('profileContainer element not found!');
+    return;
+  }
+
+  profileContainer.innerHTML = `
         <div class="space-y-4">
             <div>
                 <p class="text-sm font-medium text-gray-500">Username</p>
@@ -158,161 +163,161 @@ const displayProfile = (userData) => {
             </div>
         </div>
     `;
-    
-    console.log('Profile HTML updated. New innerHTML:', profileContainer.innerHTML);
+
+  console.log('Profile HTML updated. New innerHTML:', profileContainer.innerHTML);
 };
 
 const switchToEditMode = () => {
-    if (!currentUserData) return;
-    
-    // Populate form with current data
-    usernameInput.value = currentUserData.username;
-    bioInput.value = currentUserData.bio || '';
+  if (!currentUserData) return;
 
-    // Switch visibility
-    viewProfileSection.classList.add('hidden');
-    editProfileSection.classList.remove('hidden');
+  // Populate form with current data
+  usernameInput.value = currentUserData.username;
+  bioInput.value = currentUserData.bio || '';
+
+  // Switch visibility
+  viewProfileSection.classList.add('hidden');
+  editProfileSection.classList.remove('hidden');
 };
 
 const switchToViewMode = () => {
-    viewProfileSection.classList.remove('hidden');
-    editProfileSection.classList.add('hidden');
+  viewProfileSection.classList.remove('hidden');
+  editProfileSection.classList.add('hidden');
 };
 
 const fetchProfile = async () => {
-    console.log('fetchProfile() called');
-    const token = localStorage.getItem('token');
-    console.log('Token available:', !!token);
-    
-    if (!token) {
-        alert("You must be logged in to view this page.");
-        window.location.href = '/login.html';
-        return;
-    }
+  console.log('fetchProfile() called');
+  const token = localStorage.getItem('token');
+  console.log('Token available:', !!token);
 
-    try {
-        console.log('Making API call to:', `${API_BASE_URL}/auth/profile`);
-        const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+  if (!token) {
+    alert('You must be logged in to view this page.');
+    window.location.href = '/login.html';
+    return;
+  }
 
-        console.log('Response status:', response.status);
-        
-        if (response.ok) {
-            currentUserData = await response.json();
-            console.log('Profile data received:', currentUserData);
-            displayProfile(currentUserData);
-            fetchMyPosts(); // Fetch user's posts after fetching profile
-        } else {
-            const errorText = await response.text();
-            console.error('Profile fetch failed:', response.status, errorText);
-            alert('Could not load your profile. Please try logging in again.');
-            localStorage.removeItem('token');
-            localStorage.removeItem('userId');
-            window.location.href = '/login.html';
-        }
-    } catch (error) {
-        console.error('Error fetching profile:', error);
-        alert('An error occurred while fetching your profile.');
+  try {
+    console.log('Making API call to:', `${API_BASE_URL}/auth/profile`);
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log('Response status:', response.status);
+
+    if (response.ok) {
+      currentUserData = await response.json();
+      console.log('Profile data received:', currentUserData);
+      displayProfile(currentUserData);
+      fetchMyPosts(); // Fetch user's posts after fetching profile
+    } else {
+      const errorText = await response.text();
+      console.error('Profile fetch failed:', response.status, errorText);
+      alert('Could not load your profile. Please try logging in again.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      window.location.href = '/login.html';
     }
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    alert('An error occurred while fetching your profile.');
+  }
 };
 
 const handleUpdateProfile = async (event) => {
-    event.preventDefault();
-    const token = localStorage.getItem('token');
+  event.preventDefault();
+  const token = localStorage.getItem('token');
 
-    const updatedData = {
-        username: usernameInput.value,
-        bio: bioInput.value,
-    };
+  const updatedData = {
+    username: usernameInput.value,
+    bio: bioInput.value,
+  };
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(updatedData)
-        });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
 
-        const result = await response.json();
+    const result = await response.json();
 
-        if (response.ok) {
-            alert('Profile updated successfully!');
-            await fetchProfile(); // Refresh profile data
-            switchToViewMode();
-        } else {
-            alert(`Update failed: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        alert('An error occurred while updating your profile.');
+    if (response.ok) {
+      alert('Profile updated successfully!');
+      await fetchProfile(); // Refresh profile data
+      switchToViewMode();
+    } else {
+      alert(`Update failed: ${result.message}`);
     }
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert('An error occurred while updating your profile.');
+  }
 };
 
 const updateNavbar = () => {
-    console.log('updateNavbar() called in profile.');
-    const token = localStorage.getItem('token');
-    
-    const userNav = document.getElementById('nav-links-user');
-    const guestNav = document.getElementById('nav-links-guest');
+  console.log('updateNavbar() called in profile.');
+  const token = localStorage.getItem('token');
 
-    if (!userNav || !guestNav) {
-        console.log('Nav elements not found');
-        return;
+  const userNav = document.getElementById('nav-links-user');
+  const guestNav = document.getElementById('nav-links-guest');
+
+  if (!userNav || !guestNav) {
+    console.log('Nav elements not found');
+    return;
+  }
+
+  if (token) {
+    userNav.classList.remove('hidden');
+    guestNav.classList.add('hidden');
+
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.replaceWith(logoutButton.cloneNode(true));
+      document.getElementById('logout-button').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        console.log('User logged out, token removed.');
+        window.location.href = '/login.html';
+      });
     }
-
-    if (token) {
-        userNav.classList.remove('hidden');
-        guestNav.classList.add('hidden');
-
-        const logoutButton = document.getElementById('logout-button');
-        if (logoutButton) {
-            logoutButton.replaceWith(logoutButton.cloneNode(true));
-            document.getElementById('logout-button').addEventListener('click', () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('userId');
-                console.log('User logged out, token removed.');
-                window.location.href = '/login.html';
-            });
-        }
-    } else {
-        userNav.classList.add('hidden');
-        guestNav.classList.remove('hidden');
-    }
+  } else {
+    userNav.classList.add('hidden');
+    guestNav.classList.remove('hidden');
+  }
 };
 
 // --- Event Listeners ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded event fired in profile.js');
-    console.log('Elements found:', {
-        editProfileBtn: !!editProfileBtn,
-        cancelEditBtn: !!cancelEditBtn,
-        editProfileForm: !!editProfileForm,
-        profileContainer: !!profileContainer,
-        myPostsContainer: !!myPostsContainer
-    });
+  console.log('DOMContentLoaded event fired in profile.js');
+  console.log('Elements found:', {
+    editProfileBtn: !!editProfileBtn,
+    cancelEditBtn: !!cancelEditBtn,
+    editProfileForm: !!editProfileForm,
+    profileContainer: !!profileContainer,
+    myPostsContainer: !!myPostsContainer,
+  });
 
-    if (!localStorage.getItem('token')) {
-        alert("You must be logged in to view this page.");
-        window.location.href = '/login.html';
-        return;
-    }
-    
-    // Update navbar to show user navigation
-    updateNavbar();
-    
-    fetchProfile();
+  if (!localStorage.getItem('token')) {
+    alert('You must be logged in to view this page.');
+    window.location.href = '/login.html';
+    return;
+  }
 
-    if (editProfileBtn) {
-        editProfileBtn.addEventListener('click', switchToEditMode);
-    }
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', switchToViewMode);
-    }
-    if (editProfileForm) {
-        editProfileForm.addEventListener('submit', handleUpdateProfile);
-    }
-}); 
+  // Update navbar to show user navigation
+  updateNavbar();
+
+  fetchProfile();
+
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener('click', switchToEditMode);
+  }
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener('click', switchToViewMode);
+  }
+  if (editProfileForm) {
+    editProfileForm.addEventListener('submit', handleUpdateProfile);
+  }
+});

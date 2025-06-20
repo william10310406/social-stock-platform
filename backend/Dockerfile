@@ -30,4 +30,4 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 # The command to run the application will be specified in docker-compose.yml
 # But we can expose the port here
-EXPOSE 5000 
+EXPOSE 5000

@@ -16,4 +16,4 @@ flask db upgrade
 
 # Start the application
 echo "Starting application with Gunicorn..."
-exec gunicorn --bind 0.0.0.0:5000 --workers 4 --threads 2 --access-logfile - "run:create_app()" 
+exec gunicorn --bind 0.0.0.0:5000 --workers 4 --threads 2 --access-logfile - "run:create_app()"

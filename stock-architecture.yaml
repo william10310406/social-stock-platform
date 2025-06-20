@@ -1,4 +1,3 @@
-```yaml
 project_name: Stock Insight Platform
 purpose: >-
   An interactive, security‑hardened web platform that serves real‑time & historical
@@ -300,7 +299,7 @@ deployment:
       image: redis:alpine
       port: 6379
       purpose: rate_limiting_storage
-  
+
   current_features_implemented:
     authentication:
       - user_registration_with_validation

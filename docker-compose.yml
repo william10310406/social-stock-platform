@@ -70,4 +70,4 @@ volumes:
 
 networks:
   stock-insight-net:
-    driver: bridge 
+    driver: bridge

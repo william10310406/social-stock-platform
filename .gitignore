@@ -22,7 +22,7 @@ yarn-error.log*
 .vscode/
 .idea/
 .DS_Store
-*.swp 
+*.swp
 
 # Docker
 .env

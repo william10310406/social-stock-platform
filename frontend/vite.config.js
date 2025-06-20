@@ -1,5 +1,5 @@
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   root: resolve(__dirname, ''),
@@ -13,13 +13,13 @@ export default defineConfig({
         post: resolve(__dirname, 'post.html'),
       },
     },
-    outDir: resolve(__dirname, 'dist')
+    outDir: resolve(__dirname, 'dist'),
   },
   server: {
     host: '0.0.0.0',
     port: 5173,
     watch: {
-      usePolling: true
-    }
-  }
-}) 
+      usePolling: true,
+    },
+  },
+});
