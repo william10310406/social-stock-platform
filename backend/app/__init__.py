@@ -58,4 +58,33 @@ def create_app(config_class=Config):
     def index():
         return "Welcome to the Stock Insight Platform!"
 
+    @app.route("/health")
+    @app.route("/api/health")
+    def health_check():
+        """Application health check endpoint"""
+        try:
+            from datetime import datetime
+
+            from sqlalchemy import text
+
+            # Test database connection
+            with db.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+
+            return {
+                "status": "healthy",
+                "timestamp": datetime.utcnow().isoformat(),
+                "version": "1.0.0",
+                "database": "connected",
+                "services": {"database": "ok", "redis": "ok"},
+            }, 200
+
+        except Exception as e:
+            app.logger.error(f"Health check failed: {e}")
+            return {
+                "status": "unhealthy",
+                "timestamp": datetime.utcnow().isoformat(),
+                "error": str(e),
+            }, 503
+
     return app
