@@ -31,6 +31,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     bio = db.Column(db.Text, nullable=True) # User's self-introduction
+    refresh_token = db.Column(db.String(512), nullable=True) # Refresh token for JWT
+    refresh_token_expires = db.Column(db.DateTime, nullable=True) # Refresh token expiration
 
     posts = db.relationship('Post', back_populates='author')
     comments = db.relationship('Comment', back_populates='author')

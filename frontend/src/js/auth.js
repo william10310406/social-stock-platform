@@ -5,11 +5,94 @@ import '../css/style.css';
 const API_BASE_URL = 'http://localhost:5001';
 
 // Function to handle user logout
-const handleLogout = () => {
+const handleLogout = async () => {
+    const token = localStorage.getItem('token');
+    
+    // Call logout API to revoke refresh token
+    if (token) {
+        try {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.log('Logout API call failed, but continuing with local logout');
+        }
+    }
+    
+    // Clear local storage
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
-    console.log('User logged out, token removed.');
+    localStorage.removeItem('tokenExpires');
+    console.log('User logged out, tokens removed.');
     window.location.href = '/login.html';
+};
+
+// Function to refresh access token
+const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    
+    if (!refreshToken) {
+        console.log('No refresh token available');
+        handleLogout();
+        return null;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: refreshToken })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Store new access token
+            localStorage.setItem('token', data.access_token);
+            
+            // Calculate expiration time
+            const expiresAt = new Date().getTime() + (data.expires_in * 1000);
+            localStorage.setItem('tokenExpires', expiresAt.toString());
+            
+            console.log('Access token refreshed successfully');
+            return data.access_token;
+        } else {
+            console.log('Token refresh failed:', data.message);
+            handleLogout();
+            return null;
+        }
+    } catch (error) {
+        console.error('Token refresh error:', error);
+        handleLogout();
+        return null;
+    }
+};
+
+// Function to get valid token (refreshes if needed)
+const getValidToken = async () => {
+    const token = localStorage.getItem('token');
+    const tokenExpires = localStorage.getItem('tokenExpires');
+    
+    if (!token) {
+        return null;
+    }
+    
+    // Check if token will expire in the next 5 minutes
+    const now = new Date().getTime();
+    const expiresAt = parseInt(tokenExpires) || 0;
+    const fiveMinutes = 5 * 60 * 1000;
+    
+    if (expiresAt - now < fiveMinutes) {
+        console.log('Token will expire soon, refreshing...');
+        return await refreshAccessToken();
+    }
+    
+    return token;
 };
 
 // Function to update the navbar based on login status
@@ -72,8 +155,15 @@ if (loginForm) {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem('token', data.token);
+                // Store both access and refresh tokens
+                localStorage.setItem('token', data.access_token || data.token);
+                localStorage.setItem('refreshToken', data.refresh_token);
                 localStorage.setItem('userId', data.user.id);
+                
+                // Calculate and store token expiration
+                const expiresAt = new Date().getTime() + (data.expires_in * 1000);
+                localStorage.setItem('tokenExpires', expiresAt.toString());
+                
                 window.location.href = '/dashboard.html';
             } else {
                 errorDiv.textContent = data.message || 'Login failed.';
@@ -105,8 +195,15 @@ if (registerForm) {
             const data = await response.json();
 
             if (response.status === 201) {
-                localStorage.setItem('token', data.token);
+                // Store both access and refresh tokens
+                localStorage.setItem('token', data.access_token || data.token);
+                localStorage.setItem('refreshToken', data.refresh_token);
                 localStorage.setItem('userId', data.user.id);
+                
+                // Calculate and store token expiration
+                const expiresAt = new Date().getTime() + (data.expires_in * 1000);
+                localStorage.setItem('tokenExpires', expiresAt.toString());
+                
                 window.location.href = '/dashboard.html';
             } else {
                 errorDiv.textContent = data.message || 'Registration failed.';
@@ -119,4 +216,49 @@ if (registerForm) {
     });
 }
 
-console.log("auth.js loaded. Page protection is now handled by inline scripts."); 
+// Enhanced fetch function with automatic token refresh
+window.apiRequest = async (url, options = {}) => {
+    const token = await getValidToken();
+    
+    if (!token && !options.skipAuth) {
+        handleLogout();
+        return null;
+    }
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+    
+    if (token && !options.skipAuth) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+    
+    // Handle token expiration
+    if (response.status === 401) {
+        const data = await response.json();
+        if (data.error_code === 'TOKEN_EXPIRED') {
+            console.log('Token expired, attempting refresh...');
+            const newToken = await refreshAccessToken();
+            if (newToken) {
+                // Retry the request with new token
+                headers['Authorization'] = `Bearer ${newToken}`;
+                return fetch(url, { ...options, headers });
+            }
+        }
+    }
+    
+    return response;
+};
+
+// Export functions for use in other modules
+window.handleLogout = handleLogout;
+window.getValidToken = getValidToken;
+window.refreshAccessToken = refreshAccessToken;
+
+console.log("auth.js loaded with refresh token support. Page protection is now handled by inline scripts."); 

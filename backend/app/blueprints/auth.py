@@ -5,6 +5,7 @@ from flask_cors import CORS
 from ..models import User
 from ..extensions import db
 from ..decorators import token_required
+from ..utils import TokenManager
 
 auth_bp = Blueprint('auth_bp', __name__)
 CORS(auth_bp)
@@ -36,15 +37,15 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    # Generate token for the new user
-    token = jwt.encode({
-        'user_id': new_user.id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-    }, current_app.config['SECRET_KEY'], algorithm="HS256")
+    # Generate token pair for the new user
+    token_data = TokenManager.generate_token_pair(new_user.id)
 
     return jsonify({
         "message": "User registered successfully",
-        "token": token,
+        "access_token": token_data['access_token'],
+        "refresh_token": token_data['refresh_token'],
+        "expires_in": token_data['expires_in'],
+        "token": token_data['access_token'],  # Keep for backward compatibility
         "user": {
             "id": new_user.id,
             "username": new_user.username,
@@ -66,14 +67,15 @@ def login():
     if not user or not user.check_password(password):
         return jsonify({"message": "Invalid credentials"}), 401
 
-    token = jwt.encode({
-        'user_id': user.id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-    }, current_app.config['SECRET_KEY'], algorithm="HS256")
+    # Generate token pair for the user
+    token_data = TokenManager.generate_token_pair(user.id)
 
     return jsonify({
         "message": "Login successful",
-        "token": token,
+        "access_token": token_data['access_token'],
+        "refresh_token": token_data['refresh_token'],
+        "expires_in": token_data['expires_in'],
+        "token": token_data['access_token'],  # Keep for backward compatibility
         "user": {
             "id": user.id,
             "username": user.username,
@@ -120,4 +122,56 @@ def update_profile(current_user):
     
     db.session.commit()
 
-    return jsonify({'message': 'Profile updated successfully'}), 200 
+    return jsonify({'message': 'Profile updated successfully'}), 200
+
+@auth_bp.route('/refresh', methods=['POST'])
+def refresh_token():
+    """Refresh access token using refresh token"""
+    data = request.get_json()
+    if not data or not data.get('refresh_token'):
+        return jsonify({'message': 'Refresh token is required'}), 400
+    
+    refresh_token = data['refresh_token']
+    
+    # Verify refresh token
+    user = TokenManager.verify_refresh_token(refresh_token)
+    if not user:
+        return jsonify({'message': 'Invalid or expired refresh token'}), 401
+    
+    # Generate new access token
+    new_access_token = TokenManager.generate_access_token(user.id)
+    
+    return jsonify({
+        'message': 'Token refreshed successfully',
+        'access_token': new_access_token,
+        'token': new_access_token,  # Keep for backward compatibility
+        'expires_in': int(current_app.config['JWT_ACCESS_TOKEN_EXPIRES'].total_seconds()),
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+    }), 200
+
+@auth_bp.route('/logout', methods=['POST'])
+@token_required
+def logout(current_user):
+    """Logout user by revoking refresh token"""
+    # Revoke refresh token
+    TokenManager.revoke_refresh_token(current_user.id)
+    
+    return jsonify({
+        'message': 'Logged out successfully'
+    }), 200
+
+@auth_bp.route('/logout-all', methods=['POST'])
+@token_required
+def logout_all(current_user):
+    """Logout user from all devices by revoking refresh token"""
+    # This is the same as logout since we only store one refresh token per user
+    # In a more advanced system, you might store multiple refresh tokens per user
+    TokenManager.revoke_refresh_token(current_user.id)
+    
+    return jsonify({
+        'message': 'Logged out from all devices successfully'
+    }), 200 
