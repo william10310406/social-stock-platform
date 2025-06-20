@@ -1,5 +1,11 @@
-import '../css/style.css';
-import { API_BASE_URL } from './api.js';
+// post.js - Post detail functionality
+// 使用全局 API_BASE_URL
+
+// 獲取 API_BASE_URL 的函數
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}
 
 let currentPostId = null;
 let currentUserId = null; // We need to get this from the token ideally, but we'll fetch it.
@@ -23,7 +29,7 @@ const fetchPost = async () => {
     const payload = JSON.parse(atob(token.split('.')[1]));
     currentUserId = payload.user_id;
 
-    const response = await fetch(`${API_BASE_URL}/posts/${currentPostId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${currentPostId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -98,7 +104,7 @@ const handleLikePost = async (event) => {
   const method = isLiked ? 'DELETE' : 'POST';
 
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${postId}/like`, {
       method: method,
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -128,7 +134,7 @@ const handleAddComment = async (event) => {
   if (!body.trim()) return;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/${currentPostId}/comments`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${currentPostId}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -153,7 +159,7 @@ const handleDeleteComment = async (event) => {
 
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/comments/${commentId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/comments/${commentId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -168,46 +174,24 @@ const handleDeleteComment = async (event) => {
   }
 };
 
-const updateNavbar = () => {
-  console.log('updateNavbar() called in post.');
-  const token = localStorage.getItem('token');
-
-  const userNav = document.getElementById('nav-links-user');
-  const guestNav = document.getElementById('nav-links-guest');
-
-  if (!userNav || !guestNav) {
-    console.log('Nav elements not found');
-    return;
-  }
-
-  if (token) {
-    userNav.classList.remove('hidden');
-    guestNav.classList.add('hidden');
-
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.replaceWith(logoutButton.cloneNode(true));
-      document.getElementById('logout-button').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        console.log('User logged out, token removed.');
-        window.location.href = '/login.html';
-      });
-    }
-  } else {
-    userNav.classList.add('hidden');
-    guestNav.classList.remove('hidden');
-  }
-};
+// updateNavbar function is now handled by auth.js to avoid conflicts
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('token')) {
-    window.location.href = '/login.html';
+    window.location.href = '/src/pages/auth/login.html';
     return;
   }
 
-  // Update navbar to show user navigation
-  updateNavbar();
+  // Update navbar to show user navigation (wait for auth.js if needed)
+  const tryUpdateNavbar = () => {
+    if (typeof updateNavbar === 'function') {
+      updateNavbar();
+    } else {
+      // Wait a bit for auth.js to load and try again
+      setTimeout(tryUpdateNavbar, 50);
+    }
+  };
+  tryUpdateNavbar();
 
   fetchPost();
   commentForm.addEventListener('submit', handleAddComment);

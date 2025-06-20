@@ -1,35 +1,34 @@
 // auth.js - Handles login/register, form validation, JWT storage
 
-import '../css/style.css';
-
-const API_BASE_URL = 'http://localhost:5001';
+// 使用函數來獲取 API_BASE_URL，避免全局變量衝突
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}
 
 // Function to handle user logout
 const handleLogout = async () => {
-  const token = localStorage.getItem('token');
-
-  // Call logout API to revoke refresh token
-  if (token) {
-    try {
-      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      await fetch(`${getApiBaseUrl()}/auth/logout`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
       });
-    } catch (error) {
-      console.log('Logout API call failed, but continuing with local logout');
     }
-  }
+  } catch (error) {
+    console.error('Logout error:', error);
+  } finally {
+    // Clean up local storage
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenExpires');
+    localStorage.removeItem('userId');
 
-  // Clear local storage
-  localStorage.removeItem('token');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('tokenExpires');
-  console.log('User logged out, tokens removed.');
-  window.location.href = '/login.html';
+    // Redirect to login using route config
+    RouteUtils.redirectToLogin();
+  }
 };
 
 // Function to refresh access token
@@ -43,7 +42,7 @@ const refreshAccessToken = async () => {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -145,7 +144,7 @@ if (loginForm) {
     const errorDiv = document.getElementById('login-error');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -163,7 +162,8 @@ if (loginForm) {
         const expiresAt = new Date().getTime() + data.expires_in * 1000;
         localStorage.setItem('tokenExpires', expiresAt.toString());
 
-        window.location.href = '/dashboard.html';
+        // Redirect using route config
+        RouteUtils.redirectToDashboard();
       } else {
         errorDiv.textContent = data.message || 'Login failed.';
         errorDiv.style.display = 'block';
@@ -185,7 +185,7 @@ if (registerForm) {
     const errorDiv = document.getElementById('register-error');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      const response = await fetch(`${getApiBaseUrl()}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password }),
@@ -203,7 +203,8 @@ if (registerForm) {
         const expiresAt = new Date().getTime() + data.expires_in * 1000;
         localStorage.setItem('tokenExpires', expiresAt.toString());
 
-        window.location.href = '/dashboard.html';
+        // Redirect using route config
+        RouteUtils.redirectToDashboard();
       } else {
         errorDiv.textContent = data.message || 'Registration failed.';
         errorDiv.style.display = 'block';

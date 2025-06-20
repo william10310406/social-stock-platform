@@ -1,5 +1,11 @@
-import '../css/style.css';
-import { API_BASE_URL } from './api.js';
+// friends.js - Friends management functionality
+// 使用全局 API_BASE_URL
+
+// 獲取 API_BASE_URL 的函數
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}
 
 // --- DOM Elements ---
 const friendsListContainer = document.getElementById('friends-list');
@@ -12,7 +18,7 @@ const token = localStorage.getItem('token');
 // --- API Calls ---
 const apiFetch = (endpoint, options = {}) => {
   options.headers = { ...options.headers, Authorization: `Bearer ${token}` };
-  return fetch(`${API_BASE_URL}${endpoint}`, options);
+  return fetch(`${getApiBaseUrl()}${endpoint}`, options);
 };
 
 // --- Rendering Functions ---
@@ -106,47 +112,25 @@ const renderAll = () => {
   renderPendingRequests();
 };
 
-const updateNavbar = () => {
-  console.log('updateNavbar() called in friends.');
-  const token = localStorage.getItem('token');
-
-  const userNav = document.getElementById('nav-links-user');
-  const guestNav = document.getElementById('nav-links-guest');
-
-  if (!userNav || !guestNav) {
-    console.log('Nav elements not found');
-    return;
-  }
-
-  if (token) {
-    userNav.classList.remove('hidden');
-    guestNav.classList.add('hidden');
-
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.replaceWith(logoutButton.cloneNode(true));
-      document.getElementById('logout-button').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        console.log('User logged out, token removed.');
-        window.location.href = '/login.html';
-      });
-    }
-  } else {
-    userNav.classList.add('hidden');
-    guestNav.classList.remove('hidden');
-  }
-};
+// updateNavbar function is now handled by auth.js to avoid conflicts
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
   if (!token) {
-    window.location.href = '/login.html';
+    window.location.href = '/src/pages/auth/login.html';
     return;
   }
 
-  // Update navbar to show user navigation
-  updateNavbar();
+  // Update navbar to show user navigation (wait for auth.js if needed)
+  const tryUpdateNavbar = () => {
+    if (typeof updateNavbar === 'function') {
+      updateNavbar();
+    } else {
+      // Wait a bit for auth.js to load and try again
+      setTimeout(tryUpdateNavbar, 50);
+    }
+  };
+  tryUpdateNavbar();
 
   renderAll();
   userSearchInput.addEventListener('input', searchUsers);

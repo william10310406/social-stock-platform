@@ -1,7 +1,13 @@
-import '../css/style.css';
-import { API_BASE_URL } from './api.js';
+// profile.js - Profile page functionality
+// 使用全局 API_BASE_URL
 
-console.log('profile.js loaded, API_BASE_URL:', API_BASE_URL);
+// 獲取 API_BASE_URL 的函數
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}
+
+console.log('profile.js loaded, API_BASE_URL:', getApiBaseUrl());
 
 let currentUserData = null; // Store current user data globally on this page
 
@@ -29,7 +35,7 @@ const handleLikePost = async (event) => {
   const method = isLiked ? 'DELETE' : 'POST';
 
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${postId}/like`, {
       method: method,
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -63,7 +69,7 @@ const displayPosts = (posts) => {
       (post) => `
         <div class="border-b pb-4 mb-4" id="post-${post.id}">
             <div class="flex justify-between items-start mb-2">
-                <a href="/post.html?id=${post.id}" class="text-lg font-semibold text-gray-800 hover:underline">${post.title}</a>
+                <a href="/src/pages/posts/detail.html?id=${post.id}" class="text-lg font-semibold text-gray-800 hover:underline">${post.title}</a>
                 <button data-post-id="${post.id}" class="delete-post-btn ml-4 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm flex-shrink-0">Delete</button>
             </div>
             <p class="text-gray-600 mt-1 mb-3 whitespace-pre-wrap">${post.body}</p>
@@ -73,7 +79,7 @@ const displayPosts = (posts) => {
                     <button data-post-id="${post.id}" class="like-btn ${post.current_user_liked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500">
                         ❤️ <span class="like-count">${post.likes_count}</span>
                     </button>
-                    <a href="/post.html?id=${post.id}" class="text-gray-500 hover:text-gray-800">
+                    <a href="/src/pages/posts/detail.html?id=${post.id}" class="text-gray-500 hover:text-gray-800">
                         💬 <span class="comment-count">${post.comments_count}</span>
                     </a>
                 </div>
@@ -100,7 +106,7 @@ const handleDeletePost = async (event) => {
 
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${postId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -122,7 +128,7 @@ const handleDeletePost = async (event) => {
 const fetchMyPosts = async () => {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/myposts`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/myposts`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (response.ok) {
@@ -191,13 +197,13 @@ const fetchProfile = async () => {
 
   if (!token) {
     alert('You must be logged in to view this page.');
-    window.location.href = '/login.html';
+    window.location.href = '/src/pages/auth/login.html';
     return;
   }
 
   try {
-    console.log('Making API call to:', `${API_BASE_URL}/auth/profile`);
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    console.log('Making API call to:', `${getApiBaseUrl()}/auth/profile`);
+    const response = await fetch(`${getApiBaseUrl()}/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -214,7 +220,7 @@ const fetchProfile = async () => {
       alert('Could not load your profile. Please try logging in again.');
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
-      window.location.href = '/login.html';
+      window.location.href = '/src/pages/auth/login.html';
     }
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -232,7 +238,7 @@ const handleUpdateProfile = async (event) => {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+    const response = await fetch(`${getApiBaseUrl()}/auth/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -256,37 +262,7 @@ const handleUpdateProfile = async (event) => {
   }
 };
 
-const updateNavbar = () => {
-  console.log('updateNavbar() called in profile.');
-  const token = localStorage.getItem('token');
-
-  const userNav = document.getElementById('nav-links-user');
-  const guestNav = document.getElementById('nav-links-guest');
-
-  if (!userNav || !guestNav) {
-    console.log('Nav elements not found');
-    return;
-  }
-
-  if (token) {
-    userNav.classList.remove('hidden');
-    guestNav.classList.add('hidden');
-
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.replaceWith(logoutButton.cloneNode(true));
-      document.getElementById('logout-button').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        console.log('User logged out, token removed.');
-        window.location.href = '/login.html';
-      });
-    }
-  } else {
-    userNav.classList.add('hidden');
-    guestNav.classList.remove('hidden');
-  }
-};
+// updateNavbar function is now handled by auth.js to avoid conflicts
 
 // --- Event Listeners ---
 
@@ -302,12 +278,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!localStorage.getItem('token')) {
     alert('You must be logged in to view this page.');
-    window.location.href = '/login.html';
+    window.location.href = '/src/pages/auth/login.html';
     return;
   }
 
-  // Update navbar to show user navigation
-  updateNavbar();
+  // Update navbar to show user navigation (wait for auth.js if needed)
+  const tryUpdateNavbar = () => {
+    if (typeof updateNavbar === 'function') {
+      updateNavbar();
+    } else {
+      // Wait a bit for auth.js to load and try again
+      setTimeout(tryUpdateNavbar, 50);
+    }
+  };
+  tryUpdateNavbar();
 
   fetchProfile();
 

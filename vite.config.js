@@ -7,13 +7,21 @@ export default defineConfig({
     outDir: '../dist',
     rollupOptions: {
       input: {
+        // 主頁面
         main: resolve(__dirname, 'frontend/index.html'),
-        login: resolve(__dirname, 'frontend/login.html'),
-        register: resolve(__dirname, 'frontend/register.html'),
-        dashboard: resolve(__dirname, 'frontend/dashboard.html'),
-        profile: resolve(__dirname, 'frontend/profile.html'),
-        post: resolve(__dirname, 'frontend/post.html'),
-        friends: resolve(__dirname, 'frontend/friends.html'),
+
+        // 認證頁面
+        login: resolve(__dirname, 'frontend/src/pages/auth/login.html'),
+        register: resolve(__dirname, 'frontend/src/pages/auth/register.html'),
+
+        // 儀表板頁面
+        dashboard: resolve(__dirname, 'frontend/src/pages/dashboard/index.html'),
+        profile: resolve(__dirname, 'frontend/src/pages/dashboard/profile.html'),
+        friends: resolve(__dirname, 'frontend/src/pages/dashboard/friends.html'),
+        chat: resolve(__dirname, 'frontend/src/pages/dashboard/chat.html'),
+
+        // 文章頁面
+        postDetail: resolve(__dirname, 'frontend/src/pages/posts/detail.html'),
       },
     },
   },
@@ -24,6 +32,11 @@ export default defineConfig({
     },
     watch: {
       usePolling: true,
+    }
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'frontend/src'),
     }
   }
 });

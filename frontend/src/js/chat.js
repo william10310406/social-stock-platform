@@ -1,5 +1,5 @@
-import '../css/style.css';
-import { API_BASE_URL } from './api.js';
+// chat.js - Chat functionality
+// 使用全局 API_BASE_URL
 
 let currentConversationId = null;
 let currentUserId = null;
@@ -46,7 +46,7 @@ const scrollToBottom = () => {
 const fetchConversations = async () => {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
+    const response = await fetch(`${getApiBaseUrl()}/chat/conversations`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -66,9 +66,12 @@ const fetchConversations = async () => {
 const fetchMessages = async (conversationId) => {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetch(
+      `${getApiBaseUrl()}/chat/conversations/${conversationId}/messages`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
 
     if (response.ok) {
       const data = await response.json();
@@ -85,14 +88,17 @@ const fetchMessages = async (conversationId) => {
 const sendMessage = async (conversationId, content) => {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `${getApiBaseUrl()}/chat/conversations/${conversationId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content }),
       },
-      body: JSON.stringify({ content }),
-    });
+    );
 
     if (response.ok) {
       const message = await response.json();
@@ -113,7 +119,7 @@ const sendMessage = async (conversationId, content) => {
 const createConversation = async (friendId) => {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/conversations/${friendId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/chat/conversations/${friendId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -133,7 +139,7 @@ const createConversation = async (friendId) => {
 const fetchFriends = async () => {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`${API_BASE_URL}/friends`, {
+    const response = await fetch(`${getApiBaseUrl()}/friends`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -302,34 +308,7 @@ const stopMessageRefresh = () => {
 };
 
 // 導航欄功能
-const updateNavbar = () => {
-  const token = localStorage.getItem('token');
-
-  const userNav = document.getElementById('nav-links-user');
-  const guestNav = document.getElementById('nav-links-guest');
-
-  if (!userNav || !guestNav) {
-    return;
-  }
-
-  if (token) {
-    userNav.classList.remove('hidden');
-    guestNav.classList.add('hidden');
-
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.replaceWith(logoutButton.cloneNode(true));
-      document.getElementById('logout-button').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        window.location.href = '/login.html';
-      });
-    }
-  } else {
-    userNav.classList.add('hidden');
-    guestNav.classList.remove('hidden');
-  }
-};
+// updateNavbar function is now handled by auth.js to avoid conflicts
 
 // 事件監聽器
 document.addEventListener('DOMContentLoaded', () => {
@@ -337,15 +316,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
   if (!token) {
     alert('你必須登入才能使用聊天功能');
-    window.location.href = '/login.html';
+    window.location.href = '/src/pages/auth/login.html';
     return;
   }
 
   // 獲取當前用戶ID
   currentUserId = parseInt(localStorage.getItem('userId'));
 
-  // 更新導航欄
-  updateNavbar();
+  // 更新導航欄 (wait for auth.js if needed)
+  const tryUpdateNavbar = () => {
+    if (typeof updateNavbar === 'function') {
+      updateNavbar();
+    } else {
+      // Wait a bit for auth.js to load and try again
+      setTimeout(tryUpdateNavbar, 50);
+    }
+  };
+  tryUpdateNavbar();
 
   // 載入聊天列表
   fetchConversations();
@@ -407,3 +394,9 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('beforeunload', () => {
   stopMessageRefresh();
 });
+
+// 獲取 API_BASE_URL 的函數
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}

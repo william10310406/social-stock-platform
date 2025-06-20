@@ -1,4 +1,10 @@
-const API_BASE_URL = 'http://localhost:5001/api';
+// news.js - News functionality
+
+// 獲取 API_BASE_URL 的函數
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}
 
 console.log('news.js loaded');
 
@@ -13,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Connect to the SSE endpoint with the token as a query parameter.
-    const evtSource = new EventSource(`${API_BASE_URL}/news/latest?token=${token}`);
+    const evtSource = new EventSource(`${getApiBaseUrl()}/news/latest?token=${token}`);
 
     evtSource.onopen = function () {
       console.log('Connection to news server opened.');

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="page-title" content="註冊" />
+    <title>註冊 - Stock Insight Platform</title>
+    <link rel="stylesheet" href="/src/css/style.css" />
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- 導航欄容器 -->
+    <div id="navbar-container"></div>
+
+    <main class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+          <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            建立新帳戶
+          </h2>
+          <p class="mt-2 text-sm text-gray-600">
+            加入 Stock Insight Platform 社群
+          </p>
+        </div>
+
+        <form id="register-form" class="mt-8 space-y-6">
+          <div id="register-error" class="hidden p-3 rounded-md bg-red-50 border border-red-200">
+            <div class="text-red-800 text-sm"></div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label for="username" class="block text-sm font-medium text-gray-700">
+                使用者名稱
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="請輸入使用者名稱"
+              />
+            </div>
+
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                電子郵件
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="請輸入您的電子郵件"
+              />
+            </div>
+
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700">
+                密碼
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="請輸入密碼（至少6個字符）"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div class="text-sm">
+              <a href="/src/pages/auth/login.html" class="font-medium text-indigo-600 hover:text-indigo-500">
+                已有帳戶？立即登入
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span id="register-text">註冊</span>
+              <span id="register-loading" class="hidden">註冊中...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/src/js/config/routes.js"></script>
+    <script src="/src/js/utils/pathManager.js"></script>
+    <script src="/src/js/template.js"></script>
+    <script src="/src/js/api.js"></script>
+    <script src="/src/js/auth.js"></script>
+  </body>
+</html>

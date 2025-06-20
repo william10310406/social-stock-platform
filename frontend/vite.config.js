@@ -6,11 +6,21 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        // 主頁面
         main: resolve(__dirname, 'index.html'),
-        login: resolve(__dirname, 'login.html'),
-        register: resolve(__dirname, 'register.html'),
-        dashboard: resolve(__dirname, 'dashboard.html'),
-        post: resolve(__dirname, 'post.html'),
+
+        // 認證頁面
+        login: resolve(__dirname, 'src/pages/auth/login.html'),
+        register: resolve(__dirname, 'src/pages/auth/register.html'),
+
+        // 儀表板頁面
+        dashboard: resolve(__dirname, 'src/pages/dashboard/index.html'),
+        profile: resolve(__dirname, 'src/pages/dashboard/profile.html'),
+        friends: resolve(__dirname, 'src/pages/dashboard/friends.html'),
+        chat: resolve(__dirname, 'src/pages/dashboard/chat.html'),
+
+        // 文章頁面
+        postDetail: resolve(__dirname, 'src/pages/posts/detail.html'),
       },
     },
     outDir: resolve(__dirname, 'dist'),
@@ -20,6 +30,11 @@ export default defineConfig({
     port: 5173,
     watch: {
       usePolling: true,
+    },
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
     },
   },
 });

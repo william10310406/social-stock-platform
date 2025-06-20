@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - Stock Insight Platform</title>
+    <link href="../../css/style.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    {{additional_head}}
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    {{navbar}}
+
+    <main class="container mx-auto px-4 py-8">
+        {{content}}
+    </main>
+
+    <!-- 通用 JS -->
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/main.js"></script>
+    {{additional_scripts}}
+</body>
+
+</html>

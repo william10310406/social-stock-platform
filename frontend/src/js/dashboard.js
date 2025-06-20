@@ -1,15 +1,18 @@
-import '../css/style.css';
-import './chart.js';
-import './news.js';
-import './chat.js';
-import { API_BASE_URL } from './api.js';
+// dashboard.js - Dashboard page functionality
+// 使用全局 API_BASE_URL
+
+// 獲取 API_BASE_URL 的函數
+function getApiBaseUrl() {
+  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  return `${baseUrl}/api`;
+}
 
 const fetchPosts = async () => {
   const token = localStorage.getItem('token');
   if (!token) return;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/posts`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +48,7 @@ const displayPosts = (posts) => {
     postElement.innerHTML = `
             <div class="flex justify-between items-center mb-2">
                 <h3 class="font-bold text-xl">
-                    <a href="/post.html?id=${post.id}" class="hover:underline">${post.title}</a>
+                    <a href="/src/pages/posts/detail.html?id=${post.id}" class="hover:underline">${post.title}</a>
                 </h3>
                 <span class="text-sm text-gray-600">By ${post.author}</span>
             </div>
@@ -56,7 +59,7 @@ const displayPosts = (posts) => {
                     <button data-post-id="${post.id}" class="like-btn ${post.current_user_liked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500">
                         ❤️ <span class="like-count">${post.likes_count}</span>
                     </button>
-                    <a href="/post.html?id=${post.id}" class="text-gray-500 hover:text-gray-800">
+                    <a href="/src/pages/posts/detail.html?id=${post.id}" class="text-gray-500 hover:text-gray-800">
                         💬 <span class="comment-count">${post.comments_count}</span>
                     </a>
                 </div>
@@ -81,7 +84,7 @@ const handleLikePost = async (event) => {
   const method = isLiked ? 'DELETE' : 'POST';
 
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${postId}/like`, {
       method: method,
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -123,7 +126,7 @@ const handleCreatePost = async (event) => {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}/posts`, {
+    const response = await fetch(`${getApiBaseUrl()}/posts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,57 +149,28 @@ const handleCreatePost = async (event) => {
   }
 };
 
-const updateNavbar = () => {
-  console.log('updateNavbar() called in dashboard.');
-  const token = localStorage.getItem('token');
-  console.log('Token found:', !!token);
-
-  const userNav = document.getElementById('nav-links-user');
-  const guestNav = document.getElementById('nav-links-guest');
-
-  console.log('userNav element:', userNav);
-  console.log('guestNav element:', guestNav);
-
-  if (!userNav || !guestNav) {
-    console.log('Nav elements not found');
-    return;
-  }
-
-  if (token) {
-    console.log('Showing user navigation');
-    userNav.classList.remove('hidden');
-    guestNav.classList.add('hidden');
-
-    const logoutButton = document.getElementById('logout-button');
-    console.log('Logout button:', logoutButton);
-    if (logoutButton) {
-      logoutButton.replaceWith(logoutButton.cloneNode(true));
-      document.getElementById('logout-button').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        console.log('User logged out, token removed.');
-        window.location.href = '/login.html';
-      });
-    }
-  } else {
-    console.log('Showing guest navigation');
-    userNav.classList.add('hidden');
-    guestNav.classList.remove('hidden');
-  }
-};
+// updateNavbar function is now handled by auth.js to avoid conflicts
 
 const initDashboard = () => {
   // Route Protection
   if (!localStorage.getItem('token')) {
     alert('You must be logged in to view this page.');
-    window.location.href = '/login.html';
+    window.location.href = '/src/pages/auth/login.html';
     return; // Stop further execution
   }
 
   console.log('dashboard.js loaded');
 
-  // Update navbar to show user navigation
-  updateNavbar();
+  // Update navbar to show user navigation (wait for auth.js if needed)
+  const tryUpdateNavbar = () => {
+    if (typeof updateNavbar === 'function') {
+      updateNavbar();
+    } else {
+      // Wait a bit for auth.js to load and try again
+      setTimeout(tryUpdateNavbar, 50);
+    }
+  };
+  tryUpdateNavbar();
 
   fetchPosts();
 

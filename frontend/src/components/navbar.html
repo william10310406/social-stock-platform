@@ -1,0 +1,55 @@
+<nav class="bg-white shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <a href="/src/pages/dashboard/index.html" class="text-xl font-bold text-gray-800">StockInsight</a>
+      </div>
+
+      <div class="flex items-center">
+        <!-- Links for logged-in users -->
+        <div id="nav-links-user" class="hidden items-center space-x-4">
+          <a
+            href="/src/pages/dashboard/index.html"
+            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >儀表板</a
+          >
+          <a
+            href="/src/pages/dashboard/profile.html"
+            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >個人資料</a
+          >
+          <a
+            href="/src/pages/dashboard/friends.html"
+            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >好友</a
+          >
+          <a
+            href="/src/pages/dashboard/chat.html"
+            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >聊天</a
+          >
+          <button
+            id="logout-button"
+            class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+          >
+            登出
+          </button>
+        </div>
+
+        <!-- Links for guests -->
+        <div id="nav-links-guest" class="hidden items-center space-x-4">
+          <a
+            href="/src/pages/auth/login.html"
+            class="px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >登入</a
+          >
+          <a
+            href="/src/pages/auth/register.html"
+            class="px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >註冊</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

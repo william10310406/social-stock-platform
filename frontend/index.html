@@ -1,27 +1,115 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="page-title" content="首頁">
     <title>Stock Insight Platform</title>
     <link rel="stylesheet" href="/src/css/style.css" />
   </head>
-  <body class="bg-gray-100">
-    <nav id="main-nav" class="bg-white shadow-md">
-      <!-- Dynamic nav content will be injected here by auth.js -->
-    </nav>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- 導航欄容器 -->
+    <div id="navbar-container"></div>
 
-    <main class="p-8">
-      <h1 class="text-4xl font-bold text-center">Welcome to the Stock Insight Platform</h1>
-      <p class="text-xl text-center mt-4 text-gray-700">
-        Your one-stop solution for stock market analysis.
-      </p>
+    <main class="container mx-auto px-4 py-16">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 mb-6">
+          歡迎來到 Stock Insight Platform
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          您的股票市場分析一站式解決方案，結合社交網絡與投資洞察
+        </p>
+
+        <!-- CTA 按鈕 -->
+        <div id="guest-cta" class="space-x-4">
+          <a
+            href="/src/pages/auth/register.html"
+            class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+          >
+            立即註冊
+          </a>
+          <a
+            href="/src/pages/auth/login.html"
+            class="inline-block bg-white hover:bg-gray-50 text-indigo-600 font-bold py-3 px-8 rounded-lg text-lg border border-indigo-600 transition-colors"
+          >
+            會員登入
+          </a>
+        </div>
+
+        <!-- 已登入用戶的歡迎訊息 -->
+        <div id="user-welcome" class="hidden">
+          <p class="text-lg text-gray-600 mb-6">歡迎回來！</p>
+          <a
+            href="/src/pages/dashboard/index.html"
+            class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+          >
+            前往儀表板
+          </a>
+        </div>
+      </div>
+
+      <!-- 功能介紹 -->
+      <div class="mt-20 grid md:grid-cols-3 gap-8">
+        <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">股票分析</h3>
+          <p class="text-gray-600">即時股票數據分析與趨勢預測</p>
+        </div>
+
+        <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">社交網絡</h3>
+          <p class="text-gray-600">與投資者交流分享投資心得</p>
+        </div>
+
+        <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">即時聊天</h3>
+          <p class="text-gray-600">與好友即時討論市場動態</p>
+        </div>
+      </div>
     </main>
 
-    <footer class="text-center p-4 mt-8">
-      <p>&copy; 2024 Stock Insight Platform</p>
+    <footer class="bg-white border-t border-gray-200 mt-20">
+      <div class="container mx-auto px-4 py-8 text-center">
+        <p class="text-gray-600">&copy; 2024 Stock Insight Platform. All rights reserved.</p>
+      </div>
     </footer>
 
-    <script type="module" src="/src/js/auth.js"></script>
+    <!-- Scripts -->
+    <script src="/src/js/template.js"></script>
+    <script src="/src/js/api.js"></script>
+    <script src="/src/js/auth.js"></script>
+    <script>
+      // 首頁特定邏輯
+      document.addEventListener('DOMContentLoaded', () => {
+        // 檢查用戶是否已登入
+        setTimeout(() => {
+          const token = localStorage.getItem('access_token');
+          const guestCta = document.getElementById('guest-cta');
+          const userWelcome = document.getElementById('user-welcome');
+
+          if (token) {
+            guestCta.classList.add('hidden');
+            userWelcome.classList.remove('hidden');
+          } else {
+            guestCta.classList.remove('hidden');
+            userWelcome.classList.add('hidden');
+          }
+        }, 100);
+      });
+    </script>
   </body>
 </html>
