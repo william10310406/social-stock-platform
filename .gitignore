@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-selfcheck.json
+pip-log.txt
+
+# Node
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+*.swp 
+
+# Docker
+.env
+.env.local
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/

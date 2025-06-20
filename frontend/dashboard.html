@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Stock Insight Platform</title>
+    <!-- Removed inline script as we handle protection in dashboard.js -->
+    <link rel="stylesheet" href="/src/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- No inline styles needed anymore -->
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <nav class="bg-white shadow-sm">
+        <!-- Authenticated User Nav -->
+        <div id="nav-links-user" class="">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <a href="/dashboard.html" class="flex-shrink-0 flex items-center text-xl font-bold">StockInsight</a>
+                        <div class="ml-6 flex space-x-8">
+                            <a href="/dashboard.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
+                            <a href="/profile.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Profile</a>
+                            <a href="/friends.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Friends</a>
+                            <a href="/chat.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Chat</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center ml-6">
+                        <button id="logout-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Nav -->
+        <div id="nav-links-guest" class="hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <a href="/" class="flex items-center text-xl font-bold">StockInsight</a>
+                    <div class="flex items-center">
+                        <a href="/login.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mr-2">Login</a>
+                        <a href="/register.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Register</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Stock Chart -->
+            <div class="md:col-span-2">
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Stock Chart</h2>
+                    <div style="height: 300px;">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Post Section -->
+            <div class="md:col-span-1">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Create a New Post</h2>
+                    <form id="create-post-form">
+                        <div class="mb-4">
+                            <label for="post-title" class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="post-title" name="post-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="post-body" class="block text-sm font-medium text-gray-700">Body</label>
+                            <textarea id="post-body" name="post-body" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required></textarea>
+                        </div>
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Publish Post
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Posts Section -->
+            <div class="md:col-span-1">
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Recent Posts</h2>
+                    <div id="posts-container" class="space-y-4">
+                        <!-- Posts will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/dashboard.js"></script>
+</body>
+</html> 

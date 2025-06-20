@@ -1,0 +1,71 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stock-insight-frontend
+    ports:
+      - "5173:5173"
+    networks:
+      - stock-insight-net
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stock-insight-backend
+    ports:
+      - "5001:5000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/stock_insight_db
+      - SECRET_KEY=99cf0cb0afe6c423edad1923b6c5a9a8cbad26176cde6344009929f086acbd0b
+      - FLASK_APP=run.py
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=stock_insight_db
+      - FERNET_KEY=DsBlbaBwjjtJ6md_lU3ipzHN0aoePRrtkd298vo5PCk=
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - stock-insight-net
+    volumes:
+      - ./backend:/app
+
+  db:
+    image: postgres:alpine
+    container_name: stock-insight-db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=stock_insight_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d stock_insight_db"]
+      interval: 10s
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - stock-insight-net
+
+  redis:
+    image: "redis:alpine"
+    container_name: stock-insight-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - stock-insight-net
+
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  stock-insight-net:
+    driver: bridge 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天 - Stock Insight Platform</title>
+    <link rel="stylesheet" href="/src/css/style.css">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-sm">
+        <!-- Authenticated User Nav -->
+        <div id="nav-links-user" class="">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <a href="/dashboard.html" class="flex-shrink-0 flex items-center text-xl font-bold">StockInsight</a>
+                        <div class="ml-6 flex space-x-8">
+                            <a href="/dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
+                            <a href="/profile.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Profile</a>
+                            <a href="/friends.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Friends</a>
+                            <a href="/chat.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Chat</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center ml-6">
+                        <button id="logout-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Nav -->
+        <div id="nav-links-guest" class="hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <a href="/" class="flex items-center text-xl font-bold">StockInsight</a>
+                    <div class="flex items-center">
+                        <a href="/login.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mr-2">Login</a>
+                        <a href="/register.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Register</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-10 p-4">
+        <div class="flex h-96 bg-white rounded-lg shadow-lg overflow-hidden">
+            
+            <!-- 聊天列表側邊欄 -->
+            <div class="w-1/3 border-r border-gray-200 flex flex-col">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">聊天</h2>
+                </div>
+                <div id="conversations-list" class="flex-1 overflow-y-auto">
+                    <!-- 聊天列表將在這裡顯示 -->
+                    <div class="p-4 text-center text-gray-500">
+                        載入中...
+                    </div>
+                </div>
+            </div>
+
+            <!-- 聊天區域 -->
+            <div class="flex-1 flex flex-col">
+                <div id="chat-header" class="p-4 border-b border-gray-200 hidden">
+                    <h3 id="chat-title" class="text-lg font-semibold text-gray-800"></h3>
+                </div>
+                
+                <div id="chat-placeholder" class="flex-1 flex items-center justify-center text-gray-500">
+                    選擇一個聊天開始對話
+                </div>
+
+                <div id="chat-area" class="flex-1 flex flex-col hidden">
+                    <!-- 消息區域 -->
+                    <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <!-- 消息將在這裡顯示 -->
+                    </div>
+
+                    <!-- 輸入區域 -->
+                    <div class="p-4 border-t border-gray-200">
+                        <form id="message-form" class="flex space-x-2">
+                            <input 
+                                type="text" 
+                                id="message-input" 
+                                placeholder="輸入消息..." 
+                                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                maxlength="1000"
+                            >
+                            <button 
+                                type="submit" 
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                                發送
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 開始新聊天對話框 -->
+        <div id="new-chat-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900">開始新聊天</h3>
+                    <div class="mt-4">
+                        <select id="friend-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">選擇好友...</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <button id="cancel-new-chat" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">取消</button>
+                        <button id="start-new-chat" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">開始聊天</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新聊天按鈕 -->
+    <button id="new-chat-btn" class="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+    </button>
+    
+    <script type="module" src="/src/js/chat.js"></script>
+</body>
+</html> 

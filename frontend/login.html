@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Stock Insight Platform</title>
+    <link rel="stylesheet" href="/src/css/style.css">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-sm">
+        <!-- Authenticated User Nav -->
+        <div id="nav-links-user" class="hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <a href="/dashboard.html" class="flex-shrink-0 flex items-center text-xl font-bold">StockInsight</a>
+                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            <a href="/dashboard.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
+                            <a href="/profile.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Profile</a>
+                            <a href="/friends.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Friends</a>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex sm:items-center sm:ml-6">
+                        <button id="logout-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Nav -->
+        <div id="nav-links-guest" class="hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <a href="/" class="flex items-center text-xl font-bold">StockInsight</a>
+                    <div class="flex items-center">
+                        <a href="/login.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mr-2">Login</a>
+                        <a href="/register.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Register</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+            </div>
+            <form id="login-form" class="mt-8 space-y-6" action="#" method="POST">
+                <input type="hidden" name="remember" value="true">
+                <div id="login-error" class="hidden text-red-500 text-sm"></div>
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="email" class="sr-only">Email address</label>
+                        <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Password</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="text-sm">
+                        <a href="/register.html" class="font-medium text-indigo-600 hover:text-indigo-500"> Or create a new account </a>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Sign in
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/auth.js"></script>
+</body>
+</html> 

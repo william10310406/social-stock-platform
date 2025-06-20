@@ -1,0 +1,23 @@
+{
+  "name": "stock-insight-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^4.1.10",
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "highcharts": "^11.1.0"
+  }
+}
+ 

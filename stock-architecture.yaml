@@ -1,0 +1,345 @@
+```yaml
+project_name: Stock Insight Platform
+purpose: >-
+  An interactive, security‑hardened web platform that serves real‑time & historical
+  stock data, live market news, social posting with comments/likes, friendship system,
+  and real-time private chat functionality.
+
+components:
+  frontend:
+    tech_stack: [HTML5, CSS3, JavaScript (ES6 modules), Vite, TailwindCSS]
+    pages:
+      - index.html            # landing page
+      - login.html           # user authentication
+      - register.html        # user registration
+      - dashboard.html       # main dashboard with posts feed
+      - profile.html         # user profile management
+      - friends.html         # friend management (search, requests, friends list)
+      - chat.html           # real-time chat interface
+      - post.html           # individual post view with comments
+    modules:
+      - api.js              # API base URL configuration
+      - auth.js             # authentication, JWT token management
+      - dashboard.js        # main feed, post interactions
+      - profile.js          # profile editing, user posts
+      - friends.js          # friend system functionality
+      - chat.js             # real-time chat with auto-refresh
+      - post.js             # post/comment CRUD, like system
+      - main.js             # shared utilities
+      - news.js             # news feed functionality
+      - chart.js            # stock chart functionality (placeholder)
+    features:
+      - responsive_design   # mobile-friendly interface
+      - chinese_localization # 中文界面支持
+      - real_time_updates   # auto-refresh chat messages
+      - friendship_system   # comprehensive friend management
+      - social_interactions # posts, comments, likes
+    security:
+      - input_sanitisation  # XSS prevention
+      - jwt_token_validation # client-side auth checking
+      - protected_routes    # authentication required pages
+
+  backend:
+    framework: Flask 2.x + Gunicorn
+    structure:
+      entrypoint: run.py
+      app_factory: app/__init__.py
+      blueprints:
+        auth:
+          prefix: /api/auth
+          endpoints:
+            - path: /register         # POST - user registration
+            - path: /login           # POST - user authentication
+            - path: /profile         # GET/PUT - user profile management
+        posts:
+          prefix: /api/posts
+          endpoints:
+            - path: /                # GET - fetch all posts, POST - create post
+            - path: /<id>           # GET - single post, DELETE - delete own post
+            - path: /<id>/comments  # GET - post comments, POST - add comment
+            - path: /<id>/like      # POST - like post, DELETE - unlike post
+            - path: /myposts        # GET - user's own posts
+        friends:
+          prefix: /api/friends
+          endpoints:
+            - path: /               # GET - friends list
+            - path: /search         # GET - search users by username
+            - path: /requests       # POST - send friend request
+            - path: /requests/pending # GET - pending friend requests
+            - path: /requests/<id>  # PUT - accept/decline friend request
+        chat:
+          prefix: /api/chat
+          endpoints:
+            - path: /conversations  # GET - chat conversations list
+            - path: /conversations/<user_id> # GET - get/create conversation with user
+            - path: /conversations/<id>/messages # GET - fetch messages, POST - send message
+            - path: /conversations/<id> # DELETE - delete conversation
+        stocks:
+          prefix: /api/stocks
+          endpoints:
+            - path: /watchlist      # GET/POST - user stock watchlist
+            - path: /<symbol>/data  # GET - stock data (placeholder)
+        news:
+          prefix: /api/news
+          endpoints:
+            - path: /latest         # GET - latest news feed
+    features:
+      - jwt_based_authentication
+      - friend_only_chat_restriction
+      - real_time_message_polling
+      - post_like_system
+      - user_profile_management
+      - friendship_workflow
+    security_layers:
+      - jwt_token_authentication
+      - token_required_decorators
+      - rate_limiting (Flask‑Limiter)
+      - sql_parameterised_queries
+      - cors_protection
+      - request_logging (rotating file)
+    cache_layer:
+      type: Redis
+      purpose: session & rate limit storage
+    database_migrations:
+      tool: Flask-Migrate (Alembic)
+      latest_revision: c1234567890a (chat models)
+
+  database:
+    engine: PostgreSQL 14
+    orm: SQLAlchemy + Flask-Migrate (Alembic)
+    tables:
+      users:
+        columns:
+            - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - username: VARCHAR(80) UNIQUE NOT NULL
+          - email: VARCHAR(120) UNIQUE NOT NULL
+          - password_hash: VARCHAR(256) NOT NULL
+          - bio: TEXT NULL                      # user profile bio
+        constraints:
+          - UNIQUE(username)
+          - UNIQUE(email)
+          - CHECK(LENGTH(username) >= 3)
+          - CHECK(LENGTH(password_hash) > 0)
+        indexes:
+          - username_idx: (username)
+          - email_idx: (email)
+      posts:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - author_id: INTEGER FK users(id) NOT NULL
+          - title: VARCHAR(200) NOT NULL
+          - body: TEXT NOT NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+          - updated_at: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        constraints:
+          - FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+          - CHECK(LENGTH(title) >= 1)
+          - CHECK(LENGTH(body) >= 1)
+        indexes:
+          - author_idx: (author_id)
+          - created_at_idx: (created_at DESC)
+          - title_search_idx: (title) # for search functionality
+        relationships:
+          - author: User
+          - comments: Comment[] (cascade delete)
+          - likes: Like[] (cascade delete)
+      comments:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - post_id: INTEGER FK posts(id) NOT NULL
+          - author_id: INTEGER FK users(id) NOT NULL
+          - body: TEXT NOT NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+        constraints:
+          - FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+          - FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+          - CHECK(LENGTH(body) >= 1)
+        indexes:
+          - post_idx: (post_id)
+          - author_idx: (author_id)
+          - created_at_idx: (created_at DESC)
+        relationships:
+          - author: User
+          - post: Post
+      likes:
+        columns:
+          - user_id: INTEGER FK users(id) NOT NULL
+          - post_id: INTEGER FK posts(id) NOT NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+        primary_key: [user_id, post_id]
+        constraints:
+          - FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          - FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+        indexes:
+          - post_likes_idx: (post_id) # for counting likes per post
+          - user_likes_idx: (user_id) # for user activity
+      friendships:
+        columns:
+          - requester_id: INTEGER FK users(id) NOT NULL
+          - addressee_id: INTEGER FK users(id) NOT NULL
+          - status: VARCHAR(20) DEFAULT 'pending' NOT NULL  # pending, accepted, declined
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+          - updated_at: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        primary_key: [requester_id, addressee_id]
+        constraints:
+          - FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE
+          - FOREIGN KEY (addressee_id) REFERENCES users(id) ON DELETE CASCADE
+          - CHECK(requester_id != addressee_id) # prevent self-friendship
+          - CHECK(status IN ('pending', 'accepted', 'declined'))
+        indexes:
+          - requester_idx: (requester_id)
+          - addressee_idx: (addressee_id)
+          - status_idx: (status)
+          - pending_requests_idx: (addressee_id, status) # for pending requests lookup
+      conversations:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - user1_id: INTEGER FK users(id) NOT NULL
+          - user2_id: INTEGER FK users(id) NOT NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+          - updated_at: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        constraints:
+          - FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE
+          - FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE
+          - CHECK(user1_id != user2_id) # prevent self-conversation
+          - UNIQUE(user1_id, user2_id) # prevent duplicate conversations
+        indexes:
+          - user1_idx: (user1_id)
+          - user2_idx: (user2_id)
+          - updated_at_idx: (updated_at DESC) # for recent conversations
+          - participants_idx: (user1_id, user2_id) # for conversation lookup
+        relationships:
+          - user1: User
+          - user2: User
+          - messages: Message[] (cascade delete)
+      messages:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - conversation_id: INTEGER FK conversations(id) NOT NULL
+          - sender_id: INTEGER FK users(id) NOT NULL
+          - content: TEXT NOT NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+          - is_read: BOOLEAN DEFAULT FALSE
+        constraints:
+          - FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+          - FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+          - CHECK(LENGTH(content) >= 1)
+        indexes:
+          - conversation_idx: (conversation_id, created_at DESC) # for message history
+          - sender_idx: (sender_id)
+          - unread_idx: (conversation_id, is_read) # for unread message counts
+          - created_at_idx: (created_at DESC) # for pagination
+        relationships:
+          - conversation: Conversation
+          - sender: User
+      stocks:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - symbol: VARCHAR(20) UNIQUE NOT NULL
+          - name: VARCHAR(100) NOT NULL
+          - exchange: VARCHAR(50) NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+          - updated_at: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        constraints:
+          - UNIQUE(symbol)
+          - CHECK(LENGTH(symbol) >= 1)
+          - CHECK(LENGTH(name) >= 1)
+        indexes:
+          - symbol_idx: (symbol) # primary lookup
+          - exchange_idx: (exchange) # filter by exchange
+          - name_search_idx: (name) # for name-based search
+      user_stocks:
+        columns:
+          - user_id: INTEGER FK users(id) NOT NULL
+          - stock_id: INTEGER FK stocks(id) NOT NULL
+          - added_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+        primary_key: [user_id, stock_id]
+        constraints:
+          - FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          - FOREIGN KEY (stock_id) REFERENCES stocks(id) ON DELETE CASCADE
+        indexes:
+          - user_watchlist_idx: (user_id) # user's watchlist
+          - stock_watchers_idx: (stock_id) # who watches this stock
+      news:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - title: VARCHAR(255) NOT NULL
+          - source: VARCHAR(100) NULL
+          - url: VARCHAR(255) UNIQUE NOT NULL
+          - summary: TEXT NULL
+          - published_at: DATETIME NOT NULL
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+        constraints:
+          - UNIQUE(url)
+          - CHECK(LENGTH(title) >= 1)
+          - CHECK(LENGTH(url) >= 1)
+        indexes:
+          - published_at_idx: (published_at DESC) # for recent news
+          - source_idx: (source) # filter by source
+          - title_search_idx: (title) # for search functionality
+          - url_idx: (url) # unique constraint support
+
+deployment:
+  containerization: Docker Compose
+  services:
+    frontend:
+      image: node:18-alpine
+      framework: Vite development server
+      port: 5173
+      features: [hot_reload, tailwind_watch]
+    backend:
+      image: python:3.10-slim
+      server: Gunicorn with gthread workers
+      port: 5000 (internal), 5001 (exposed)
+      workers: 4
+    database:
+      image: postgres:14
+      port: 5432
+      features: [persistent_volume, health_checks]
+    cache:
+      image: redis:alpine
+      port: 6379
+      purpose: rate_limiting_storage
+  
+  current_features_implemented:
+    authentication:
+      - user_registration_with_validation
+      - jwt_token_based_login
+      - protected_route_middleware
+      - profile_management
+    social:
+      - friend_request_system
+      - accept_decline_friend_requests
+      - user_search_functionality
+      - friends_list_management
+    content:
+      - create_edit_delete_posts
+      - threaded_comments_system
+      - like_unlike_posts
+      - user_post_history
+    communication:
+      - real_time_private_chat
+      - conversation_management
+      - message_history
+      - unread_message_indicators
+      - friend_only_chat_restriction
+    ui_ux:
+      - responsive_design_with_tailwind
+      - chinese_localization
+      - auto_refresh_functionality
+      - modern_chat_interface
+      - unified_navigation_system
+
+  development_status:
+    completed: [auth, social, posts, chat, basic_ui]
+    in_progress: [stock_data_integration, news_feed]
+    planned: [real_time_notifications, advanced_stock_charts]
+
+notes:
+  - JWT tokens stored in localStorage for client authentication
+  - Chat messages auto-refresh every 3 seconds
+  - Friend-only chat restriction enforced at API level
+  - All database migrations managed through Flask-Migrate
+  - Chinese interface with responsive TailwindCSS design
+  - PostgreSQL for production-ready data persistence
+```
