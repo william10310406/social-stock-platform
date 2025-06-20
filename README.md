@@ -1,5 +1,19 @@
 # Stock Insight Platform
 
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+
+![GitHub repo size](https://img.shields.io/github/repo-size/william10310406/social-stock-platform?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/william10310406/social-stock-platform?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/william10310406/social-stock-platform?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/william10310406/social-stock-platform?style=flat-square)
+
 一個互動式的社交金融平台，提供用戶註冊、好友系統、社交發帖、即時聊天等功能。未來將整合股票數據和市場新聞。
 
 ## ✨ 主要功能
