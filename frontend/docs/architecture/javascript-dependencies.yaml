@@ -130,9 +130,13 @@ javascript_dependencies:
       - "所有模組 (通過全域變數)"
 
   utils/websocket.js:
-    description: "WebSocket 管理器 - 即時通信功能"
+    description: "Socket.IO 管理器 - 即時通信功能 (Flask-SocketIO 集成)"
     type: "utility"
     level: 1
+    technology_stack:
+      frontend: "Socket.IO Client 4.0.1"
+      backend: "Flask-SocketIO 5.3.6"
+      protocol: "Engine.IO 4 (HTTP Long Polling)"
     imports:
       - from: "../config/routes.js"
         items: ["RouteUtils"]
@@ -140,11 +144,22 @@ javascript_dependencies:
       - "WebSocketManager"
     global_variables:
       - "window.websocketManager"
-    purpose: "WebSocket 連接和訊息管理"
+      - "window.io (Socket.IO Client)"
+    purpose: "Socket.IO 連接和即時訊息管理"
+    features:
+      - real_time_messaging
+      - user_presence_tracking
+      - typing_indicators
+      - heartbeat_monitoring
+      - chat_room_management
+      - automatic_reconnection
     dependencies:
       - "routes.js"
+      - "Socket.IO Client (CDN)"
     used_by:
       - "chat.js"
+    testing:
+      - "frontend/tests/socketio/ (完整測試套件)"
 
   utils/pwa.js:
     description: "PWA 管理器 - 處理 Service Worker 註冊、安裝提示和推送通知"
@@ -283,22 +298,35 @@ javascript_dependencies:
       - "dashboard/friends.html"
 
   chat.js:
-    description: "聊天功能 - 即時聊天和訊息管理"
+    description: "Socket.IO 即時聊天功能 - 完整的即時通信系統"
     type: "feature"
     level: 2
+    real_time_features:
+      - socket_io_integration
+      - real_time_messaging
+      - user_presence_tracking
+      - typing_indicators
+      - chat_room_management
+      - heartbeat_monitoring
     imports:
       - from: "./config/routes.js"
         items: ["RouteUtils"]
     exports: []
     global_variables: []
-    purpose: "即時聊天功能"
+    purpose: "Socket.IO 驅動的即時聊天功能"
     dependencies:
       - "routes.js"
       - "api.js (全域)"
       - "auth.js (全域)"
       - "websocket.js (全域)"
+      - "Socket.IO Client 4.0.1"
+    backend_integration:
+      - "Flask-SocketIO 5.3.6"
+      - "Gunicorn Eventlet Worker"
     used_by:
       - "dashboard/chat.html"
+    testing:
+      - "frontend/tests/socketio/ (功能測試)"
 
   post.js:
     description: "文章功能 - 文章詳情、評論和點讚"

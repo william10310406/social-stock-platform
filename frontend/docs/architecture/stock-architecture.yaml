@@ -83,10 +83,30 @@ components:
       - path_validation        # 路徑驗證安全
 
   backend:
-    framework: Flask 2.x + Gunicorn
+    framework: Flask 2.x + Gunicorn + Flask-SocketIO
+    real_time_features:
+      technology: Flask-SocketIO 5.3.6 + Socket.IO
+      transport: HTTP Long Polling (Engine.IO 4)
+      worker_configuration: Gunicorn Eventlet Worker (single worker)
+      capabilities:
+        - real_time_messaging
+        - user_presence_management
+        - typing_indicators
+        - heartbeat_monitoring
+        - chat_room_management
+        - connection_state_tracking
     structure:
       entrypoint: run.py
       app_factory: app/__init__.py
+      socketio_config:
+        cors_allowed_origins: ["http://localhost:5173", "http://0.0.0.0:5173"]
+        async_mode: eventlet
+        ping_timeout: 60
+        ping_interval: 25
+        logger: true
+        engineio_logger: true
+      testing_suite: backend/tests/test_socketio.py
+      alternative_runner: backend/scripts/run_socketio.py
       blueprints:
         auth:
           prefix: /api/auth
@@ -117,6 +137,18 @@ components:
             - path: /conversations/<user_id> # GET - get/create conversation with user
             - path: /conversations/<id>/messages # GET - fetch messages, POST - send message
             - path: /conversations/<id> # DELETE - delete conversation
+          socketio_events:
+            connection_events:
+              - connect               # User connects to Socket.IO
+              - disconnect           # User disconnects from Socket.IO
+            chat_events:
+              - join_chat            # Join specific chat room
+              - leave_chat           # Leave specific chat room
+              - send_message         # Send real-time message
+              - typing               # Typing indicator
+            heartbeat_events:
+              - ping                 # Client heartbeat ping
+              - pong                 # Server heartbeat pong
         stocks:
           prefix: /api/stocks
           endpoints:
@@ -129,7 +161,11 @@ components:
     features:
       - jwt_based_authentication
       - friend_only_chat_restriction
-      - real_time_message_polling
+      - real_time_socketio_messaging
+      - user_presence_tracking
+      - typing_indicators
+      - heartbeat_monitoring
+      - chat_room_management
       - post_like_system
       - user_profile_management
       - friendship_workflow
@@ -139,6 +175,7 @@ components:
       - rate_limiting (Flask‑Limiter)
       - sql_parameterised_queries
       - cors_protection
+      - socketio_cors_configuration
       - request_logging (rotating file)
     cache_layer:
       type: Redis
@@ -339,9 +376,12 @@ deployment:
       features: [hot_reload, tailwind_watch, docker_proxy_support]
     backend:
       image: python:3.10-slim
-      server: Gunicorn with gthread workers
+      server: Gunicorn with eventlet worker
       port: 5000 (internal), 5001 (exposed)
-      workers: 4
+      workers: 1
+      worker_class: eventlet
+      worker_connections: 1000
+      socketio_support: true
     database:
       image: postgres:14
       port: 5432
@@ -368,11 +408,15 @@ deployment:
       - like_unlike_posts
       - user_post_history
     communication:
-      - real_time_private_chat
+      - real_time_socketio_chat
+      - user_presence_management
+      - typing_indicators
+      - heartbeat_monitoring
       - conversation_management
       - message_history
       - unread_message_indicators
       - friend_only_chat_restriction
+      - chat_room_management
     ui_ux:
       - responsive_design_with_tailwind
       - chinese_localization
@@ -394,7 +438,9 @@ deployment:
 
 notes:
   - JWT tokens stored in localStorage for client authentication
-  - Chat messages auto-refresh every 3 seconds
+  - Real-time chat powered by Flask-SocketIO 5.3.6 + Socket.IO Client 4.0.1
+  - WebSocket transport uses HTTP Long Polling (Engine.IO 4) for compatibility
+  - Gunicorn runs with single eventlet worker to support real-time features
   - Friend-only chat restriction enforced at API level
   - All database migrations managed through Flask-Migrate
   - Chinese interface with responsive TailwindCSS design
@@ -403,4 +449,6 @@ notes:
   - RouteUtils provides semantic API for path operations with parameter substitution
   - Automatic migration tools and comprehensive testing ensure zero-error deployment
   - Development safety guidelines prevent dependency cycles and maintain architecture integrity
+  - Comprehensive Socket.IO test suite available at /tests/socketio/
+  - Docker environment fully supports WebSocket connections with proper proxy configuration
 ```
