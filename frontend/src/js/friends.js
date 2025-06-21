@@ -2,7 +2,7 @@
 // 使用全局 API_BASE_URL
 
 // 導入路徑配置
-import { RouteUtils, ROUTES } from './config/routes.js';
+import { RouteUtils } from './config/routes.js';
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {

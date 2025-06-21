@@ -2,7 +2,7 @@
 // 實現真正的實時通訊，替代輪詢機制
 
 // 導入路徑配置
-import { RouteUtils, ROUTES } from '../config/routes.js';
+import { RouteUtils } from '../config/routes.js';
 
 class WebSocketManager {
   constructor() {

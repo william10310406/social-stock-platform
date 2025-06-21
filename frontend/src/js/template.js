@@ -4,7 +4,7 @@
  */
 
 // 導入路徑配置
-import { RouteUtils, ROUTES } from './config/routes.js';
+import { ROUTES } from './config/routes.js';
 
 class TemplateEngine {
   constructor() {

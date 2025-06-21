@@ -242,15 +242,14 @@ const LEGACY_ROUTES = {
   api: ROUTES.api,
 };
 
-// 導出配置
-if (typeof module !== 'undefined' && module.exports) {
-  // Node.js 環境
-  module.exports = { ROUTES, RouteUtils, LEGACY_ROUTES };
-} else {
-  // 瀏覽器環境
+// ES6 模組導出
+export { ROUTES, RouteUtils, LEGACY_ROUTES };
+
+// 向後兼容：瀏覽器全局變量
+if (typeof window !== 'undefined') {
   window.ROUTES = ROUTES;
   window.RouteUtils = RouteUtils;
-  window.LEGACY_ROUTES = LEGACY_ROUTES; // 向後兼容
+  window.LEGACY_ROUTES = LEGACY_ROUTES;
 }
 
 console.log('Routes configuration loaded:', ROUTES);

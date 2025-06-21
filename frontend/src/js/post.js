@@ -2,7 +2,7 @@
 // 使用全局 API_BASE_URL
 
 // 導入路徑配置
-import { RouteUtils, ROUTES } from './config/routes.js';
+// import { RouteUtils } from './config/routes.js'; // 暫時註解，未使用
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
@@ -179,28 +179,29 @@ const handleDeleteComment = async (event) => {
 
 // updateNavbar function is now handled by auth.js to avoid conflicts
 
-const initPost = () => {
-  // Route Protection
-  if (!localStorage.getItem('token')) {
-    alert('You must be logged in to view this page.');
-    RouteUtils.redirectToLogin();
-    return; // Stop further execution
-  }
+// 已移至 DOMContentLoaded 事件中，避免重複定義
+// const initPost = () => {
+//   // Route Protection
+//   if (!localStorage.getItem('token')) {
+//     alert('You must be logged in to view this page.');
+//     RouteUtils.redirectToLogin();
+//     return; // Stop further execution
+//   }
 
-  // Update navbar to show user navigation (wait for auth.js if needed)
-  const tryUpdateNavbar = () => {
-    if (typeof updateNavbar === 'function') {
-      updateNavbar();
-    } else {
-      // Wait a bit for auth.js to load and try again
-      setTimeout(tryUpdateNavbar, 50);
-    }
-  };
-  tryUpdateNavbar();
+//   // Update navbar to show user navigation (wait for auth.js if needed)
+//   const tryUpdateNavbar = () => {
+//     if (typeof updateNavbar === 'function') {
+//       updateNavbar();
+//     } else {
+//       // Wait a bit for auth.js to load and try again
+//       setTimeout(tryUpdateNavbar, 50);
+//     }
+//   };
+//   tryUpdateNavbar();
 
-  fetchPost();
-  commentForm.addEventListener('submit', handleAddComment);
-};
+//   fetchPost();
+//   commentForm.addEventListener('submit', handleAddComment);
+// };
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('token')) {

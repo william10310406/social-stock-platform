@@ -2,7 +2,7 @@
 // 使用全局 API_BASE_URL
 
 // 導入路徑配置
-import { RouteUtils, ROUTES } from './config/routes.js';
+import { RouteUtils } from './config/routes.js';
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
@@ -103,7 +103,7 @@ const displayPosts = (posts) => {
 
 const handleDeletePost = async (event) => {
   const postId = event.target.dataset.postId;
-  if (!confirm(`Are you sure you want to delete this post?`)) {
+  if (!confirm('Are you sure you want to delete this post?')) {
     return;
   }
 

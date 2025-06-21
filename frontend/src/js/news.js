@@ -43,7 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
     evtSource.onerror = function (err) {
       console.error('EventSource failed:', err);
       const errorP = document.createElement('p');
-      errorP.innerHTML = `<strong>Error connecting to news feed. Maybe your session expired?</strong>`;
+      errorP.innerHTML =
+        '<strong>Error connecting to news feed. Maybe your session expired?</strong>';
       newsFeed.prepend(errorP);
       evtSource.close();
     };
