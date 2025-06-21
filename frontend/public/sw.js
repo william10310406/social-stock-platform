@@ -5,18 +5,25 @@ const CACHE_NAME = 'stock-insight-v1.0.0';
 const STATIC_CACHE = 'static-v1.0.0';
 const DYNAMIC_CACHE = 'dynamic-v1.0.0';
 
-// 需要緩存的靜態資源
-const STATIC_ASSETS = [
-  '/',
+// 路徑配置（從 routes.js 同步）
+const CACHE_PATHS = [
+  // 主頁面
   '/index.html',
+
+  // 認證頁面
   '/src/pages/auth/login.html',
   '/src/pages/auth/register.html',
+
+  // 儀表板頁面
   '/src/pages/dashboard/index.html',
   '/src/pages/dashboard/profile.html',
   '/src/pages/dashboard/friends.html',
   '/src/pages/dashboard/chat.html',
+
+  // 文章頁面
   '/src/pages/posts/detail.html',
-  '/src/css/style.css',
+
+  // JavaScript 文件
   '/src/js/config/routes.js',
   '/src/js/utils/pathManager.js',
   '/src/js/template.js',
@@ -27,9 +34,17 @@ const STATIC_ASSETS = [
   '/src/js/friends.js',
   '/src/js/profile.js',
   '/src/js/post.js',
+
+  // 組件
   '/src/components/navbar.html',
+
+  // 樣式和其他資源
+  '/src/css/style.css',
   '/manifest.json',
 ];
+
+// 預設路徑
+const DEFAULT_PAGE = '/src/pages/dashboard/index.html';
 
 // API 端點白名單（需要網路連接）
 const API_ENDPOINTS = ['http://localhost:5001/api', '/api'];
@@ -43,7 +58,7 @@ self.addEventListener('install', (event) => {
       .open(STATIC_CACHE)
       .then((cache) => {
         console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
+        return cache.addAll(CACHE_PATHS);
       })
       .then(() => {
         console.log('Service Worker: Static assets cached');

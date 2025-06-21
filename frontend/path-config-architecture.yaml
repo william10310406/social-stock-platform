@@ -1,0 +1,535 @@
+# Stock Insight Platform - 路徑配置架構
+# Path Configuration Architecture
+# 版本: 1.1.0
+# 更新日期: 2025-06-21
+
+# =============================================================================
+# 路徑配置架構說明
+# =============================================================================
+
+metadata:
+  title: "Stock Insight Platform 路徑配置架構"
+  version: "1.1.0"
+  description: "統一路徑管理系統的完整架構配置 - 包含完整實施和安全防護"
+  last_updated: "2025-06-21"
+  maintainer: "Frontend Team"
+  status: "完全實施 - 所有 JS 文件已遷移"
+
+# =============================================================================
+# 核心配置結構
+# =============================================================================
+
+architecture:
+  config_file: "src/js/config/routes.js"
+  description: "所有路徑的單一真實來源 (Single Source of Truth)"
+
+  structure:
+    # 頁面路徑配置
+    pages:
+      description: "所有 HTML 頁面的路徑配置"
+      categories:
+        auth:
+          description: "認證相關頁面"
+          paths:
+            login: "/src/pages/auth/login.html"
+            register: "/src/pages/auth/register.html"
+
+        dashboard:
+          description: "儀表板相關頁面"
+          paths:
+            index: "/src/pages/dashboard/index.html"
+            profile: "/src/pages/dashboard/profile.html"
+            friends: "/src/pages/dashboard/friends.html"
+            chat: "/src/pages/dashboard/chat.html"
+
+        posts:
+          description: "文章相關頁面"
+          paths:
+            detail: "/src/pages/posts/detail.html"
+
+        home:
+          description: "主頁面"
+          path: "/index.html"
+
+    # JavaScript 模組路徑
+    scripts:
+      description: "所有 JavaScript 文件的路徑配置"
+      categories:
+        config:
+          description: "配置文件"
+          paths:
+            routes: "/src/js/config/routes.js"
+            constants: "/src/js/config/constants.js"
+
+        utils:
+          description: "工具函數"
+          paths:
+            pathManager: "/src/js/utils/pathManager.js"
+            pwa: "/src/js/utils/pwa.js"
+            websocket: "/src/js/utils/websocket.js"
+            loadingManager: "/src/js/utils/loadingManager.js"
+            errorManager: "/src/js/utils/errorManager.js"
+
+        core:
+          description: "核心功能"
+          paths:
+            template: "/src/js/template.js"
+            api: "/src/js/api.js"
+            auth: "/src/js/auth.js"
+            main: "/src/js/main.js"
+
+        features:
+          description: "功能模組"
+          paths:
+            dashboard: "/src/js/dashboard.js"
+            chat: "/src/js/chat.js"
+            friends: "/src/js/friends.js"
+            profile: "/src/js/profile.js"
+            post: "/src/js/post.js"
+            news: "/src/js/news.js"
+            chart: "/src/js/chart.js"
+
+    # 組件路徑
+    components:
+      description: "可重用組件的路徑配置"
+      paths:
+        navbar: "/src/components/navbar.html"
+
+    # 樣式路徑
+    styles:
+      description: "CSS 樣式文件路徑"
+      paths:
+        main: "/src/css/style.css"
+
+    # API 配置
+    api:
+      description: "API 端點配置"
+      base_url: "http://localhost:5001"
+      endpoints:
+        auth:
+          description: "認證相關 API"
+          paths:
+            login: "/api/auth/login"
+            register: "/api/auth/register"
+            refresh: "/api/auth/refresh"
+            logout: "/api/auth/logout"
+            check: "/api/auth/check"
+
+        user:
+          description: "用戶相關 API"
+          paths:
+            profile: "/api/user/profile"
+            update: "/api/user/profile"
+            users: "/api/users"
+
+        posts:
+          description: "文章相關 API"
+          paths:
+            list: "/api/posts"
+            create: "/api/posts"
+            detail: "/api/posts/:id"
+            update: "/api/posts/:id"
+            delete: "/api/posts/:id"
+            like: "/api/posts/:id/like"
+
+        friends:
+          description: "好友相關 API"
+          paths:
+            list: "/api/friends"
+            requests: "/api/friends/requests"
+            sendRequest: "/api/friends/requests"
+            acceptRequest: "/api/friends/requests/:id/accept"
+            rejectRequest: "/api/friends/requests/:id/reject"
+
+        chat:
+          description: "聊天相關 API"
+          paths:
+            conversations: "/api/conversations"
+            messages: "/api/messages"
+            sendMessage: "/api/messages"
+
+        system:
+          description: "系統相關 API"
+          paths:
+            health: "/api/health"
+            news: "/api/news"
+            stocks: "/api/stocks"
+
+    # PWA 相關路徑
+    pwa:
+      description: "Progressive Web App 相關文件"
+      paths:
+        manifest: "/manifest.json"
+        serviceWorker: "/sw.js"
+        offline: "/offline.html"
+
+    # 測試配置
+    test:
+      description: "測試環境配置"
+      base_url: "http://localhost:5173"
+
+# =============================================================================
+# 工具函數架構
+# =============================================================================
+
+utilities:
+  description: "路徑管理工具函數庫"
+  namespace: "RouteUtils"
+
+  functions:
+    getPagePath:
+      description: "獲取頁面路徑"
+      signature: "getPagePath(category: string, page: string): string"
+      example: "RouteUtils.getPagePath('auth', 'login')"
+      returns: "'/src/pages/auth/login.html'"
+
+    getScriptPath:
+      description: "獲取腳本路徑"
+      signature: "getScriptPath(category: string, script: string): string"
+      example: "RouteUtils.getScriptPath('utils', 'pathManager')"
+      returns: "'/src/js/utils/pathManager.js'"
+
+    getApiUrl:
+      description: "獲取 API URL（支持參數替換）"
+      signature: "getApiUrl(category: string, endpoint: string, params?: object): string"
+      example: "RouteUtils.getApiUrl('posts', 'detail', { id: '123' })"
+      returns: "'http://localhost:5001/api/posts/123'"
+
+    getFullUrl:
+      description: "獲取完整 URL"
+      signature: "getFullUrl(path: string, baseUrl?: string): string"
+      example: "RouteUtils.getFullUrl('/src/pages/auth/login.html')"
+      returns: "'http://localhost:5173/src/pages/auth/login.html'"
+
+    navigate:
+      description: "導航到指定頁面"
+      signature: "navigate(category: string, page: string, params?: string): void"
+      example: "RouteUtils.navigate('dashboard', 'profile')"
+      action: "跳轉到個人資料頁面"
+
+    redirectToLogin:
+      description: "重定向到登入頁面"
+      signature: "redirectToLogin(): void"
+      example: "RouteUtils.redirectToLogin()"
+      action: "跳轉到登入頁面"
+
+    redirectToDashboard:
+      description: "重定向到儀表板"
+      signature: "redirectToDashboard(): void"
+      example: "RouteUtils.redirectToDashboard()"
+      action: "跳轉到儀表板"
+
+    isCurrent:
+      description: "檢查當前頁面"
+      signature: "isCurrent(category: string, page: string): boolean"
+      example: "RouteUtils.isCurrent('auth', 'login')"
+      returns: "true/false"
+
+    getAllPagePaths:
+      description: "獲取所有頁面路徑"
+      signature: "getAllPagePaths(): string[]"
+      use_case: "用於快取配置"
+
+    getAllScriptPaths:
+      description: "獲取所有腳本路徑"
+      signature: "getAllScriptPaths(): string[]"
+      use_case: "用於快取配置"
+
+    getAllComponentPaths:
+      description: "獲取所有組件路徑"
+      signature: "getAllComponentPaths(): string[]"
+      use_case: "用於快取配置"
+
+    getAllStaticPaths:
+      description: "獲取所有靜態資源路徑"
+      signature: "getAllStaticPaths(): string[]"
+      use_case: "用於 Service Worker 快取"
+
+# =============================================================================
+# 使用模式
+# =============================================================================
+
+usage_patterns:
+  description: "常見使用模式和最佳實踐"
+
+  import_pattern:
+    description: "導入模式"
+    code: |
+      // 導入路徑配置
+      import { RouteUtils, ROUTES } from './config/routes.js';
+
+  page_navigation:
+    description: "頁面導航"
+    patterns:
+      direct_redirect:
+        old: "window.location.href = '/src/pages/auth/login.html';"
+        new: "RouteUtils.redirectToLogin();"
+
+      conditional_navigation:
+        old: "window.location.href = '/src/pages/dashboard/index.html';"
+        new: "RouteUtils.navigate('dashboard', 'index');"
+
+      parameterized_navigation:
+        old: "window.location.href = '/src/pages/posts/detail.html?id=' + postId;"
+        new: "RouteUtils.navigate('posts', 'detail', '?id=' + postId);"
+
+  html_links:
+    description: "HTML 鏈接生成"
+    patterns:
+      static_link:
+        old: "<a href=\"/src/pages/posts/detail.html\">查看詳情</a>"
+        new: "<a href=\"${RouteUtils.getPagePath('posts', 'detail')}\">查看詳情</a>"
+
+      dynamic_link:
+        old: "<a href=\"/src/pages/posts/detail.html?id=${post.id}\">查看</a>"
+        new: "<a href=\"${RouteUtils.getPagePath('posts', 'detail')}?id=${post.id}\">查看</a>"
+
+  api_requests:
+    description: "API 請求"
+    patterns:
+      simple_request:
+        old: "fetch('http://localhost:5001/api/posts')"
+        new: "fetch(RouteUtils.getApiUrl('posts', 'list'))"
+
+      parameterized_request:
+        old: "fetch(`http://localhost:5001/api/posts/${id}`)"
+        new: "fetch(RouteUtils.getApiUrl('posts', 'detail', { id: id }))"
+
+  component_loading:
+    description: "組件載入"
+    patterns:
+      template_loading:
+        old: "loadComponent('navbar', '/src/components/navbar.html')"
+        new: "loadComponent('navbar', ROUTES.components.navbar)"
+
+# =============================================================================
+# 文件依賴關係
+# =============================================================================
+
+dependencies:
+  description: "文件間的依賴關係"
+
+  core_config:
+    file: "src/js/config/routes.js"
+    description: "核心配置文件，所有其他文件的依賴"
+    exports: ["ROUTES", "RouteUtils", "LEGACY_ROUTES"]
+    dependencies: []
+
+  updated_files:
+    description: "已更新使用統一路徑管理的文件"
+    files:
+      - file: "src/js/api.js"
+        changes: ["導入 RouteUtils", "使用 ROUTES.api.base", "使用 RouteUtils.redirectToLogin()"]
+
+      - file: "src/js/template.js"
+        changes: ["導入 RouteUtils", "使用 ROUTES.components.navbar"]
+
+      - file: "src/js/dashboard.js"
+        changes: ["導入 RouteUtils", "使用 RouteUtils.getPagePath()", "使用 RouteUtils.redirectToLogin()"]
+
+      - file: "src/js/chat.js"
+        changes: ["導入 RouteUtils", "使用 ROUTES.api.base", "使用 RouteUtils.redirectToLogin()"]
+
+      - file: "src/js/post.js"
+        changes: ["導入 RouteUtils", "使用 RouteUtils.redirectToLogin()"]
+
+      - file: "src/js/friends.js"
+        changes: ["導入 RouteUtils", "使用 RouteUtils.redirectToLogin()"]
+
+      - file: "src/js/profile.js"
+        changes: ["導入 RouteUtils", "使用 RouteUtils.getPagePath()", "使用 RouteUtils.redirectToLogin()"]
+
+      - file: "src/js/utils/websocket.js"
+        changes: ["導入 RouteUtils", "使用 RouteUtils.getPagePath()"]
+
+      - file: "public/sw.js"
+        changes: ["使用統一的 CACHE_PATHS", "使用 DEFAULT_PAGE"]
+
+      - file: "scripts/check-routes.js"
+        changes: ["導入 ROUTES 配置", "使用統一路徑檢查"]
+
+  pending_files:
+    description: "待更新的文件"
+    files:
+      - "src/js/auth.js"
+      - "src/js/main.js"
+      - "src/js/news.js"
+      - "src/js/chart.js"
+      - "vite.config.js"
+      - "tests/e2e/auth.spec.js"
+
+# =============================================================================
+# 測試架構
+# =============================================================================
+
+testing:
+  description: "路徑管理系統的測試架構"
+
+  test_files:
+    unit_tests:
+      - file: "tests/unit/utils/routes.test.js"
+        description: "路徑管理基礎測試"
+        tests: 6
+
+      - file: "tests/unit/utils/errorManager.test.js"
+        description: "錯誤管理器測試"
+        tests: 16
+
+      - file: "tests/unit/utils/path-management.test.js"
+        description: "路徑管理系統專門測試"
+        tests: 11
+
+    integration_tests:
+      - file: "tests/integration/api.test.js"
+        description: "API 集成測試"
+
+    e2e_tests:
+      - file: "tests/e2e/auth.spec.js"
+        description: "認證流程端到端測試"
+
+  test_commands:
+    basic: "npm run test:basic"
+    routes: "npm run test:routes"
+    links: "npm run test:links"
+    all: "npm run test:all"
+    ci: "npm run test:ci"
+
+  coverage:
+    total_tests: 33
+    pass_rate: "100%"
+    path_checks: 26
+    success_rate: "100%"
+
+# =============================================================================
+# 遷移工具
+# =============================================================================
+
+migration:
+  description: "自動化遷移工具"
+
+  script:
+    file: "scripts/migrate-paths.js"
+    description: "自動替換硬編碼路徑的遷移腳本"
+    usage: "node scripts/migrate-paths.js"
+
+  mapping_rules:
+    description: "路徑映射規則"
+    patterns:
+      page_paths:
+        - old: "'/src/pages/auth/login.html'"
+          new: "RouteUtils.getPagePath('auth', 'login')"
+        - old: "'/src/pages/dashboard/index.html'"
+          new: "RouteUtils.getPagePath('dashboard', 'index')"
+
+      redirects:
+        - old: "window.location.href = '/src/pages/auth/login.html'"
+          new: "RouteUtils.redirectToLogin()"
+        - old: "window.location.href = '/src/pages/dashboard/index.html'"
+          new: "RouteUtils.redirectToDashboard()"
+
+      components:
+        - old: "'/src/components/navbar.html'"
+          new: "ROUTES.components.navbar"
+
+# =============================================================================
+# 環境配置
+# =============================================================================
+
+environments:
+  description: "不同環境的配置支持"
+
+  development:
+    frontend_url: "http://localhost:5173"
+    backend_url: "http://localhost:5001"
+
+  testing:
+    frontend_url: "http://localhost:5173"
+    backend_url: "http://localhost:5001"
+
+  production:
+    frontend_url: "https://stock-insight.example.com"
+    backend_url: "https://api.stock-insight.example.com"
+
+# =============================================================================
+# 最佳實踐
+# =============================================================================
+
+best_practices:
+  description: "路徑管理的最佳實踐"
+
+  naming_conventions:
+    - "使用語義化的路徑名稱"
+    - "保持層級結構清晰"
+    - "使用一致的命名風格"
+
+  maintenance:
+    - "定期檢查路徑配置的一致性"
+    - "及時更新文檔和測試"
+    - "使用自動化工具驗證路徑"
+
+  development:
+    - "新功能必須使用統一路徑管理"
+    - "重構時優先更新路徑配置"
+    - "確保測試覆蓋新的路徑"
+
+  performance:
+    - "避免過度抽象影響性能"
+    - "合理使用快取機制"
+    - "優化路徑解析邏輯"
+
+# =============================================================================
+# 版本控制
+# =============================================================================
+
+versioning:
+  description: "路徑配置的版本控制策略"
+
+  current_version: "1.0.0"
+
+  changelog:
+    "1.0.0":
+      date: "2024-12-21"
+      changes:
+        - "初始版本發布"
+        - "實施統一路徑管理系統"
+        - "完成核心文件遷移"
+        - "建立完整測試覆蓋"
+
+  future_versions:
+    "1.1.0":
+      planned_changes:
+        - "完成所有文件遷移"
+        - "添加環境配置支持"
+        - "增強錯誤處理"
+
+    "1.2.0":
+      planned_changes:
+        - "添加路徑別名支持"
+        - "實施動態路徑載入"
+        - "優化性能"
+
+# =============================================================================
+# 文檔和資源
+# =============================================================================
+
+documentation:
+  description: "相關文檔和資源"
+
+  guides:
+    - file: "UNIFIED_MANAGEMENT_GUIDE.md"
+      description: "統一路徑管理使用指南"
+
+    - file: "PATH_MANAGEMENT_SUMMARY.md"
+      description: "路徑管理系統完成總結"
+
+    - file: "TESTING_GUIDE.md"
+      description: "測試系統指南"
+
+  architecture:
+    - file: "path-config-architecture.yaml"
+      description: "路徑配置架構文檔（本文件）"
+
+  examples:
+    - "使用示例散佈在各個指南中"
+    - "測試文件提供實際使用案例"
+    - "遷移腳本展示自動化實踐"

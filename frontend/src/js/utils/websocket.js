@@ -1,6 +1,9 @@
 // WebSocket 管理器
 // 實現真正的實時通訊，替代輪詢機制
 
+// 導入路徑配置
+import { RouteUtils, ROUTES } from '../config/routes.js';
+
 class WebSocketManager {
   constructor() {
     this.ws = null;
@@ -266,12 +269,14 @@ class WebSocketManager {
   showFriendRequestNotification(request) {
     if (Notification.permission === 'granted') {
       new Notification('新的好友請求', {
-        body: `${request.sender_name} 想要成為您的好友`,
+        body: `${request.sender_name} 想要加您為好友`,
         icon: '/icons/icon-192x192.png',
         badge: '/icons/badge-72x72.png',
         tag: 'friend-request',
         data: {
-          url: '/src/pages/dashboard/friends.html',
+          type: 'friend_request',
+          url: RouteUtils.getPagePath('dashboard', 'friends'),
+          requestId: request.id,
         },
       });
     }

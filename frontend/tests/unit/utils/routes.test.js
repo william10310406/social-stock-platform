@@ -1,5 +1,5 @@
 // 路徑管理工具單元測試
-import '../test-setup.js';
+const { describe, test, expect, beforeEach } = require('@jest/globals');
 
 // 模擬 ROUTES 配置
 global.ROUTES = {

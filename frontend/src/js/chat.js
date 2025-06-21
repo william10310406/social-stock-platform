@@ -1,5 +1,6 @@
 // chat.js - Chat functionality
-// 使用全局 API_BASE_URL
+// 導入路徑配置
+import { RouteUtils, ROUTES } from './config/routes.js';
 
 let currentConversationId = null;
 let currentUserId = null;
@@ -316,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
   if (!token) {
     alert('你必須登入才能使用聊天功能');
-    window.location.href = '/src/pages/auth/login.html';
+    RouteUtils.redirectToLogin();
     return;
   }
 
@@ -397,6 +398,5 @@ window.addEventListener('beforeunload', () => {
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
-  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
-  return `${baseUrl}/api`;
+  return `${ROUTES.api.base}/api`;
 }

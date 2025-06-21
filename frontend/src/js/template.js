@@ -3,6 +3,9 @@
  * 用於將公共組件注入到頁面中
  */
 
+// 導入路徑配置
+import { RouteUtils, ROUTES } from './config/routes.js';
+
 class TemplateEngine {
   constructor() {
     this.components = new Map();
@@ -49,7 +52,7 @@ class TemplateEngine {
    */
   async initPage(pageConfig) {
     // 載入導航欄
-    await this.loadComponent('navbar', '/src/components/navbar.html');
+    await this.loadComponent('navbar', ROUTES.components.navbar);
 
     // 更新頁面標題
     if (pageConfig.title) {

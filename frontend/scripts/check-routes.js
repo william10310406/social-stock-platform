@@ -5,9 +5,41 @@
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
+const { ROUTES } = require('../src/js/config/routes.js');
 
 const BASE_URL = 'http://localhost:5173';
 const API_BASE_URL = 'http://localhost:5001';
+
+// 從統一配置獲取路徑
+const PATHS_TO_CHECK = [
+  // 主頁面
+  ROUTES.pages.home,
+
+  // 認證頁面
+  ...Object.values(ROUTES.pages.auth),
+
+  // 儀表板頁面
+  ...Object.values(ROUTES.pages.dashboard),
+
+  // 文章頁面
+  ...Object.values(ROUTES.pages.posts),
+];
+
+const SCRIPTS_TO_CHECK = [
+  // 配置腳本
+  ...Object.values(ROUTES.scripts.config),
+
+  // 工具腳本
+  ...Object.values(ROUTES.scripts.utils),
+
+  // 核心腳本
+  ...Object.values(ROUTES.scripts.core),
+
+  // 功能腳本
+  ...Object.values(ROUTES.scripts.features),
+];
+
+const COMPONENTS_TO_CHECK = Object.values(ROUTES.components);
 
 // 定義所有需要檢查的路徑
 const ROUTES_TO_CHECK = {

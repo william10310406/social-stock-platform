@@ -16,27 +16,70 @@ components:
       - friends.html         # friend management (search, requests, friends list)
       - chat.html           # real-time chat interface
       - post.html           # individual post view with comments
+
+    # 統一路徑管理系統
+    path_management:
+      description: "統一路徑管理系統 - 解決硬編碼路徑問題"
+      core_config: "src/js/config/routes.js"
+      architecture:
+        single_source_of_truth: "所有路徑的統一配置中心"
+        route_utils: "強大的路徑管理工具函數庫"
+        automatic_migration: "自動路徑遷移工具"
+        comprehensive_testing: "完整的測試覆蓋"
+      benefits:
+        - one_place_modification: "一處修改，處處生效"
+        - zero_maintenance_overhead: "零維護開銷"
+        - parameter_substitution: "支持參數化路徑"
+        - environment_configuration: "環境配置支持"
+        - ide_friendly: "IDE 友好的語義化 API"
+
     modules:
-      - api.js              # API base URL configuration
-      - auth.js             # authentication, JWT token management
-      - dashboard.js        # main feed, post interactions
-      - profile.js          # profile editing, user posts
-      - friends.js          # friend system functionality
-      - chat.js             # real-time chat with auto-refresh
-      - post.js             # post/comment CRUD, like system
-      - main.js             # shared utilities
-      - news.js             # news feed functionality
-      - chart.js            # stock chart functionality (placeholder)
+      core:
+        - config/routes.js     # 統一路徑配置 - 所有路徑的單一真實來源
+        - config/constants.js  # 系統常量配置
+        - api.js              # API 工具函數 - 使用統一路徑管理
+        - auth.js             # 認證管理 - JWT token 處理
+        - template.js         # 模板引擎 - 使用統一組件路徑
+        - main.js             # 共享工具函數
+
+      features:
+        - dashboard.js        # 儀表板 - 使用 RouteUtils 進行路徑管理
+        - profile.js          # 個人資料 - 集成統一導航
+        - friends.js          # 好友系統 - 統一重定向邏輯
+        - chat.js             # 即時聊天 - 使用統一 API 路徑
+        - post.js             # 文章系統 - 統一路徑導航
+        - news.js             # 新聞功能
+        - chart.js            # 股票圖表功能 (佔位符)
+
+      utilities:
+        - utils/pathManager.js    # 路徑管理工具 (已棄用 - 使用 RouteUtils)
+        - utils/errorManager.js   # 錯誤管理系統
+        - utils/loadingManager.js # 載入狀態管理
+        - utils/websocket.js      # WebSocket 管理 - 使用統一路徑
+        - utils/pwa.js           # PWA 功能支持
+
+      scripts:
+        - scripts/migrate-paths.js    # 自動路徑遷移工具
+        - scripts/check-routes.js     # 路徑驗證腳本 - 使用統一配置
+        - scripts/dependency-check.js # 依賴檢查工具 - 防止循環依賴
+        - scripts/validate-links.js   # 鏈接驗證工具
+
     features:
-      - responsive_design   # mobile-friendly interface
-      - chinese_localization # 中文界面支持
-      - real_time_updates   # auto-refresh chat messages
-      - friendship_system   # comprehensive friend management
-      - social_interactions # posts, comments, likes
+      - responsive_design      # 響應式設計
+      - chinese_localization   # 中文界面支持
+      - real_time_updates     # 即時更新功能
+      - friendship_system     # 完整好友管理系統
+      - social_interactions   # 社交互動功能
+      - unified_path_management # 統一路徑管理系統
+      - automatic_error_handling # 自動錯誤處理
+      - comprehensive_testing    # 完整測試覆蓋
+
     security:
-      - input_sanitisation  # XSS prevention
-      - jwt_token_validation # client-side auth checking
-      - protected_routes    # authentication required pages
+      - input_sanitisation     # XSS 防護
+      - jwt_token_validation   # 客戶端認證驗證
+      - protected_routes       # 受保護路由
+      - dependency_cycle_prevention # 循環依賴防護
+      - path_validation        # 路徑驗證安全
 
   backend:
     framework: Flask 2.x + Gunicorn
@@ -328,9 +371,16 @@ deployment:
       - auto_refresh_functionality
       - modern_chat_interface
       - unified_navigation_system
+    architecture:
+      - unified_path_management_system
+      - centralized_route_configuration
+      - automatic_path_migration_tools
+      - comprehensive_testing_framework
+      - dependency_cycle_prevention
+      - development_safety_guidelines
 
   development_status:
-    completed: [auth, social, posts, chat, basic_ui]
+    completed: [auth, social, posts, chat, basic_ui, path_management_system]
     in_progress: [stock_data_integration, news_feed]
     planned: [real_time_notifications, advanced_stock_charts]
 
@@ -341,4 +391,8 @@ notes:
   - All database migrations managed through Flask-Migrate
   - Chinese interface with responsive TailwindCSS design
   - PostgreSQL for production-ready data persistence
+  - Unified path management system eliminates hardcoded paths across all JS files
+  - RouteUtils provides semantic API for path operations with parameter substitution
+  - Automatic migration tools and comprehensive testing ensure zero-error deployment
+  - Development safety guidelines prevent dependency cycles and maintain architecture integrity
 ```

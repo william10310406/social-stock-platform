@@ -1,6 +1,9 @@
 // friends.js - Friends management functionality
 // 使用全局 API_BASE_URL
 
+// 導入路徑配置
+import { RouteUtils, ROUTES } from './config/routes.js';
+
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
   const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
@@ -115,9 +118,11 @@ const renderAll = () => {
 // updateNavbar function is now handled by auth.js to avoid conflicts
 
 // --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
-  if (!token) {
-    window.location.href = '/src/pages/auth/login.html';
+const initFriends = () => {
+  // Route Protection
+  if (!localStorage.getItem('token')) {
+    alert('You must be logged in to view this page.');
+    RouteUtils.redirectToLogin();
     return;
   }
 
@@ -134,4 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderAll();
   userSearchInput.addEventListener('input', searchUsers);
-});
+};
+
+document.addEventListener('DOMContentLoaded', initFriends);

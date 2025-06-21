@@ -1,6 +1,8 @@
 // api.js - API utilities and endpoints
+// 導入路徑配置
+import { RouteUtils, ROUTES } from './config/routes.js';
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = ROUTES.api.base;
 
 const fetchWithAuth = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
@@ -23,7 +25,7 @@ const fetchWithAuth = async (endpoint, options = {}) => {
     // Token is invalid or expired, redirect to login
     alert('Your session has expired. Please log in again.');
     localStorage.removeItem('token');
-    window.location.href = '/src/pages/auth/login.html';
+    RouteUtils.redirectToLogin();
     // Throw an error to stop further processing in the calling function
     throw new Error('Unauthorized');
   }
