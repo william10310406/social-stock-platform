@@ -3,8 +3,7 @@
  * 用於將公共組件注入到頁面中
  */
 
-// 導入路徑配置
-import { ROUTES } from './config/routes.js';
+// 使用全局路徑配置 (由 pathManager 設置)
 
 class TemplateEngine {
   constructor() {
@@ -51,8 +50,12 @@ class TemplateEngine {
    * 初始化頁面
    */
   async initPage(pageConfig) {
-    // 載入導航欄
-    await this.loadComponent('navbar', ROUTES.components.navbar);
+    // 載入導航欄 (使用全局 ROUTES)
+    if (window.ROUTES && window.ROUTES.components && window.ROUTES.components.navbar) {
+      await this.loadComponent('navbar', window.ROUTES.components.navbar);
+    } else {
+      console.warn('ROUTES not available, skipping navbar load');
+    }
 
     // 更新頁面標題
     if (pageConfig.title) {
@@ -68,7 +71,12 @@ class TemplateEngine {
 }
 
 // 全局實例
-window.templateEngine = new TemplateEngine();
+const templateEngine = new TemplateEngine();
+window.templateEngine = templateEngine;
+
+// ES6 模組導出
+export default templateEngine;
+export { TemplateEngine };
 
 // 頁面載入完成後初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -78,5 +86,5 @@ document.addEventListener('DOMContentLoaded', () => {
     title: titleMeta ? titleMeta.content : '首頁',
   };
 
-  window.templateEngine.initPage(config);
+  templateEngine.initPage(config);
 });

@@ -1,10 +1,10 @@
 // dashboard.js - Dashboard page functionality
-// 導入路徑配置
-import { RouteUtils, ROUTES } from './config/routes.js';
+// 使用全局路徑配置 (由 pathManager 設置)
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
-  return `${ROUTES.api.base}/api`;
+  const apiBase = window.ROUTES ? window.ROUTES.api.base : '';
+  return `${apiBase}/api`;
 }
 
 const fetchPosts = async () => {
@@ -48,7 +48,7 @@ const displayPosts = (posts) => {
     postElement.innerHTML = `
             <div class="flex justify-between items-center mb-2">
                 <h3 class="font-bold text-xl">
-                    <a href="${RouteUtils.getPagePath('posts', 'detail')}?id=${post.id}" class="hover:underline">${post.title}</a>
+                    <a href="${window.RouteUtils ? window.RouteUtils.getPagePath('posts', 'detail') : '/src/pages/posts/detail.html'}?id=${post.id}" class="hover:underline">${post.title}</a>
                 </h3>
                 <span class="text-sm text-gray-600">By ${post.author}</span>
             </div>
@@ -59,7 +59,7 @@ const displayPosts = (posts) => {
                     <button data-post-id="${post.id}" class="like-btn ${post.current_user_liked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500">
                         ❤️ <span class="like-count">${post.likes_count}</span>
                     </button>
-                    <a href="${RouteUtils.getPagePath('posts', 'detail')}?id=${post.id}" class="text-gray-500 hover:text-gray-800">
+                    <a href="${window.RouteUtils ? window.RouteUtils.getPagePath('posts', 'detail') : '/src/pages/posts/detail.html'}?id=${post.id}" class="text-gray-500 hover:text-gray-800">
                         💬 <span class="comment-count">${post.comments_count}</span>
                     </a>
                 </div>
@@ -155,7 +155,11 @@ const initDashboard = () => {
   // Route Protection
   if (!localStorage.getItem('token')) {
     alert('You must be logged in to view this page.');
-    RouteUtils.redirectToLogin();
+    if (window.RouteUtils) {
+      window.RouteUtils.redirectToLogin();
+    } else {
+      window.location.href = '/src/pages/auth/login.html';
+    }
     return; // Stop further execution
   }
 

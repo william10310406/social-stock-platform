@@ -2,8 +2,8 @@
 // 由於 Playwright 測試運行在 Node.js 環境，無法直接使用 ES6 模組
 
 const TEST_CONFIG = {
-  BASE_URL: 'http://localhost:5173',
-  API_BASE_URL: 'http://localhost:5001',
+  BASE_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
+  API_BASE_URL: process.env.NODE_ENV === 'docker' ? '' : 'http://localhost:5001',
 
   // 頁面路徑
   PAGES: {

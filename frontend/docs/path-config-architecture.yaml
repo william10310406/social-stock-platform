@@ -20,8 +20,10 @@ metadata:
 # =============================================================================
 
 architecture:
-  config_file: "src/js/config/routes.js"
-  description: "所有路徑的單一真實來源 (Single Source of Truth)"
+  config_files:
+    production: "src/js/config/routes.js"
+    docker: "src/js/config/routes-docker.js"
+  description: "所有路徑的單一真實來源 (Single Source of Truth)，支援多環境配置"
 
   structure:
     # 頁面路徑配置
@@ -104,7 +106,9 @@ architecture:
     # API 配置
     api:
       description: "API 端點配置"
-      base_url: "http://localhost:5001"
+      base_url:
+        development: "http://localhost:5001"
+        docker: ""  # 使用相對路徑通過 Vite 代理
       endpoints:
         auth:
           description: "認證相關 API"
@@ -441,14 +445,27 @@ environments:
   development:
     frontend_url: "http://localhost:5173"
     backend_url: "http://localhost:5001"
+    config_file: "routes.js"
+
+  docker:
+    frontend_url: "http://localhost:5173"
+    backend_url: ""  # 通過代理訪問
+    config_file: "routes-docker.js"
+    features:
+      - "使用 Vite 代理避免 CORS"
+      - "相對 API 路徑"
+      - "HMR 支援 (端口 5174)"
+      - "容器間通信"
 
   testing:
     frontend_url: "http://localhost:5173"
     backend_url: "http://localhost:5001"
+    config_file: "routes.js"
 
   production:
     frontend_url: "https://stock-insight.example.com"
     backend_url: "https://api.stock-insight.example.com"
+    config_file: "routes.js"
 
 # =============================================================================
 # 最佳實踐

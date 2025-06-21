@@ -47,7 +47,7 @@ const CACHE_PATHS = [
 const DEFAULT_PAGE = '/src/pages/dashboard/index.html';
 
 // API 端點白名單（需要網路連接）
-const API_ENDPOINTS = ['http://localhost:5001/api', '/api'];
+const API_ENDPOINTS = ['/api'];
 
 // 安裝 Service Worker
 self.addEventListener('install', (event) => {

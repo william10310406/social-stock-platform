@@ -11,8 +11,8 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
-    // 代碼風格
-    indent: ['error', 2],
+    // 代碼風格 (交由 Prettier 處理)
+    indent: 'off', // 禁用，由 Prettier 處理
     quotes: ['error', 'single'],
     semi: ['error', 'always'],
     'comma-dangle': ['error', 'always-multiline'],

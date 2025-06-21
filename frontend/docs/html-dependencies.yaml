@@ -1,0 +1,361 @@
+# HTML 文件依賴關係映射
+# Stock Insight Platform - 前端架構文檔
+#
+# 此文件記錄所有 HTML 文件及其 JavaScript 依賴關係
+# 用於避免循環依賴並提供清晰的系統概覽
+
+html_dependencies:
+  # 主頁面
+  index.html:
+    description: "應用程式主頁面"
+    path: "/index.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        docker_path: "/src/js/config/routes-docker.js"
+        type: "module"
+        purpose: "路徑配置 (Docker 環境使用簡化版)"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "pwa"
+        path: "/src/js/utils/pwa.js"
+        type: "module"
+        purpose: "PWA 功能"
+      - name: "template"
+        path: "/src/js/template.js"
+        type: "module"
+        purpose: "模板引擎"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+    external_scripts:
+      - name: "Chart.js"
+        url: "https://cdn.jsdelivr.net/npm/chart.js"
+        purpose: "圖表庫"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+
+  # 認證頁面
+  auth/login.html:
+    description: "用戶登入頁面"
+    path: "/src/pages/auth/login.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "template"
+        path: "/src/js/template.js"
+        type: "module"
+        purpose: "模板引擎"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+    features:
+      - "用戶登入表單"
+      - "表單驗證"
+      - "錯誤處理"
+
+  auth/register.html:
+    description: "用戶註冊頁面"
+    path: "/src/pages/auth/register.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "template"
+        path: "/src/js/template.js"
+        type: "module"
+        purpose: "模板引擎"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+    features:
+      - "用戶註冊表單"
+      - "表單驗證"
+      - "錯誤處理"
+
+  # 儀表板頁面
+  dashboard/index.html:
+    description: "主儀表板頁面"
+    path: "/src/pages/dashboard/index.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "pwa"
+        path: "/src/js/utils/pwa.js"
+        type: "module"
+        purpose: "PWA 功能"
+      - name: "template"
+        path: "/src/js/template.js"
+        type: "module"
+        purpose: "模板引擎"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+      - name: "dashboard"
+        path: "/src/js/dashboard.js"
+        type: "module"
+        purpose: "儀表板功能"
+    external_scripts:
+      - name: "Chart.js"
+        url: "https://cdn.jsdelivr.net/npm/chart.js"
+        purpose: "圖表庫"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+      - stockChart: "#stockChart"
+      - postsContainer: "#posts-container"
+    features:
+      - "股票圖表顯示"
+      - "文章發布"
+      - "文章列表"
+      - "快速功能連結"
+
+  dashboard/profile.html:
+    description: "個人資料頁面"
+    path: "/src/pages/dashboard/profile.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+      - name: "profile"
+        path: "/src/js/profile.js"
+        type: "module"
+        purpose: "個人資料功能"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+    features:
+      - "個人資料編輯"
+      - "頭像上傳"
+      - "密碼修改"
+
+  dashboard/friends.html:
+    description: "好友管理頁面"
+    path: "/src/pages/dashboard/friends.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+      - name: "friends"
+        path: "/src/js/friends.js"
+        type: "module"
+        purpose: "好友管理功能"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+    features:
+      - "好友列表"
+      - "好友請求"
+      - "用戶搜索"
+
+  dashboard/chat.html:
+    description: "聊天頁面"
+    path: "/src/pages/dashboard/chat.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+      - name: "chat"
+        path: "/src/js/chat.js"
+        type: "module"
+        purpose: "聊天功能"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+    features:
+      - "即時聊天"
+      - "WebSocket 連接"
+      - "訊息歷史"
+
+  # 文章頁面
+  posts/detail.html:
+    description: "文章詳情頁面"
+    path: "/src/pages/posts/detail.html"
+    scripts:
+      - name: "routes"
+        path: "/src/js/config/routes.js"
+        type: "module"
+        purpose: "路徑配置"
+      - name: "pathManager"
+        path: "/src/js/utils/pathManager.js"
+        type: "module"
+        purpose: "路徑管理工具"
+      - name: "api"
+        path: "/src/js/api.js"
+        type: "module"
+        purpose: "API 工具"
+      - name: "auth"
+        path: "/src/js/auth.js"
+        type: "module"
+        purpose: "認證系統"
+      - name: "post"
+        path: "/src/js/post.js"
+        type: "module"
+        purpose: "文章功能"
+    stylesheets:
+      - "/src/css/style.css"
+    components:
+      - navbar: "#navbar-container"
+    features:
+      - "文章內容顯示"
+      - "評論系統"
+      - "點讚功能"
+
+# 載入順序規則
+loading_order:
+  development:
+    1: "routes.js - 路徑配置必須最先載入"
+    2: "pathManager.js - 路徑管理工具"
+    3: "template.js - 模板引擎"
+    4: "api.js - API 工具"
+    5: "auth.js - 認證系統"
+    6: "功能特定腳本 (dashboard.js, profile.js, friends.js, chat.js, post.js)"
+    7: "pwa.js - PWA 功能 (可選)"
+
+  docker:
+    1: "routes-docker.js - Docker 專用路徑配置"
+    2: "pathManager.js - 自動檢測並載入 Docker 路由"
+    3: "template.js - 模板引擎"
+    4: "api.js - 使用相對 API 路徑"
+    5: "auth.js - 認證系統"
+    6: "功能特定腳本"
+    7: "pwa.js - PWA 功能 (可選)"
+
+# 依賴關係規則
+dependency_rules:
+  - "所有頁面都必須載入 routes.js"
+  - "所有頁面都必須載入 pathManager.js"
+  - "所有頁面都必須載入 template.js (用於導航欄)"
+  - "所有頁面都必須載入 api.js (用於 API 調用)"
+  - "所有頁面都必須載入 auth.js (用於認證檢查)"
+  - "功能特定腳本只在對應頁面載入"
+  - "PWA 功能只在主頁面和儀表板載入"
+
+# Docker 環境特殊考量
+docker_environment:
+  config_differences:
+    - "使用 routes-docker.js 而非 routes.js"
+    - "API 使用相對路徑避免 CORS (api.base: '')"
+    - "pathManager.js 優先載入 Docker 配置"
+    - "complete-test.html 作為環境測試工具"
+
+  testing:
+    test_page: "complete-test.html"
+    features:
+      - "環境檢測 (Vite 開發模式)"
+      - "API 連接測試 (通過代理)"
+      - "模組載入測試 (routes-docker.js)"
+      - "WebSocket 測試 (應用層級，非 HMR)"
+      - "實時日誌監控"
+
+  proxy_configuration:
+    vite_proxy:
+      api: "http://stock-insight-backend:5000"
+      ws: "ws://stock-insight-backend:5000"
+    hmr_port: 5174
+
+# 循環依賴檢查
+circular_dependency_check:
+  safe_patterns:
+    - "routes.js/routes-docker.js 不依賴任何其他模組"
+    - "pathManager.js 智能載入適當的路由配置"
+    - "template.js 只依賴路由配置"
+    - "api.js 只依賴路由配置"
+    - "auth.js 只依賴路由配置"
+    - "功能腳本通過全域變數訪問其他模組"
+
+  warning_patterns:
+    - "避免功能腳本之間的直接導入"
+    - "使用全域變數或事件系統進行跨模組通信"

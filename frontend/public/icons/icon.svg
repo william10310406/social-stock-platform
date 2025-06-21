@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- 背景圓形 -->
+  <circle cx="256" cy="256" r="240" fill="#4f46e5" stroke="#3730a3" stroke-width="8"/>
+
+  <!-- 股票圖表線條 -->
+  <path d="M120 320 L180 280 L240 300 L300 220 L380 180"
+        stroke="white" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 數據點 -->
+  <circle cx="120" cy="320" r="8" fill="white"/>
+  <circle cx="180" cy="280" r="8" fill="white"/>
+  <circle cx="240" cy="300" r="8" fill="white"/>
+  <circle cx="300" cy="220" r="8" fill="white"/>
+  <circle cx="380" cy="180" r="8" fill="white"/>
+
+  <!-- 向上箭頭表示增長 -->
+  <path d="M350 200 L380 170 L410 200"
+        stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 文字 S -->
+  <text x="256" y="380" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="120" font-weight="bold">S</text>
+</svg>

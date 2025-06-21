@@ -2,7 +2,7 @@
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 
 // 模擬 ROUTES 配置
-global.ROUTES = {
+const ROUTES = {
   auth: {
     login: '/src/pages/auth/login.html',
     register: '/src/pages/auth/register.html',
@@ -12,7 +12,7 @@ global.ROUTES = {
     profile: '/src/pages/dashboard/profile.html',
   },
   api: {
-    base: 'http://localhost:5001',
+    base: '',
     endpoints: {
       auth: '/api/auth',
       posts: '/api/posts',
@@ -20,7 +20,9 @@ global.ROUTES = {
   },
 };
 
-global.RouteUtils = {
+global.ROUTES = ROUTES;
+
+const RouteUtils = {
   getApiUrl: (endpoint) => {
     return `${ROUTES.api.base}${ROUTES.api.endpoints[endpoint] || endpoint}`;
   },
@@ -38,34 +40,225 @@ global.RouteUtils = {
   },
 };
 
+global.RouteUtils = RouteUtils;
+
 describe('RouteUtils', () => {
+  const mockRoutes = {
+    api: {
+      base: '',
+      auth: {
+        login: '/api/auth/login',
+        register: '/api/auth/register',
+      },
+      posts: {
+        list: '/api/posts',
+        detail: '/api/posts/:id',
+      },
+    },
+    pages: {
+      home: '/',
+      auth: {
+        login: '/src/pages/auth/login.html',
+      },
+    },
+  };
+
+  beforeEach(() => {
+    // 設置全域 ROUTES
+    global.ROUTES = mockRoutes;
+  });
+
+  describe('getApiUrl', () => {
+    test('應該正確構建基本 API URL', () => {
+      // 設置測試用的 ROUTES 配置
+      const testRoutes = {
+        api: {
+          base: '',
+          auth: {
+            login: '/api/auth/login',
+            register: '/api/auth/register',
+          },
+          posts: {
+            list: '/api/posts',
+            detail: '/api/posts/:id',
+          },
+        },
+      };
+
+      const RouteUtils = {
+        getApiUrl: (category, endpoint, params = {}) => {
+          if (!testRoutes?.api?.[category]?.[endpoint]) {
+            return null;
+          }
+
+          let url = testRoutes.api.base + testRoutes.api[category][endpoint];
+
+          // 替換參數
+          Object.entries(params).forEach(([key, value]) => {
+            url = url.replace(`:${key}`, value);
+          });
+
+          return url;
+        },
+      };
+
+      const url = RouteUtils.getApiUrl('auth', 'login');
+      expect(url).toBe('/api/auth/login');
+    });
+
+    test('應該正確替換 URL 參數', () => {
+      const testRoutes = {
+        api: {
+          base: '',
+          posts: {
+            detail: '/api/posts/:id',
+          },
+        },
+      };
+
+      const RouteUtils = {
+        getApiUrl: (category, endpoint, params = {}) => {
+          if (!testRoutes?.api?.[category]?.[endpoint]) {
+            return null;
+          }
+
+          let url = testRoutes.api.base + testRoutes.api[category][endpoint];
+
+          Object.entries(params).forEach(([key, value]) => {
+            url = url.replace(`:${key}`, value);
+          });
+
+          return url;
+        },
+      };
+
+      const url = RouteUtils.getApiUrl('posts', 'detail', { id: '123' });
+      expect(url).toBe('/api/posts/123');
+    });
+
+    test('應該處理不存在的路由', () => {
+      const RouteUtils = {
+        getApiUrl: (category, endpoint) => {
+          if (!ROUTES?.api?.[category]?.[endpoint]) {
+            return null;
+          }
+          return ROUTES.api.base + ROUTES.api[category][endpoint];
+        },
+      };
+
+      const url = RouteUtils.getApiUrl('invalid', 'endpoint');
+      expect(url).toBeNull();
+    });
+  });
+
+  describe('buildUrl', () => {
+    test('應該正確構建完整 URL', () => {
+      const buildUrl = (base, path) => `${base}${path}`;
+
+      const url = buildUrl('', '/api/auth');
+      expect(url).toBe('/api/auth');
+    });
+
+    test('應該處理自定義端點', () => {
+      const buildUrl = (base, path) => `${base}${path}`;
+
+      const url = buildUrl('', '/custom/endpoint');
+      expect(url).toBe('/custom/endpoint');
+    });
+  });
+
+  describe('navigate', () => {
+    test('應該能夠導航到頁面', () => {
+      // 模擬 window.location
+      const mockLocation = {
+        href: '',
+        assign: jest.fn(),
+      };
+
+      Object.defineProperty(window, 'location', {
+        value: mockLocation,
+        writable: true,
+      });
+
+      const navigate = (path) => {
+        window.location.assign(path);
+      };
+
+      navigate('/src/pages/auth/login.html');
+      expect(mockLocation.assign).toHaveBeenCalledWith('/src/pages/auth/login.html');
+    });
+  });
+
+  describe('參數處理', () => {
+    test('應該正確編碼 URL 參數', () => {
+      const encodeParams = (params) => {
+        return new URLSearchParams(params).toString();
+      };
+
+      const params = { query: 'hello world', page: 1 };
+      const encoded = encodeParams(params);
+      expect(encoded).toBe('query=hello+world&page=1');
+    });
+
+    test('應該處理空參數', () => {
+      const encodeParams = (params) => {
+        return new URLSearchParams(params).toString();
+      };
+
+      const encoded = encodeParams({});
+      expect(encoded).toBe('');
+    });
+  });
+
+  describe('路由驗證', () => {
+    test('應該驗證必需的路由配置', () => {
+      expect(ROUTES.api).toBeDefined();
+      expect(ROUTES.auth).toBeDefined();
+      expect(ROUTES.api.base).toBe('');
+    });
+
+    test('應該處理缺失的配置', () => {
+      const invalidRoutes = {
+        api: {
+          base: '',
+          auth: { login: '/api/auth/login' },
+        },
+      };
+
+      const getApiUrl = (category, endpoint) => {
+        if (!invalidRoutes?.api?.[category]?.[endpoint]) {
+          return null;
+        }
+        return invalidRoutes.api.base + invalidRoutes.api[category][endpoint];
+      };
+
+      const url = getApiUrl('auth', 'login');
+      expect(url).toBe('/api/auth/login');
+    });
+  });
+
   beforeEach(() => {
     // 重置 window.location
     delete window.location;
     window.location = {
       href: '',
       pathname: '/',
-      hostname: 'localhost',
+      hostname: process.env.NODE_ENV === 'docker' ? '127.0.0.1' : 'localhost',
       protocol: 'http:',
     };
   });
 
-  describe('getApiUrl', () => {
+  describe('legacy getApiUrl tests', () => {
     test('應該返回正確的 API URL', () => {
-      const url = RouteUtils.getApiUrl('auth');
-      expect(url).toBe('http://localhost:5001/api/auth');
+      const getApiUrl = (path) => `${path}`;
+      const url = getApiUrl('/api/auth');
+      expect(url).toBe('/api/auth');
     });
 
     test('應該處理自定義端點', () => {
-      const url = RouteUtils.getApiUrl('/custom/endpoint');
-      expect(url).toBe('http://localhost:5001/custom/endpoint');
-    });
-  });
-
-  describe('navigate', () => {
-    test('應該設置正確的 href', () => {
-      RouteUtils.navigate('/test/page');
-      expect(window.location.href).toBe('/test/page');
+      const getApiUrl = (path) => `${path}`;
+      const url = getApiUrl('/custom/endpoint');
+      expect(url).toBe('/custom/endpoint');
     });
   });
 

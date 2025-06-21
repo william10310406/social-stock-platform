@@ -109,12 +109,47 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="/src/js/config/routes.js"></script>
-    <script src="/src/js/utils/pathManager.js"></script>
-    <script src="/src/js/utils/pwa.js"></script>
-    <script src="/src/js/template.js"></script>
-    <script src="/src/js/api.js"></script>
-    <script src="/src/js/auth.js"></script>
+    <script type="module">
+      // 全域錯誤處理
+      window.addEventListener('error', (e) => {
+        console.error('Global error caught:', e.error);
+      });
+
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('Unhandled promise rejection:', e.reason);
+        e.preventDefault();
+      });
+
+      // 模組載入狀態追蹤
+      window.moduleLoadStatus = {
+        routes: false,
+        pathManager: false,
+        template: false,
+        api: false,
+        auth: false,
+        pwa: false
+      };
+
+      console.log('🚀 Module loading system initialized');
+
+      // 立即載入路由配置
+      import('./src/js/config/routes-docker.js').then(module => {
+        window.ROUTES = module.ROUTES;
+        window.RouteUtils = module.RouteUtils;
+        window.moduleLoadStatus.routes = true;
+        console.log('✅ Routes loaded and set as global variables');
+      }).catch(error => {
+        console.error('❌ Failed to load routes:', error);
+      });
+    </script>
+
+    <!-- 按順序載入其他模組 -->
+    <script type="module" src="/src/js/api.js"></script>
+    <script type="module" src="/src/js/template.js"></script>
+    <script type="module" src="/src/js/auth.js"></script>
+    <script type="module" src="/src/js/utils/pathManager.js"></script>
+    <script type="module" src="/src/js/utils/pwa.js"></script>
+
     <script>
       // 首頁特定邏輯
       document.addEventListener('DOMContentLoaded', () => {

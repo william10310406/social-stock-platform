@@ -13,9 +13,14 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 BOLD='\033[1m'
 
-# 基礎 URL
-BASE_URL="http://localhost:5173"
-API_BASE_URL="http://localhost:5001"
+# 基礎 URL - 支援環境變數配置
+BASE_URL=${FRONTEND_URL:-"http://localhost:5173"}
+API_BASE_URL=${BACKEND_URL:-"http://localhost:5001"}
+
+# Docker 環境檢測
+if [ "$NODE_ENV" = "docker" ]; then
+    API_BASE_URL=""  # Docker 環境使用代理
+fi
 
 # 計數器
 TOTAL_CHECKS=0
@@ -48,20 +53,50 @@ check_url() {
 check_service() {
     echo -e "\n${BOLD}${CYAN}檢查服務狀態...${NC}"
 
+    # 檢測環境類型
+    if [ "$NODE_ENV" = "docker" ] || [ -f /.dockerenv ]; then
+        echo -e "  ${BLUE}🐳 Docker 環境檢測${NC}"
+        ENVIRONMENT="docker"
+    else
+        echo -e "  ${BLUE}💻 本地環境檢測${NC}"
+        ENVIRONMENT="local"
+    fi
+
     if curl -s --max-time 3 "$BASE_URL" > /dev/null; then
         echo -e "  ${GREEN}✅ 前端服務運行中${NC}"
         FRONTEND_RUNNING=true
     else
         echo -e "  ${RED}❌ 前端服務未運行${NC}"
-        echo -e "  ${YELLOW}請執行: docker-compose up -d${NC}"
+        if [ "$ENVIRONMENT" = "docker" ]; then
+            echo -e "  ${YELLOW}請執行: docker-compose up -d${NC}"
+        else
+            echo -e "  ${YELLOW}請執行: npm run dev${NC}"
+        fi
         FRONTEND_RUNNING=false
     fi
 
-    if curl -s --max-time 3 "$API_BASE_URL/api/health" > /dev/null; then
+    # 後端檢查邏輯
+    if [ "$ENVIRONMENT" = "docker" ] && [ -n "$API_BASE_URL" ]; then
+        # Docker 環境但設置了 API_BASE_URL，直接檢查
+        api_check_url="$API_BASE_URL/api/health"
+    elif [ "$ENVIRONMENT" = "docker" ]; then
+        # Docker 環境使用代理
+        api_check_url="$BASE_URL/api/health"
+    else
+        # 本地環境
+        api_check_url="$API_BASE_URL/api/health"
+    fi
+
+    if curl -s --max-time 3 "$api_check_url" > /dev/null; then
         echo -e "  ${GREEN}✅ 後端服務運行中${NC}"
         BACKEND_RUNNING=true
     else
         echo -e "  ${RED}❌ 後端服務未運行${NC}"
+        if [ "$ENVIRONMENT" = "docker" ]; then
+            echo -e "  ${YELLOW}檢查 Docker 容器: docker-compose logs backend${NC}"
+        else
+            echo -e "  ${YELLOW}請啟動後端服務${NC}"
+        fi
         BACKEND_RUNNING=false
     fi
 }

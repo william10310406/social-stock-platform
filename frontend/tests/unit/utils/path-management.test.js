@@ -23,7 +23,7 @@ describe('路徑管理系統', () => {
         navbar: '/src/components/navbar.html',
       },
       api: {
-        base: 'http://localhost:5001',
+        base: '',
         endpoints: {
           auth: {
             login: '/api/auth/login',
@@ -80,7 +80,7 @@ describe('路徑管理系統', () => {
     });
 
     test('應該包含 API 配置', () => {
-      expect(ROUTES.api.base).toBe('http://localhost:5001');
+      expect(ROUTES.api.base).toBe('');
       expect(ROUTES.api.endpoints.auth.login).toBe('/api/auth/login');
       expect(ROUTES.api.endpoints.posts.list).toBe('/api/posts');
     });
@@ -103,18 +103,14 @@ describe('路徑管理系統', () => {
 
   describe('RouteUtils.getApiUrl', () => {
     test('應該正確構建 API URL', () => {
-      expect(RouteUtils.getApiUrl('auth', 'login')).toBe('http://localhost:5001/api/auth/login');
-      expect(RouteUtils.getApiUrl('posts', 'list')).toBe('http://localhost:5001/api/posts');
+      expect(RouteUtils.getApiUrl('auth', 'login')).toBe('/api/auth/login');
+      expect(RouteUtils.getApiUrl('posts', 'list')).toBe('/api/posts');
     });
 
     test('應該正確替換路徑參數', () => {
-      expect(RouteUtils.getApiUrl('posts', 'detail', { id: '123' })).toBe(
-        'http://localhost:5001/api/posts/123',
-      );
+      expect(RouteUtils.getApiUrl('posts', 'detail', { id: '123' })).toBe('/api/posts/123');
 
-      expect(RouteUtils.getApiUrl('posts', 'like', { id: '456' })).toBe(
-        'http://localhost:5001/api/posts/456/like',
-      );
+      expect(RouteUtils.getApiUrl('posts', 'like', { id: '456' })).toBe('/api/posts/456/like');
     });
   });
 
@@ -135,7 +131,7 @@ describe('路徑管理系統', () => {
 
     test('應該處理缺少參數的情況', () => {
       const url = RouteUtils.getApiUrl('posts', 'detail', {});
-      expect(url).toBe('http://localhost:5001/api/posts/:id');
+      expect(url).toBe('/api/posts/:id');
     });
   });
 });
@@ -151,7 +147,7 @@ describe('路徑管理系統集成測試', () => {
         home: '/index.html',
       },
       api: {
-        base: 'http://localhost:5001',
+        base: '',
         endpoints: {
           auth: { login: '/api/auth/login' },
           posts: { list: '/api/posts', like: '/api/posts/:id/like' },
@@ -181,12 +177,12 @@ describe('路徑管理系統集成測試', () => {
 
     // API 請求流程
     const loginApi = RouteUtils.getApiUrl('auth', 'login');
-    expect(loginApi).toBe('http://localhost:5001/api/auth/login');
+    expect(loginApi).toBe('/api/auth/login');
 
     const postsApi = RouteUtils.getApiUrl('posts', 'list');
-    expect(postsApi).toBe('http://localhost:5001/api/posts');
+    expect(postsApi).toBe('/api/posts');
 
     const likeApi = RouteUtils.getApiUrl('posts', 'like', { id: '123' });
-    expect(likeApi).toBe('http://localhost:5001/api/posts/123/like');
+    expect(likeApi).toBe('/api/posts/123/like');
   });
 });

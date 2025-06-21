@@ -1,12 +1,11 @@
 // friends.js - Friends management functionality
 // 使用全局 API_BASE_URL
 
-// 導入路徑配置
-import { RouteUtils } from './config/routes.js';
+// 使用全局路徑配置 (由 pathManager 設置)
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
-  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  const baseUrl = window.API_BASE_URL || '';
   return `${baseUrl}/api`;
 }
 

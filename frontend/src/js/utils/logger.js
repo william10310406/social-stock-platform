@@ -4,7 +4,10 @@
 class Logger {
   constructor() {
     this.isDevelopment =
-      process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'docker' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
     this.logLevel = this.isDevelopment ? 'debug' : 'error';
     this.logHistory = [];
     this.maxHistorySize = 100;

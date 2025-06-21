@@ -69,7 +69,7 @@ const ROUTES = {
 
   // API 端點
   api: {
-    base: 'http://localhost:5001',
+    base: '',
     endpoints: {
       // 認證
       auth: {
@@ -129,7 +129,7 @@ const ROUTES = {
 
   // 測試相關
   test: {
-    base: 'http://localhost:5173',
+    base: '',
   },
 };
 

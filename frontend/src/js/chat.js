@@ -1,6 +1,5 @@
 // chat.js - Chat functionality
-// 導入路徑配置
-import { RouteUtils, ROUTES } from './config/routes.js';
+// 使用全局路徑配置 (由 pathManager 設置)
 
 let currentConversationId = null;
 let currentUserId = null;
@@ -398,5 +397,6 @@ window.addEventListener('beforeunload', () => {
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
-  return `${ROUTES.api.base}/api`;
+  const apiBase = window.ROUTES ? window.ROUTES.api.base : '';
+  return `${apiBase}/api`;
 }

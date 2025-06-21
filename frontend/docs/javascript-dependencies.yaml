@@ -1,0 +1,429 @@
+# JavaScript 文件依賴關係映射
+# Stock Insight Platform - 前端架構文檔
+#
+# 此文件記錄所有 JavaScript 文件及其相互依賴關係
+# 用於避免循環依賴並提供清晰的模組結構
+
+javascript_dependencies:
+  # 核心配置模組
+  config/routes.js:
+    description: "統一路徑配置文件 - 所有路徑的單一真實來源"
+    type: "config"
+    level: 0  # 最基礎層級，不依賴任何其他模組
+    imports: []
+    exports:
+      - "ROUTES"
+      - "RouteUtils"
+      - "LEGACY_ROUTES"
+    global_variables:
+      - "window.ROUTES"
+      - "window.RouteUtils"
+      - "window.LEGACY_ROUTES"
+    purpose: "提供統一的路徑管理和導航功能"
+    used_by:
+      - "pathManager.js"
+      - "template.js"
+      - "api.js"
+      - "auth.js"
+      - "pwa.js"
+      - "dashboard.js"
+      - "所有功能模組"
+
+  config/routes-docker.js:
+    description: "Docker 專用路徑配置 - 簡化版，解決容器環境模組載入問題"
+    type: "config"
+    level: 0  # 基礎層級，Docker 環境專用
+    imports: []
+    exports:
+      - "ROUTES"
+      - "RouteUtils"
+    global_variables:
+      - "window.ROUTES"
+      - "window.RouteUtils"
+    purpose: "Docker 環境中的路徑管理，使用相對 API 路徑避免 CORS"
+    environment: "docker"
+    features:
+      - "相對 API 路徑 (api.base: '')"
+      - "簡化的 RouteUtils 函數"
+      - "立即設置全局變數"
+      - "自動環境檢測"
+    used_by:
+      - "Docker 環境中的所有模組"
+      - "pathManager.js (優先載入)"
+      - "complete-test.html"
+
+  config/constants.js:
+    description: "應用程式常數配置"
+    type: "config"
+    level: 0
+    imports: []
+    exports:
+      - "APP_CONSTANTS"
+    global_variables:
+      - "window.APP_CONSTANTS"
+    purpose: "存儲應用程式級別的常數"
+    used_by: []
+
+  # 核心工具模組
+  utils/pathManager.js:
+    description: "路徑管理工具 - 批量更新 HTML 文件中的路徑引用，Docker 環境適配"
+    type: "utility"
+    level: 1  # 依賴 routes.js 或 routes-docker.js
+    imports:
+      - from: "../config/routes-docker.js (優先)"
+        items: ["ROUTES"]
+        fallback: "../config/routes.js"
+    exports:
+      - "PathManager"
+    global_variables:
+      - "window.PathManager"
+    purpose: "自動更新頁面中的路徑連結，支援 Docker 環境自動載入"
+    dependencies:
+      - "routes-docker.js (優先)"
+      - "routes.js (備選)"
+    docker_features:
+      - "優先載入 Docker 專用路由"
+      - "自動環境檢測"
+      - "錯誤回退機制"
+    used_by:
+      - "所有 HTML 頁面 (自動初始化)"
+
+  utils/logger.js:
+    description: "統一日誌管理器 - 提供結構化、可控制的日誌輸出"
+    type: "utility"
+    level: 0  # 獨立模組
+    imports: []
+    exports:
+      - "logger (default)"
+      - "Logger"
+    global_variables:
+      - "window.logger"
+      - "window.log"
+    purpose: "統一的日誌管理和輸出"
+    used_by:
+      - "所有模組 (通過全域變數)"
+
+  utils/errorManager.js:
+    description: "錯誤管理器 - 統一錯誤處理和用戶提示"
+    type: "utility"
+    level: 0
+    imports: []
+    exports:
+      - "ErrorManager"
+    global_variables:
+      - "window.errorManager"
+    purpose: "統一錯誤處理和用戶提示"
+    used_by:
+      - "所有模組 (通過全域變數)"
+
+  utils/loadingManager.js:
+    description: "載入狀態管理器 - 統一載入動畫和狀態管理"
+    type: "utility"
+    level: 0
+    imports: []
+    exports:
+      - "LoadingManager"
+    global_variables:
+      - "window.loadingManager"
+    purpose: "統一載入狀態管理"
+    used_by:
+      - "所有模組 (通過全域變數)"
+
+  utils/websocket.js:
+    description: "WebSocket 管理器 - 即時通信功能"
+    type: "utility"
+    level: 1
+    imports:
+      - from: "../config/routes.js"
+        items: ["RouteUtils"]
+    exports:
+      - "WebSocketManager"
+    global_variables:
+      - "window.websocketManager"
+    purpose: "WebSocket 連接和訊息管理"
+    dependencies:
+      - "routes.js"
+    used_by:
+      - "chat.js"
+
+  utils/pwa.js:
+    description: "PWA 管理器 - 處理 Service Worker 註冊、安裝提示和推送通知"
+    type: "utility"
+    level: 1
+    imports:
+      - from: "../config/routes.js"
+        items: ["ROUTES"]
+    exports:
+      - "pwaManager (default)"
+      - "PWAManager"
+    global_variables:
+      - "window.pwaManager"
+    purpose: "PWA 功能管理"
+    dependencies:
+      - "routes.js"
+    used_by:
+      - "主頁面和儀表板 (自動初始化)"
+
+  # 核心功能模組
+  template.js:
+    description: "模板引擎 - 將公共組件注入到頁面中"
+    type: "core"
+    level: 1
+    imports:
+      - from: "./config/routes.js"
+        items: ["ROUTES"]
+    exports:
+      - "templateEngine (default)"
+      - "TemplateEngine"
+    global_variables:
+      - "window.templateEngine"
+    purpose: "載入和渲染公共組件 (如導航欄)"
+    dependencies:
+      - "routes.js"
+    used_by:
+      - "所有 HTML 頁面 (自動初始化)"
+
+  api.js:
+    description: "API 工具和端點 - 統一 API 調用和認證處理"
+    type: "core"
+    level: 1
+    imports:
+      - from: "./config/routes.js"
+        items: ["RouteUtils"]
+    exports: []  # 使用全域變數
+    global_variables:
+      - "window.API_BASE_URL"
+      - "window.fetchWithAuth"
+      - "window.API_ENDPOINTS"
+    purpose: "統一 API 調用和錯誤處理"
+    dependencies:
+      - "routes.js"
+    used_by:
+      - "auth.js"
+      - "dashboard.js"
+      - "profile.js"
+      - "friends.js"
+      - "chat.js"
+      - "post.js"
+
+  auth.js:
+    description: "認證系統 - 處理登入/註冊、表單驗證、JWT 存儲"
+    type: "core"
+    level: 1
+    imports:
+      - from: "./config/routes.js"
+        items: ["RouteUtils", "ROUTES"]
+    exports:
+      - "handleLogout"
+      - "getValidToken"
+      - "refreshAccessToken"
+      - "updateNavbar"
+    global_variables:
+      - "window.handleLogout"
+      - "window.getValidToken"
+      - "window.refreshAccessToken"
+      - "window.updateNavbar"
+      - "window.apiRequest"
+    purpose: "用戶認證和會話管理"
+    dependencies:
+      - "routes.js"
+    used_by:
+      - "所有需要認證的頁面"
+
+  # 功能特定模組
+  dashboard.js:
+    description: "儀表板功能 - 主儀表板頁面的功能實現"
+    type: "feature"
+    level: 2
+    imports:
+      - from: "./config/routes.js"
+        items: ["RouteUtils", "ROUTES"]
+    exports: []
+    global_variables: []
+    purpose: "儀表板頁面功能 (文章管理、圖表顯示)"
+    dependencies:
+      - "routes.js"
+      - "api.js (全域)"
+      - "auth.js (全域)"
+    used_by:
+      - "dashboard/index.html"
+
+  profile.js:
+    description: "個人資料功能 - 用戶個人資料管理"
+    type: "feature"
+    level: 2
+    imports:
+      - from: "./config/routes.js"
+        items: ["RouteUtils"]
+    exports: []
+    global_variables: []
+    purpose: "個人資料編輯和管理"
+    dependencies:
+      - "routes.js"
+      - "api.js (全域)"
+      - "auth.js (全域)"
+    used_by:
+      - "dashboard/profile.html"
+
+  friends.js:
+    description: "好友管理功能 - 好友列表和請求管理"
+    type: "feature"
+    level: 2
+    imports:
+      - from: "./config/routes.js"
+        items: ["RouteUtils"]
+    exports: []
+    global_variables: []
+    purpose: "好友管理和社交功能"
+    dependencies:
+      - "routes.js"
+      - "api.js (全域)"
+      - "auth.js (全域)"
+    used_by:
+      - "dashboard/friends.html"
+
+  chat.js:
+    description: "聊天功能 - 即時聊天和訊息管理"
+    type: "feature"
+    level: 2
+    imports:
+      - from: "./config/routes.js"
+        items: ["RouteUtils"]
+    exports: []
+    global_variables: []
+    purpose: "即時聊天功能"
+    dependencies:
+      - "routes.js"
+      - "api.js (全域)"
+      - "auth.js (全域)"
+      - "websocket.js (全域)"
+    used_by:
+      - "dashboard/chat.html"
+
+  post.js:
+    description: "文章功能 - 文章詳情、評論和點讚"
+    type: "feature"
+    level: 2
+    imports: []  # 暫時註解掉導入
+    exports: []
+    global_variables: []
+    purpose: "文章詳情頁面功能"
+    dependencies:
+      - "api.js (全域)"
+      - "auth.js (全域)"
+    used_by:
+      - "posts/detail.html"
+
+  # 其他功能模組
+  chart.js:
+    description: "圖表功能 - 股票圖表和數據視覺化"
+    type: "feature"
+    level: 1
+    imports: []
+    exports: []
+    global_variables: []
+    purpose: "圖表渲染和數據視覺化"
+    dependencies:
+      - "Chart.js (外部庫)"
+    used_by:
+      - "dashboard.js"
+
+  news.js:
+    description: "新聞功能 - 股票新聞和資訊"
+    type: "feature"
+    level: 1
+    imports: []
+    exports: []
+    global_variables: []
+    purpose: "新聞資訊管理"
+    dependencies: []
+    used_by: []
+
+  main.js:
+    description: "主應用程式入口 - 應用程式初始化"
+    type: "core"
+    level: 1
+    imports: []
+    exports: []
+    global_variables: []
+    purpose: "應用程式初始化和全域設定"
+    dependencies: []
+    used_by: []
+
+# 依賴層級結構
+dependency_levels:
+  level_0:
+    description: "基礎層 - 不依賴任何其他模組"
+    modules:
+      - "config/routes.js"
+      - "config/constants.js"
+      - "utils/logger.js"
+      - "utils/errorManager.js"
+      - "utils/loadingManager.js"
+
+  level_1:
+    description: "工具層 - 只依賴基礎層模組"
+    modules:
+      - "utils/pathManager.js"
+      - "utils/websocket.js"
+      - "utils/pwa.js"
+      - "template.js"
+      - "api.js"
+      - "auth.js"
+      - "chart.js"
+      - "news.js"
+      - "main.js"
+
+  level_2:
+    description: "功能層 - 依賴基礎層和工具層"
+    modules:
+      - "dashboard.js"
+      - "profile.js"
+      - "friends.js"
+      - "chat.js"
+      - "post.js"
+
+# 載入順序建議
+loading_order:
+  1: "基礎配置 (routes.js, constants.js)"
+  2: "核心工具 (logger.js, errorManager.js, loadingManager.js)"
+  3: "路徑和模板 (pathManager.js, template.js)"
+  4: "API 和認證 (api.js, auth.js)"
+  5: "功能特定模組 (dashboard.js, profile.js, etc.)"
+  6: "PWA 和 WebSocket (pwa.js, websocket.js)"
+
+# 循環依賴檢查規則
+circular_dependency_rules:
+  allowed_patterns:
+    - "基礎層模組可以被任何層級引用"
+    - "工具層模組可以被功能層引用"
+    - "同層級模組通過全域變數通信"
+
+  forbidden_patterns:
+    - "功能層模組不能直接導入其他功能層模組"
+    - "工具層模組不能導入功能層模組"
+    - "任何模組都不能導入比自己層級更高的模組"
+
+  communication_methods:
+    - "全域變數 (window.*)"
+    - "事件系統 (addEventListener/dispatchEvent)"
+    - "DOM 操作和數據屬性"
+    - "localStorage/sessionStorage"
+
+# 模組類型說明
+module_types:
+  config:
+    description: "配置模組 - 存儲應用程式配置和常數"
+    examples: ["routes.js", "constants.js"]
+
+  utility:
+    description: "工具模組 - 提供通用功能和服務"
+    examples: ["pathManager.js", "logger.js", "errorManager.js"]
+
+  core:
+    description: "核心模組 - 應用程式基礎功能"
+    examples: ["template.js", "api.js", "auth.js"]
+
+  feature:
+    description: "功能模組 - 特定頁面或功能的實現"
+    examples: ["dashboard.js", "profile.js", "friends.js"]

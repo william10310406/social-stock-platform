@@ -7,8 +7,10 @@ const https = require('https');
 const { URL } = require('url');
 const { ROUTES } = require('../src/js/config/routes.js');
 
-const BASE_URL = 'http://localhost:5173';
-const API_BASE_URL = 'http://localhost:5001';
+// 環境檢測 - 支援 Docker
+const isDocker = process.env.NODE_ENV === 'docker';
+const BASE_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const API_BASE_URL = isDocker ? '' : 'http://localhost:5001';
 
 // 從統一配置獲取路徑
 const PATHS_TO_CHECK = [

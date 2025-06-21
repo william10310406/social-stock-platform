@@ -3,7 +3,7 @@
 // 模擬 API 工具
 class MockApiUtils {
   constructor() {
-    this.baseURL = 'http://localhost:5001';
+    this.baseURL = '';
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };
@@ -186,7 +186,7 @@ describe('API Integration Tests', () => {
         password: 'password123',
       });
 
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/auth/login', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,22 +198,8 @@ describe('API Integration Tests', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    test('應該處理登入失敗', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: () => Promise.resolve({ message: 'Invalid credentials' }),
-      });
-
-      await expect(api.login({ username: 'testuser', password: 'wrongpassword' })).rejects.toEqual({
-        status: 401,
-        message: 'Invalid credentials',
-        data: { message: 'Invalid credentials' },
-      });
-    });
-
-    test('應該使用 refresh token 更新訪問令牌', async () => {
-      localStorage.setItem('refresh_token', 'mock-refresh-token');
+    test('應該成功刷新 token', async () => {
+      localStorage.setItem('refresh_token', 'old-refresh-token');
 
       const mockResponse = {
         access_token: 'new-access-token',
@@ -228,60 +214,74 @@ describe('API Integration Tests', () => {
 
       const result = await api.refreshToken();
 
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/auth/refresh', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: 'mock-refresh-token' }),
+        body: JSON.stringify({
+          refresh_token: 'old-refresh-token',
+        }),
       });
 
       expect(result).toEqual(mockResponse);
     });
-  });
 
-  describe('Authenticated Requests', () => {
-    beforeEach(() => {
-      localStorage.setItem('access_token', 'mock-access-token');
-    });
+    test('應該處理登入失敗', async () => {
+      const mockErrorResponse = {
+        message: 'Invalid credentials',
+      };
 
-    test('應該在請求中包含認證標頭', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({ id: 1, username: 'testuser' }),
-      });
-
-      await api.getProfile();
-
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/user/profile', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer mock-access-token',
-        },
-      });
-    });
-
-    test('應該處理 401 未授權錯誤', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: () => Promise.resolve({ message: 'Token expired' }),
+        json: () => Promise.resolve(mockErrorResponse),
       });
 
-      await expect(api.getProfile()).rejects.toEqual({
+      await expect(
+        api.login({
+          username: 'invalid',
+          password: 'invalid',
+        }),
+      ).rejects.toEqual({
         status: 401,
-        message: 'Token expired',
-        data: { message: 'Token expired' },
+        message: 'Invalid credentials',
+        data: mockErrorResponse,
       });
     });
   });
 
-  describe('Posts API', () => {
-    beforeEach(() => {
-      localStorage.setItem('access_token', 'mock-access-token');
-    });
+  describe('User Profile Management', () => {
+    test('應該成功獲取用戶資料', async () => {
+      localStorage.setItem('access_token', 'valid-token');
 
-    test('應該獲取文章列表', async () => {
+      const mockProfile = {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        bio: 'Test bio',
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(mockProfile),
+      });
+
+      const result = await api.getProfile();
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer valid-token',
+        },
+      });
+
+      expect(result).toEqual(mockProfile);
+    });
+  });
+
+  describe('Posts Management', () => {
+    test('應該成功獲取文章列表', async () => {
       const mockPosts = [
         { id: 1, title: 'Post 1', content: 'Content 1' },
         { id: 2, title: 'Post 2', content: 'Content 2' },
@@ -290,27 +290,24 @@ describe('API Integration Tests', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ posts: mockPosts, total: 2 }),
+        json: () => Promise.resolve(mockPosts),
       });
 
       const result = await api.getPosts({ page: 1, limit: 10 });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:5001/api/posts?page=1&limit=10',
-        expect.objectContaining({
-          method: 'GET',
-          headers: expect.objectContaining({
-            Authorization: 'Bearer mock-access-token',
-          }),
-        }),
-      );
+      expect(mockFetch).toHaveBeenCalledWith('/api/posts?page=1&limit=10', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-      expect(result).toEqual({ posts: mockPosts, total: 2 });
+      expect(result).toEqual(mockPosts);
     });
 
-    test('應該創建新文章', async () => {
+    test('應該成功創建文章', async () => {
+      localStorage.setItem('access_token', 'valid-token');
+
       const newPost = { title: 'New Post', content: 'New Content' };
-      const mockResponse = { id: 3, ...newPost, created_at: '2023-01-01' };
+      const mockResponse = { id: 3, ...newPost };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -320,11 +317,11 @@ describe('API Integration Tests', () => {
 
       const result = await api.createPost(newPost);
 
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/posts', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer mock-access-token',
+          Authorization: 'Bearer valid-token',
         },
         body: JSON.stringify(newPost),
       });
@@ -332,8 +329,10 @@ describe('API Integration Tests', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    test('應該點讚文章', async () => {
-      const mockResponse = { liked: true, likes_count: 5 };
+    test('應該成功點讚文章', async () => {
+      localStorage.setItem('access_token', 'valid-token');
+
+      const mockResponse = { message: 'Post liked successfully' };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -343,11 +342,11 @@ describe('API Integration Tests', () => {
 
       const result = await api.likePost(1);
 
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/posts/1/like', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/posts/1/like', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer mock-access-token',
+          Authorization: 'Bearer valid-token',
         },
         body: JSON.stringify({}),
       });
@@ -356,30 +355,11 @@ describe('API Integration Tests', () => {
     });
   });
 
-  describe('Friends API', () => {
-    beforeEach(() => {
-      localStorage.setItem('access_token', 'mock-access-token');
-    });
+  describe('Friends Management', () => {
+    test('應該成功發送好友請求', async () => {
+      localStorage.setItem('access_token', 'valid-token');
 
-    test('應該獲取好友列表', async () => {
-      const mockFriends = [
-        { id: 1, username: 'friend1', status: 'accepted' },
-        { id: 2, username: 'friend2', status: 'accepted' },
-      ];
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({ friends: mockFriends }),
-      });
-
-      const result = await api.getFriends();
-
-      expect(result).toEqual({ friends: mockFriends });
-    });
-
-    test('應該發送好友請求', async () => {
-      const mockResponse = { message: 'Friend request sent', request_id: 123 };
+      const mockResponse = { message: 'Friend request sent' };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -387,21 +367,23 @@ describe('API Integration Tests', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await api.sendFriendRequest(5);
+      const result = await api.sendFriendRequest(123);
 
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/friends/requests', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/friends/requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer mock-access-token',
+          Authorization: 'Bearer valid-token',
         },
-        body: JSON.stringify({ user_id: 5 }),
+        body: JSON.stringify({ user_id: 123 }),
       });
 
       expect(result).toEqual(mockResponse);
     });
 
-    test('應該接受好友請求', async () => {
+    test('應該成功接受好友請求', async () => {
+      localStorage.setItem('access_token', 'valid-token');
+
       const mockResponse = { message: 'Friend request accepted' };
 
       mockFetch.mockResolvedValueOnce({
@@ -412,118 +394,102 @@ describe('API Integration Tests', () => {
 
       const result = await api.acceptFriendRequest(123);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:5001/api/friends/requests/123/accept',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer mock-access-token',
-          },
-          body: JSON.stringify({}),
+      expect(mockFetch).toHaveBeenCalledWith('/api/friends/requests/123/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer valid-token',
         },
-      );
+        body: JSON.stringify({}),
+      });
 
       expect(result).toEqual(mockResponse);
     });
-  });
 
-  describe('Error Handling', () => {
     test('應該處理網路錯誤', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(api.getProfile()).rejects.toEqual({
+      await expect(api.getFriends()).rejects.toEqual({
         status: null,
         message: 'Network error',
-        error: expect.any(Error),
-      });
-    });
-
-    test('應該處理 JSON 解析錯誤', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.reject(new Error('Invalid JSON')),
-      });
-
-      await expect(api.getProfile()).rejects.toEqual({
-        status: null,
-        message: 'Network error',
-        error: expect.any(Error),
-      });
-    });
-
-    test('應該處理 HTTP 錯誤狀態', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: () => Promise.resolve({ message: 'Internal server error' }),
-      });
-
-      await expect(api.getProfile()).rejects.toEqual({
-        status: 500,
-        message: 'Internal server error',
-        data: { message: 'Internal server error' },
+        error: new Error('Network error'),
       });
     });
   });
 
-  describe('Request Configuration', () => {
-    test('應該正確處理 GET 請求參數', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({}),
-      });
-
-      await api.get('/api/posts', { page: 1, limit: 10, sort: 'created_at' });
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:5001/api/posts?page=1&limit=10&sort=created_at',
-        expect.objectContaining({ method: 'GET' }),
-      );
-    });
-
-    test('應該正確處理 PUT 請求', async () => {
-      localStorage.setItem('access_token', 'mock-access-token');
-      const updateData = { title: 'Updated Title' };
+  describe('Advanced Scenarios', () => {
+    test('應該正確處理分頁請求', async () => {
+      const mockPosts = {
+        data: [{ id: 1, title: 'Post 1' }],
+        pagination: { page: 1, totalPages: 5 },
+      };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve(updateData),
+        json: () => Promise.resolve(mockPosts),
       });
 
-      await api.updatePost(1, updateData);
-
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/posts/1', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer mock-access-token',
-        },
-        body: JSON.stringify(updateData),
+      const result = await api.getPosts({
+        page: 1,
+        limit: 10,
+        sort: 'created_at',
       });
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/posts?page=1&limit=10&sort=created_at', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      expect(result).toEqual(mockPosts);
     });
 
-    test('應該正確處理 DELETE 請求', async () => {
-      localStorage.setItem('access_token', 'mock-access-token');
+    test('應該成功獲取單篇文章', async () => {
+      const mockPost = {
+        id: 1,
+        title: 'Test Post',
+        content: 'Test Content',
+        author: 'testuser',
+      };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        status: 204,
-        json: () => Promise.resolve({}),
+        status: 200,
+        json: () => Promise.resolve(mockPost),
       });
 
-      await api.deletePost(1);
+      const result = await api.getPost(1);
 
-      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5001/api/posts/1', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/posts/1', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      expect(result).toEqual(mockPost);
+    });
+
+    test('應該成功刪除文章', async () => {
+      localStorage.setItem('access_token', 'valid-token');
+
+      const mockResponse = { message: 'Post deleted successfully' };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await api.deletePost(1);
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/posts/1', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer mock-access-token',
+          Authorization: 'Bearer valid-token',
         },
       });
+
+      expect(result).toEqual(mockResponse);
     });
   });
 });

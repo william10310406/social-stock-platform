@@ -1,8 +1,10 @@
 // auth.js - Handles login/register, form validation, JWT storage
 
+// 使用全局路徑配置 (由 pathManager 設置)
+
 // 使用函數來獲取 API_BASE_URL，避免全局變量衝突
 function getApiBaseUrl() {
-  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  const baseUrl = (window.ROUTES && window.ROUTES.api.base) || '';
   return `${baseUrl}/api`;
 }
 
@@ -27,7 +29,11 @@ const handleLogout = async () => {
     localStorage.removeItem('userId');
 
     // Redirect to login using route config
-    RouteUtils.redirectToLogin();
+    if (window.RouteUtils) {
+      window.RouteUtils.redirectToLogin();
+    } else {
+      window.location.href = '/src/pages/auth/login.html';
+    }
   }
 };
 
@@ -163,7 +169,11 @@ if (loginForm) {
         localStorage.setItem('tokenExpires', expiresAt.toString());
 
         // Redirect using route config
-        RouteUtils.redirectToDashboard();
+        if (window.RouteUtils) {
+          window.RouteUtils.redirectToDashboard();
+        } else {
+          window.location.href = '/src/pages/dashboard/index.html';
+        }
       } else {
         errorDiv.textContent = data.message || 'Login failed.';
         errorDiv.style.display = 'block';
@@ -204,7 +214,11 @@ if (registerForm) {
         localStorage.setItem('tokenExpires', expiresAt.toString());
 
         // Redirect using route config
-        RouteUtils.redirectToDashboard();
+        if (window.RouteUtils) {
+          window.RouteUtils.redirectToDashboard();
+        } else {
+          window.location.href = '/src/pages/dashboard/index.html';
+        }
       } else {
         errorDiv.textContent = data.message || 'Registration failed.';
         errorDiv.style.display = 'block';
@@ -256,10 +270,15 @@ window.apiRequest = async (url, options = {}) => {
   return response;
 };
 
+// ES6 模組導出
+export { handleLogout, getValidToken, refreshAccessToken, updateNavbar };
+export default { handleLogout, getValidToken, refreshAccessToken, updateNavbar };
+
 // Export functions for use in other modules
 window.handleLogout = handleLogout;
 window.getValidToken = getValidToken;
 window.refreshAccessToken = refreshAccessToken;
+window.updateNavbar = updateNavbar;
 
 console.log(
   'auth.js loaded with refresh token support. Page protection is now handled by inline scripts.',

@@ -1,12 +1,11 @@
 // profile.js - Profile page functionality
 // 使用全局 API_BASE_URL
 
-// 導入路徑配置
-import { RouteUtils } from './config/routes.js';
+// 使用全局路徑配置 (由 pathManager 設置)
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
-  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  const baseUrl = window.API_BASE_URL || '';
   return `${baseUrl}/api`;
 }
 
@@ -72,7 +71,7 @@ const displayPosts = (posts) => {
       (post) => `
         <div class="border-b pb-4 mb-4" id="post-${post.id}">
             <div class="flex justify-between items-start mb-2">
-                <a href="${RouteUtils.getPagePath('posts', 'detail')}?id=${post.id}" class="text-lg font-semibold text-gray-800 hover:underline">${post.title}</a>
+                <a href="${window.RouteUtils ? window.RouteUtils.getPagePath('posts', 'detail') : '/src/pages/posts/detail.html'}?id=${post.id}" class="text-lg font-semibold text-gray-800 hover:underline">${post.title}</a>
                 <button data-post-id="${post.id}" class="delete-post-btn ml-4 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm flex-shrink-0">Delete</button>
             </div>
             <p class="text-gray-600 mt-1 mb-3 whitespace-pre-wrap">${post.body}</p>
@@ -82,7 +81,7 @@ const displayPosts = (posts) => {
                     <button data-post-id="${post.id}" class="like-btn ${post.current_user_liked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500">
                         ❤️ <span class="like-count">${post.likes_count}</span>
                     </button>
-                    <a href="${RouteUtils.getPagePath('posts', 'detail')}?id=${post.id}" class="text-gray-500 hover:text-gray-800">
+                    <a href="${window.RouteUtils ? window.RouteUtils.getPagePath('posts', 'detail') : '/src/pages/posts/detail.html'}?id=${post.id}" class="text-gray-500 hover:text-gray-800">
                         💬 <span class="comment-count">${post.comments_count}</span>
                     </a>
                 </div>

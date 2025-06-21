@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐳 Docker 完整測試頁面</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        button:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .log-area {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .status-card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .status-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        .log-success { color: #98FB98; }
+        .log-error { color: #FF6B6B; }
+        .log-warning { color: #FFD93D; }
+        .log-info { color: #6BCFFF; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐳 Docker 環境完整測試</h1>
+            <p>Stock Insight Platform - 統一測試控制台</p>
+            <p id="currentTime"></p>
+        </div>
+
+        <!-- 系統狀態總覽 -->
+        <div class="test-section">
+            <h2>📊 系統狀態總覽</h2>
+            <div class="status-grid" id="statusGrid">
+                <div class="status-card status-info">
+                    <strong>Docker 容器</strong><br>
+                    <span id="dockerStatus">檢測中...</span>
+                </div>
+                <div class="status-card status-info">
+                    <strong>API 代理</strong><br>
+                    <span id="proxyStatus">檢測中...</span>
+                </div>
+                <div class="status-card status-info">
+                    <strong>模組載入</strong><br>
+                    <span id="moduleStatus">檢測中...</span>
+                </div>
+                <div class="status-card status-info">
+                    <strong>WebSocket</strong><br>
+                    <span id="wsStatus">檢測中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試控制台 -->
+        <div class="test-section">
+            <h2>🧪 測試控制台</h2>
+            <div class="test-buttons">
+                <button class="btn-primary" onclick="runAllTests()">🚀 運行全部測試</button>
+                <button class="btn-success" onclick="testBasicFunction()">✅ 基本功能</button>
+                <button class="btn-warning" onclick="testApiConnection()">🔗 API 連接</button>
+                <button class="btn-info" onclick="testModuleLoad()">📦 模組載入</button>
+                <button class="btn-purple" onclick="testWebSocket()">🔌 WebSocket</button>
+                <button class="btn-secondary" onclick="clearLogs()">🗑️ 清除日誌</button>
+            </div>
+        </div>
+
+        <!-- 日誌輸出 -->
+        <div class="test-section">
+            <h2>📝 測試日誌</h2>
+            <div id="logOutput" class="log-area">等待測試開始...\n</div>
+        </div>
+
+        <!-- 快速導航 -->
+        <div class="test-section">
+            <h2>🧭 快速導航</h2>
+            <div class="test-buttons">
+                <button class="btn-primary" onclick="goToMain()">🏠 主頁</button>
+                <button class="btn-success" onclick="goToLogin()">🔐 登入頁</button>
+                <button class="btn-warning" onclick="goToDashboard()">📊 儀表板</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 日誌管理
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logArea = document.getElementById('logOutput');
+            const colorClass = `log-${type}`;
+
+            logArea.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logOutput').innerHTML = '';
+            log('日誌已清除', 'info');
+        }
+
+        // 狀態更新
+        function updateStatus(elementId, status, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = status;
+            element.parentElement.className = `status-card status-${type}`;
+        }
+
+        // 基本功能測試
+        function testBasicFunction() {
+            log('🧪 開始基本功能測試...', 'info');
+
+            try {
+                // 數學運算
+                const result = 2 + 2;
+                if (result === 4) {
+                    log('✅ 數學運算正常', 'success');
+                } else {
+                    log('❌ 數學運算異常', 'error');
+                }
+
+                // localStorage
+                localStorage.setItem('test', 'value');
+                const stored = localStorage.getItem('test');
+                if (stored === 'value') {
+                    log('✅ localStorage 正常', 'success');
+                    localStorage.removeItem('test');
+                } else {
+                    log('❌ localStorage 異常', 'error');
+                }
+
+                // DOM 操作
+                const testDiv = document.createElement('div');
+                testDiv.textContent = 'test';
+                if (testDiv.textContent === 'test') {
+                    log('✅ DOM 操作正常', 'success');
+                } else {
+                    log('❌ DOM 操作異常', 'error');
+                }
+
+                log('🎉 基本功能測試完成', 'success');
+                updateStatus('dockerStatus', '✅ 正常運行', 'success');
+
+            } catch (error) {
+                log(`❌ 基本功能測試失敗: ${error.message}`, 'error');
+                updateStatus('dockerStatus', '❌ 測試失敗', 'error');
+            }
+        }
+
+        // API 連接測試
+        async function testApiConnection() {
+            log('🔗 開始 API 連接測試...', 'info');
+
+            try {
+                // 使用代理路徑 - 這是關鍵！
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ API 代理連接成功', 'success');
+                    log(`📊 API 狀態: ${data.status}`, 'success');
+                    log(`🗄️ 資料庫: ${data.database}`, 'info');
+                    log(`⏰ 時間戳: ${data.timestamp}`, 'info');
+
+                    updateStatus('proxyStatus', '✅ 代理正常', 'success');
+                } else {
+                    log(`❌ API 響應錯誤: ${response.status} ${response.statusText}`, 'error');
+                    updateStatus('proxyStatus', '❌ 響應錯誤', 'error');
+                }
+            } catch (error) {
+                log(`❌ API 連接失敗: ${error.message}`, 'error');
+                updateStatus('proxyStatus', '❌ 連接失敗', 'error');
+
+                if (error.message.includes('CORS')) {
+                    log('⚠️ 這是 CORS 錯誤，代理配置可能有問題', 'warning');
+                } else if (error.message.includes('Failed to fetch')) {
+                    log('⚠️ 網路連接錯誤，後端服務可能未運行', 'warning');
+                }
+            }
+        }
+
+        // 模組載入測試
+        async function testModuleLoad() {
+            log('📦 開始模組載入測試...', 'info');
+
+            try {
+                // 檢查全局變數
+                if (typeof window.ROUTES !== 'undefined') {
+                    log('✅ ROUTES 全局變數存在', 'success');
+                    log(`📋 ROUTES 包含: ${Object.keys(window.ROUTES).join(', ')}`, 'info');
+
+                    // 檢查 API 基礎配置
+                    if (window.ROUTES.api && window.ROUTES.api.base !== undefined) {
+                        log(`🔧 API 基礎 URL: "${window.ROUTES.api.base}" (空字符串表示使用代理)`, 'info');
+                    }
+                } else {
+                    log('❌ ROUTES 全局變數不存在', 'error');
+
+                    // 如果不存在，嘗試載入
+                    try {
+                        log('🔄 嘗試動態載入 Docker 路由模組...', 'info');
+                        await import('./src/js/config/routes-docker.js');
+
+                        // 再次檢查
+                        if (typeof window.ROUTES !== 'undefined') {
+                            log('✅ 動態載入後全局變數已設置', 'success');
+                        }
+                    } catch (importError) {
+                        log(`⚠️ 動態載入失敗: ${importError.message}`, 'warning');
+                    }
+                }
+
+                if (typeof window.RouteUtils !== 'undefined') {
+                    log('✅ RouteUtils 全局變數存在', 'success');
+                    log(`🔧 RouteUtils 方法: ${Object.keys(window.RouteUtils).join(', ')}`, 'info');
+                } else {
+                    log('❌ RouteUtils 全局變數不存在', 'error');
+                }
+
+                // 最終狀態檢查
+                if (typeof window.ROUTES !== 'undefined' && typeof window.RouteUtils !== 'undefined') {
+                    updateStatus('moduleStatus', '✅ 模組正常', 'success');
+                } else {
+                    updateStatus('moduleStatus', '⚠️ 部分載入', 'warning');
+                }
+
+                log('📦 模組載入測試完成', 'success');
+
+            } catch (error) {
+                log(`❌ 模組載入測試失敗: ${error.message}`, 'error');
+                updateStatus('moduleStatus', '❌ 測試失敗', 'error');
+            }
+        }
+
+        // WebSocket 測試
+        function testWebSocket() {
+            log('🔌 開始 WebSocket 測試...', 'info');
+
+            try {
+                // 測試應用程式的 WebSocket（透過代理）
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws`;
+                const testType = 'Application WebSocket';
+
+                log(`📡 測試應用程式 WebSocket: ${wsUrl}`, 'info');
+
+                // 檢測 Vite 開發環境
+                const isViteDevMode = document.querySelector('script[src*="@vite/client"]') !== null;
+                if (isViteDevMode) {
+                    log('🔧 檢測到 Vite 開發環境 - HMR 功能由 Vite 自動管理', 'info');
+                    updateStatus('wsStatus', '✅ HMR 正常', 'success');
+                }
+
+                const ws = new WebSocket(wsUrl);
+
+                ws.onopen = function() {
+                    log('✅ WebSocket 連接成功', 'success');
+                    updateStatus('wsStatus', '✅ 連接正常', 'success');
+
+                    // 發送測試消息
+                    ws.send(JSON.stringify({ type: 'ping', message: 'test' }));
+                    log('📤 發送測試消息', 'info');
+
+                    setTimeout(() => ws.close(), 1000);
+                };
+
+                ws.onmessage = function(event) {
+                    log(`📥 收到消息: ${event.data}`, 'success');
+                };
+
+                ws.onerror = function(error) {
+                    log(`❌ 應用程式 WebSocket 連接失敗: ${error.message || 'Connection failed'}`, 'error');
+
+                    // 檢查是否真的是錯誤，還是功能未實現
+                    if (isViteDevMode) {
+                        log('💡 這是開發環境，應用程式 WebSocket 失敗是正常的', 'warning');
+                        log('   - 後端可能未實現 WebSocket 功能', 'warning');
+                        log('   - 這不影響基本功能測試', 'warning');
+                        updateStatus('wsStatus', '⚠️ 功能未實現', 'warning');
+                    } else {
+                        log('💡 應用程式 WebSocket 失敗可能原因:', 'warning');
+                        log('   - 後端未啟用 WebSocket 服務', 'warning');
+                        log('   - WebSocket 代理配置錯誤', 'warning');
+                        updateStatus('wsStatus', '❌ 連接失敗', 'error');
+                    }
+                };
+
+                ws.onclose = function(event) {
+                    log(`🔌 WebSocket 連接已關閉 (code: ${event.code})`, 'info');
+                    if (event.code !== 1000) {
+                        log(`⚠️ 非正常關閉: ${event.reason || 'Unknown reason'}`, 'warning');
+                    }
+                };
+
+                // 10秒後超時
+                setTimeout(() => {
+                    if (ws.readyState === WebSocket.CONNECTING) {
+                        ws.close();
+                        log('⏰ WebSocket 連接超時 (10秒)', 'warning');
+                        updateStatus('wsStatus', '⏰ 連接超時', 'warning');
+                    }
+                }, 10000);
+
+            } catch (error) {
+                log(`❌ WebSocket 測試失敗: ${error.message}`, 'error');
+                updateStatus('wsStatus', '❌ 測試失敗', 'error');
+            }
+        }
+
+        // 運行全部測試
+        async function runAllTests() {
+            log('🚀 開始運行全部測試...', 'info');
+            clearLogs();
+            log('🚀 開始運行全部測試...', 'info');
+
+            // 重置狀態
+            updateStatus('dockerStatus', '檢測中...', 'info');
+            updateStatus('proxyStatus', '檢測中...', 'info');
+            updateStatus('moduleStatus', '檢測中...', 'info');
+            updateStatus('wsStatus', '檢測中...', 'info');
+
+            // 順序執行測試
+            setTimeout(() => testBasicFunction(), 500);
+            setTimeout(() => testApiConnection(), 1500);
+            setTimeout(() => testModuleLoad(), 2500);
+            setTimeout(() => testWebSocket(), 3500);
+
+            setTimeout(() => {
+                log('🎉 全部測試完成！', 'success');
+            }, 4500);
+        }
+
+        // 導航功能
+        function goToMain() {
+            window.location.href = '/index.html';
+        }
+
+        function goToLogin() {
+            window.location.href = '/src/pages/auth/login.html';
+        }
+
+        function goToDashboard() {
+            window.location.href = '/src/pages/dashboard/index.html';
+        }
+
+        // 更新時間
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent =
+                `測試時間: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
+
+        // 預載入路由模組
+        async function preloadRoutes() {
+            try {
+                log('🔄 預載入 Docker 路由模組...', 'info');
+                await import('./src/js/config/routes-docker.js');
+                log('✅ 路由模組預載入成功', 'success');
+
+                // 檢查全局變數是否已設置
+                if (typeof window.ROUTES !== 'undefined' && typeof window.RouteUtils !== 'undefined') {
+                    log('✅ 全局變數已正確設置', 'success');
+                } else {
+                    log('⚠️ 全局變數設置可能有問題', 'warning');
+                }
+            } catch (error) {
+                log(`❌ 路由模組預載入失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 自動初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            log('🐳 Docker 測試頁面載入完成', 'success');
+
+            // 預載入路由模組
+            await preloadRoutes();
+
+            log('👆 請點擊上方按鈕開始測試', 'info');
+
+            // 自動執行基本測試
+            setTimeout(() => {
+                testBasicFunction();
+                testApiConnection();
+            }, 1000);
+        });
+
+        // 暴露函數到全局作用域
+        window.runAllTests = runAllTests;
+        window.testBasicFunction = testBasicFunction;
+        window.testApiConnection = testApiConnection;
+        window.testModuleLoad = testModuleLoad;
+        window.testWebSocket = testWebSocket;
+        window.clearLogs = clearLogs;
+        window.goToMain = goToMain;
+        window.goToLogin = goToLogin;
+        window.goToDashboard = goToDashboard;
+    </script>
+</body>
+</html>

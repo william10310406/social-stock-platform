@@ -1,8 +1,10 @@
 import logging
 import os
+from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
 from flask import Blueprint, Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 
 from .blueprints.auth import auth_bp
@@ -23,6 +25,18 @@ migrate = Migrate()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Initialize CORS for all routes
+    CORS(
+        app,
+        origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://0.0.0.0:5173",  # Docker 容器訪問
+            "http://stock-insight-frontend:5173",  # 容器間通信
+        ],
+        supports_credentials=True,
+    )
 
     # Initialize extensions
     db.init_app(app)
@@ -53,6 +67,20 @@ def create_app(config_class=Config):
 
     app.logger.setLevel(logging.INFO)
     app.logger.info("Stock Insight Platform startup")
+
+    # 添加基本的 SocketIO 事件處理器
+    @socketio.on("connect")
+    def handle_connect():
+        app.logger.info(f"Client connected")
+
+    @socketio.on("disconnect")
+    def handle_disconnect():
+        app.logger.info(f"Client disconnected")
+
+    @socketio.on("ping")
+    def handle_ping(data):
+        app.logger.info(f"Received ping: {data}")
+        socketio.emit("pong", {"message": "pong", "timestamp": datetime.utcnow().isoformat()})
 
     @app.route("/")
     def index():

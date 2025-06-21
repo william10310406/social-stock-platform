@@ -39,7 +39,8 @@ const ENV_CONFIG = {
   development: {
     __DEV__: true,
     __PROD__: false,
-    API_BASE_URL: 'http://localhost:5001',
+    // 檢測是否在 Docker 環境中
+    API_BASE_URL: process.env.NODE_ENV === 'docker' ? '' : '',
     VITE_PORT: 5173,
   },
   production: {
@@ -51,7 +52,13 @@ const ENV_CONFIG = {
   test: {
     __DEV__: true,
     __PROD__: false,
-    API_BASE_URL: 'http://localhost:5001',
+    API_BASE_URL: '',
+    VITE_PORT: 5173,
+  },
+  docker: {
+    __DEV__: true,
+    __PROD__: false,
+    API_BASE_URL: '', // 使用代理路徑避免 CORS
     VITE_PORT: 5173,
   },
 };
@@ -91,7 +98,7 @@ const THEME_CONFIG = {
 // 測試配置
 const TEST_CONFIG = {
   testDir: './tests/e2e',
-  baseURL: 'http://localhost:5173',
+  baseURL: process.env.FRONTEND_URL || 'http://localhost:5173',
   timeout: 30000,
   retries: 2,
   workers: 1,
@@ -168,13 +175,21 @@ export function createViteConfig(mode = 'development') {
     },
     server: {
       port: envConfig.VITE_PORT,
-      host: true,
+      host: '0.0.0.0', // 允許外部訪問，Docker 必需
+      strictPort: false, // 如果端口被佔用，自動嘗試下一個
       fs: {
         strict: false,
       },
       watch: {
-        usePolling: true,
+        usePolling: true, // Docker 中必需
+        interval: 1000, // 降低輪詢頻率
       },
+      hmr: {
+        port: 5174, // 使用固定端口避免衝突
+        host: '0.0.0.0', // HMR 主機 - Docker 兼容
+        clientPort: 5174, // 確保客戶端使用正確端口
+      },
+      cors: true, // 啟用 CORS
     },
     resolve: {
       alias: getAliasConfig(),
@@ -183,6 +198,14 @@ export function createViteConfig(mode = 'development') {
       ...Object.fromEntries(
         Object.entries(envConfig).map(([key, value]) => [key, JSON.stringify(value)]),
       ),
+    },
+    optimizeDeps: {
+      include: [], // 預構建依賴
+      exclude: [], // 排除預構建
+    },
+    esbuild: {
+      target: 'es2015',
+      keepNames: true, // 保持函數名稱，便於調試
     },
   };
 }

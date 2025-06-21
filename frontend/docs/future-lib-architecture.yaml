@@ -1,0 +1,168 @@
+# Future lib/ Directory Architecture Planning
+# Stock Insight Platform - 未來庫架構規劃
+#
+# 此文件規劃未來可能需要的 lib/ 目錄結構
+# 用於指導庫的創建和組織
+
+future_lib_architecture:
+  description: "可重用庫和組件的集中管理"
+  timing: "當出現代碼重複或第三方庫增多時實施"
+
+  structure:
+    # UI 組件庫
+    components:
+      description: "可重用的 UI 組件"
+      priority: "高 - 已開始出現重複的 UI 邏輯"
+      candidates:
+        - name: "Modal"
+          current_location: "分散在各個頁面的模態框邏輯"
+          future_path: "lib/components/Modal.js"
+        - name: "Toast"
+          current_location: "errorManager.js 中的提示邏輯"
+          future_path: "lib/components/Toast.js"
+        - name: "LoadingSpinner"
+          current_location: "loadingManager.js 中的載入動畫"
+          future_path: "lib/components/LoadingSpinner.js"
+        - name: "StockChart"
+          current_location: "dashboard.js 中的圖表邏輯"
+          future_path: "lib/components/StockChart.js"
+
+    # 數據處理庫
+    data:
+      description: "數據處理和驗證工具"
+      priority: "中 - 未來股票數據處理會變複雜"
+      candidates:
+        - name: "Validator"
+          purpose: "表單驗證和數據驗證"
+          future_path: "lib/data/Validator.js"
+        - name: "Formatter"
+          purpose: "數據格式化 (日期、貨幣、數字)"
+          future_path: "lib/data/Formatter.js"
+        - name: "StockCalculator"
+          purpose: "股票相關計算 (漲跌幅、技術指標)"
+          future_path: "lib/data/StockCalculator.js"
+
+    # 第三方庫管理
+    vendors:
+      description: "第三方庫的本地化管理"
+      priority: "低 - 目前只有 Chart.js"
+      candidates:
+        - name: "Chart.js"
+          current: "CDN 載入"
+          future_path: "lib/vendors/chart.min.js"
+        - name: "Icons"
+          purpose: "圖標庫 (如 Feather Icons)"
+          future_path: "lib/vendors/icons/"
+
+    # 業務組件
+    widgets:
+      description: "業務特定的可重用組件"
+      priority: "中 - 社交功能組件會重複使用"
+      candidates:
+        - name: "UserCard"
+          purpose: "用戶卡片組件 (好友列表、搜索結果)"
+          future_path: "lib/widgets/UserCard.js"
+        - name: "PostCard"
+          purpose: "文章卡片組件"
+          future_path: "lib/widgets/PostCard.js"
+        - name: "ChatBubble"
+          purpose: "聊天氣泡組件"
+          future_path: "lib/widgets/ChatBubble.js"
+
+    # 高級工具庫
+    advanced:
+      description: "高級功能庫"
+      priority: "低 - 長期規劃"
+      candidates:
+        - name: "OfflineManager"
+          purpose: "離線功能管理"
+          future_path: "lib/advanced/OfflineManager.js"
+        - name: "CacheManager"
+          purpose: "客戶端緩存管理"
+          future_path: "lib/advanced/CacheManager.js"
+        - name: "SecurityUtils"
+          purpose: "客戶端安全工具"
+          future_path: "lib/advanced/SecurityUtils.js"
+
+# 遷移時機指標
+migration_triggers:
+  ui_components:
+    - "同一個 UI 組件在 3+ 個地方重複實現"
+    - "模態框、提示框邏輯開始複雜化"
+    - "需要統一的 UI 風格和行為"
+
+  data_processing:
+    - "股票數據處理邏輯超過 100 行"
+    - "需要複雜的數據驗證和格式化"
+    - "開始處理實時數據流"
+
+  third_party_libs:
+    - "使用 3+ 個第三方庫"
+    - "需要離線支持"
+    - "CDN 載入影響性能"
+
+  team_growth:
+    - "團隊成員超過 2 人"
+    - "需要代碼重用和標準化"
+    - "開始有組件設計需求"
+
+# 實施策略
+implementation_strategy:
+  phase_1:
+    description: "基礎組件庫"
+    timeline: "當 UI 重複達到臨界點時"
+    actions:
+      - "創建 lib/components/ 目錄"
+      - "遷移 Modal、Toast、LoadingSpinner"
+      - "更新 javascript-dependencies.yaml"
+
+  phase_2:
+    description: "數據處理庫"
+    timeline: "股票功能複雜化時"
+    actions:
+      - "創建 lib/data/ 目錄"
+      - "實施 Validator 和 Formatter"
+      - "重構現有數據處理邏輯"
+
+  phase_3:
+    description: "完整庫生態"
+    timeline: "項目成熟期"
+    actions:
+      - "完善所有庫目錄"
+      - "建立組件文檔"
+      - "實施自動化測試"
+
+# 架構影響
+architecture_impact:
+  dependency_levels:
+    current: "3 層 (Level 0-2)"
+    future: "4 層 (Level 0-3)"
+    new_level: "Level 1: lib/ (可重用庫層)"
+
+  import_patterns:
+    current: "import { RouteUtils } from './config/routes.js'"
+    future: "import { Modal } from '../lib/components/Modal.js'"
+
+  file_organization:
+    current: "功能導向 (dashboard.js, profile.js)"
+    future: "分層導向 (lib/ → utils/ → features/)"
+
+# 維護考量
+maintenance_considerations:
+  benefits:
+    - "代碼重用率提高"
+    - "維護成本降低"
+    - "團隊協作效率提升"
+    - "組件品質統一"
+
+  challenges:
+    - "初期重構成本"
+    - "依賴關係複雜化"
+    - "需要更多文檔"
+    - "測試覆蓋要求提高"
+
+  best_practices:
+    - "漸進式遷移，不要一次性重構"
+    - "保持向後兼容性"
+    - "建立清晰的組件 API"
+    - "維護組件文檔和範例"

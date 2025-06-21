@@ -101,9 +101,11 @@ global.window = {
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
   location: {
-    href: 'http://localhost:3000',
+    href: process.env.FRONTEND_URL || 'http://localhost:5173',
     pathname: '/',
-    hostname: 'localhost',
+    hostname: (process.env.FRONTEND_URL || 'http://localhost:5173').includes('localhost')
+      ? 'localhost'
+      : '127.0.0.1',
     protocol: 'http:',
   },
   localStorage: global.localStorage,

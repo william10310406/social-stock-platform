@@ -2,7 +2,7 @@
 
 // 獲取 API_BASE_URL 的函數
 function getApiBaseUrl() {
-  const baseUrl = window.API_BASE_URL || 'http://localhost:5001';
+  const baseUrl = window.API_BASE_URL || '';
   return `${baseUrl}/api`;
 }
 

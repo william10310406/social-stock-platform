@@ -36,6 +36,7 @@ components:
     modules:
       core:
         - config/routes.js     # 統一路徑配置 - 所有路徑的單一真實來源
+        - config/routes-docker.js  # Docker 專用路徑配置 - 簡化版
         - config/constants.js  # 系統常量配置
         - api.js              # API 工具函數 - 使用統一路徑管理
         - auth.js             # 認證管理 - JWT token 處理
@@ -327,8 +328,15 @@ deployment:
     frontend:
       image: node:18-alpine
       framework: Vite development server
-      port: 5173
-      features: [hot_reload, tailwind_watch]
+      ports:
+        main: 5173
+        hmr: 5174  # Hot Module Replacement WebSocket
+      environment_variables:
+        NODE_ENV: docker
+        VITE_API_BASE_URL: ""
+        VITE_HOST: "0.0.0.0"
+        VITE_PORT: "5173"
+      features: [hot_reload, tailwind_watch, docker_proxy_support]
     backend:
       image: python:3.10-slim
       server: Gunicorn with gthread workers

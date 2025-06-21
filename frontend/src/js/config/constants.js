@@ -13,8 +13,7 @@ const CURRENT_ENV = process.env.NODE_ENV || ENV.DEVELOPMENT;
 // ==================== API 配置 ====================
 const API_CONFIG = {
   // 基礎 URL
-  BASE_URL:
-    CURRENT_ENV === ENV.PRODUCTION ? 'https://your-production-api.com' : 'http://localhost:5001',
+  BASE_URL: CURRENT_ENV === ENV.PRODUCTION ? 'https://your-production-api.com' : '',
 
   // 超時設置
   TIMEOUT: 10000, // 10 秒
@@ -76,8 +75,24 @@ const API_CONFIG = {
 
 // ==================== WebSocket 配置 ====================
 const WEBSOCKET_CONFIG = {
-  URL:
-    CURRENT_ENV === ENV.PRODUCTION ? 'wss://your-production-ws.com/ws' : 'ws://localhost:5001/ws',
+  URL: (() => {
+    if (CURRENT_ENV === ENV.PRODUCTION) {
+      return 'wss://your-production-ws.com/ws';
+    }
+    // 檢測環境類型
+    if (typeof window !== 'undefined') {
+      const isViteDevMode = document.querySelector('script[src*="@vite/client"]') !== null;
+
+      if (isViteDevMode) {
+        // Vite 開發環境 (包括 Docker)，使用應用 WebSocket
+        return `ws://${window.location.host}/ws`;
+      } else {
+        // 生產環境
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${protocol}//${window.location.host}/ws`;
+      }
+    }
+  })(),
 
   // 重連配置
   RECONNECT: {

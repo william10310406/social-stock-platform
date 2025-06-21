@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <h1>Stock Insight Platform Icons</h1>
+    <p>這是一個臨時的圖標生成器。在生產環境中，您應該使用適當的圖標文件。</p>
+
+    <!-- 不同尺寸的圖標 -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div>
+            <h3>72x72</h3>
+            <svg width="72" height="72" viewBox="0 0 512 512">
+                <circle cx="256" cy="256" r="240" fill="#4f46e5"/>
+                <path d="M120 320 L180 280 L240 300 L300 220 L380 180" stroke="white" stroke-width="12" fill="none"/>
+                <text x="256" y="380" text-anchor="middle" fill="white" font-size="120" font-weight="bold">S</text>
+            </svg>
+        </div>
+
+        <div>
+            <h3>192x192</h3>
+            <svg width="192" height="192" viewBox="0 0 512 512">
+                <circle cx="256" cy="256" r="240" fill="#4f46e5"/>
+                <path d="M120 320 L180 280 L240 300 L300 220 L380 180" stroke="white" stroke-width="12" fill="none"/>
+                <text x="256" y="380" text-anchor="middle" fill="white" font-size="120" font-weight="bold">S</text>
+            </svg>
+        </div>
+
+        <div>
+            <h3>512x512</h3>
+            <svg width="512" height="512" viewBox="0 0 512 512">
+                <circle cx="256" cy="256" r="240" fill="#4f46e5"/>
+                <path d="M120 320 L180 280 L240 300 L300 220 L380 180" stroke="white" stroke-width="12" fill="none"/>
+                <text x="256" y="380" text-anchor="middle" fill="white" font-size="120" font-weight="bold">S</text>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        // 為了避免 PWA 錯誤，我們創建一個簡單的透明 PNG 數據
+        const createPlaceholderIcon = (size) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // 繪製簡單的藍色圓形
+            ctx.fillStyle = '#4f46e5';
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 10, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 添加白色文字 S
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size/4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('S', size/2, size/2);
+
+            return canvas.toDataURL('image/png');
+        };
+
+        // 為不同尺寸創建圖標
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        sizes.forEach(size => {
+            const dataUrl = createPlaceholderIcon(size);
+            const link = document.createElement('a');
+            link.download = `icon-${size}x${size}.png`;
+            link.href = dataUrl;
+            link.textContent = `下載 ${size}x${size}`;
+            link.style.display = 'block';
+            link.style.margin = '5px 0';
+            document.body.appendChild(link);
+        });
+    </script>
+</body>
+</html>

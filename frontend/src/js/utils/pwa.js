@@ -1,28 +1,46 @@
 // PWA 工具函數
 // 處理 Service Worker 註冊、安裝提示和推送通知
 
+// 使用全局路徑配置 (由 pathManager 設置)
+
 class PWAManager {
   constructor() {
     this.swRegistration = null;
     this.deferredPrompt = null;
     this.isInstalled = false;
+    this.isDevelopment =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      document.querySelector('script[src*="@vite/client"]') !== null;
 
     this.init();
   }
 
   // 初始化 PWA 功能
   async init() {
-    await this.registerServiceWorker();
-    this.setupInstallPrompt();
-    this.checkInstallation();
-    this.setupNotifications();
-    this.setupUpdateCheck();
+    try {
+      // 在開發環境中禁用某些功能以避免錯誤
+      if (this.isDevelopment) {
+        console.log('PWA: Development mode - limited functionality');
+        this.setupInstallPrompt();
+        this.checkInstallation();
+        return;
+      }
+
+      await this.registerServiceWorker();
+      this.setupInstallPrompt();
+      this.checkInstallation();
+      this.setupNotifications();
+      this.setupUpdateCheck();
+    } catch (error) {
+      console.warn('PWA: Initialization failed:', error);
+    }
   }
 
   // 註冊 Service Worker
   async registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
-      console.log('Service Worker 不支援');
+      console.log('PWA: Service Worker not supported');
       return;
     }
 
@@ -31,15 +49,16 @@ class PWAManager {
         scope: '/',
       });
 
-      console.log('Service Worker 註冊成功:', this.swRegistration.scope);
+      console.log('PWA: Service Worker registered successfully:', this.swRegistration.scope);
 
       // 監聽 Service Worker 更新
       this.swRegistration.addEventListener('updatefound', () => {
-        console.log('Service Worker 更新中...');
+        console.log('PWA: Service Worker updating...');
         this.showUpdateNotification();
       });
     } catch (error) {
-      console.error('Service Worker 註冊失敗:', error);
+      console.warn('PWA: Service Worker registration failed:', error);
+      // 不拋出錯誤，讓應用繼續運行
     }
   }
 
@@ -278,7 +297,7 @@ class PWAManager {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch(`${RouteUtils.getApiUrl('notifications')}/subscribe`, {
+      const response = await fetch(`${ROUTES.api.base}/api/notifications/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -372,7 +391,12 @@ class PWAManager {
 }
 
 // 全域 PWA 管理器實例
-window.pwaManager = new PWAManager();
+const pwaManager = new PWAManager();
+window.pwaManager = pwaManager;
+
+// ES6 模組導出
+export default pwaManager;
+export { PWAManager };
 
 // 導出供其他模組使用
 if (typeof module !== 'undefined' && module.exports) {
