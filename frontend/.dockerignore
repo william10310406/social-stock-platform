@@ -1,0 +1,54 @@
+# 前端 .dockerignore 文件
+# 排除開發和構建相關文件
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# 開發工具
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 構建產物
+dist/
+build/
+coverage/
+
+# 測試報告
+test-results/
+playwright-report/
+
+# 編輯器和 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系統文件
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# 文檔 (開發階段排除)
+docs/
+README.md
+*.md
+
+# 腳本和配置
+scripts/
+*.config.js
+*.config.cjs
+*.config.ts
+
+# 日誌
+logs/
+*.log

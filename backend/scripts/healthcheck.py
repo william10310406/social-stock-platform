@@ -19,14 +19,21 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 
+# 導入環境配置模組
+try:
+    from scripts.script_env import ScriptEnvironment
+except ImportError:
+    # 當作為獨立腳本運行時的備用導入
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, current_dir)
+    from script_env import ScriptEnvironment
+
 
 def check_database():
     """Check database connectivity"""
     try:
-        database_url = os.environ.get("DATABASE_URL")
-        if not database_url:
-            print("❌ DATABASE_URL not configured")
-            return False
+        env = ScriptEnvironment()
+        database_url = env.env_config["urls"]["database"]
 
         engine = create_engine(database_url)
         with engine.connect() as connection:
@@ -49,7 +56,8 @@ def check_redis():
     try:
         import redis
 
-        redis_url = os.environ.get("REDIS_URL", "redis://redis:6379/0")
+        env = ScriptEnvironment()
+        redis_url = env.env_config["urls"]["redis"]
         r = redis.from_url(redis_url)
         r.ping()
 
@@ -61,11 +69,14 @@ def check_redis():
         return False
 
 
-def check_application(host="localhost", port=5000, timeout=10):
+def check_application():
     """Check if the Flask application is responding"""
     try:
-        url = f"http://{host}:{port}/api/health"
-        response = requests.get(url, timeout=timeout)
+        env = ScriptEnvironment()
+        config = env.env_config
+
+        url = f"{config['urls']['backend']}/api/health"
+        response = requests.get(url, timeout=config["timeout"])
 
         if response.status_code == 200:
             print("✅ Application health endpoint OK")
@@ -105,15 +116,26 @@ def main():
     print("🏥 Stock Insight Platform - Health Check")
     print("=" * 45)
 
+    # 初始化環境配置
+    env = ScriptEnvironment()
+    env.print_environment_info()
+
     checks = [
         ("Database", check_database),
         ("Redis", check_redis),
         ("Migrations", check_migrations),
     ]
 
-    # If we're checking from inside Docker, also check the application
-    if len(sys.argv) > 1 and sys.argv[1] == "--docker":
-        checks.append(("Application", lambda: check_application(host="localhost", port=5000)))
+    # 根據參數或環境決定是否檢查應用
+    should_check_app = (
+        len(sys.argv) > 1
+        and sys.argv[1] == "--docker"
+        or env.docker_config["is_docker"]
+        or "--app" in sys.argv
+    )
+
+    if should_check_app:
+        checks.append(("Application", check_application))
 
     all_passed = True
     for name, check_func in checks:

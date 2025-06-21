@@ -36,6 +36,12 @@ yarn-error.log*
 logs/
 *.log
 
+# Test coverage
+coverage/
+*.coverage
+.nyc_output/
+.coverage
+
 # Temporary files
 tmp/
 temp/

@@ -21,6 +21,24 @@ function log(message, color = colors.reset) {
   console.log(`${color}${message}${colors.reset}`);
 }
 
+// 尋找項目根目錄
+function findProjectRoot() {
+  let currentDir = process.cwd();
+
+  // 如果當前在 scripts 目錄，向上查找
+  while (currentDir !== path.parse(currentDir).root) {
+    if (
+      fs.existsSync(path.join(currentDir, 'package.json')) ||
+      fs.existsSync(path.join(currentDir, 'src'))
+    ) {
+      return currentDir;
+    }
+    currentDir = path.dirname(currentDir);
+  }
+
+  return process.cwd();
+}
+
 // 遞歸查找所有 HTML 文件
 function findHtmlFiles(dir, htmlFiles = []) {
   const files = fs.readdirSync(dir);
@@ -233,7 +251,7 @@ function generateValidationReport(allResults) {
 async function main() {
   log(`${colors.bold}${colors.blue}🔗 Stock Insight Platform 鏈接驗證工具${colors.reset}`);
 
-  const projectRoot = path.resolve(__dirname, '..');
+  const projectRoot = findProjectRoot();
   log(`項目根目錄: ${projectRoot}\n`);
 
   // 查找所有 HTML 文件

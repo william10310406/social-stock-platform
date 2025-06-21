@@ -11,11 +11,31 @@ class DependencyChecker {
     this.visiting = new Set();
     this.errors = [];
     this.warnings = [];
+    this.projectRoot = this.findProjectRoot();
+  }
+
+  // 尋找項目根目錄
+  findProjectRoot() {
+    let currentDir = process.cwd();
+
+    // 如果當前在 scripts 目錄，向上查找
+    while (currentDir !== path.parse(currentDir).root) {
+      if (
+        fs.existsSync(path.join(currentDir, 'package.json')) ||
+        fs.existsSync(path.join(currentDir, 'src'))
+      ) {
+        return currentDir;
+      }
+      currentDir = path.dirname(currentDir);
+    }
+
+    return process.cwd();
   }
 
   // 主要檢查函數
   async checkProject() {
     console.log('🔍 開始依賴檢查...\n');
+    console.log(`📁 項目根目錄: ${this.projectRoot}`);
 
     try {
       await this.scanJavaScriptFiles();
@@ -31,7 +51,13 @@ class DependencyChecker {
 
   // 掃描所有 JavaScript 文件
   async scanJavaScriptFiles() {
-    const jsFiles = this.findJavaScriptFiles('src/js');
+    const jsDir = path.join(this.projectRoot, 'src/js');
+
+    if (!fs.existsSync(jsDir)) {
+      throw new Error(`JavaScript 源碼目錄不存在: ${jsDir}`);
+    }
+
+    const jsFiles = this.findJavaScriptFiles(jsDir);
 
     for (const file of jsFiles) {
       await this.analyzeFile(file);
@@ -173,7 +199,7 @@ class DependencyChecker {
   checkRoutesDependencies() {
     console.log('📍 檢查路徑配置依賴...');
 
-    const routesFile = path.resolve('src/js/config/routes.js');
+    const routesFile = path.resolve(this.projectRoot, 'src/js/config/routes.js');
     // 嘗試不同的路徑格式
     let routesDeps = this.dependencies.get(routesFile);
 
@@ -233,7 +259,10 @@ class DependencyChecker {
 
   // 計算到 routes.js 的正確路徑
   calculateExpectedRoutesPath(fromFile) {
-    const relativePath = path.relative(path.dirname(fromFile), 'src/js/config/routes.js');
+    const relativePath = path.relative(
+      path.dirname(fromFile),
+      path.join(this.projectRoot, 'src/js/config/routes.js'),
+    );
 
     return relativePath.startsWith('.') ? relativePath : './' + relativePath;
   }

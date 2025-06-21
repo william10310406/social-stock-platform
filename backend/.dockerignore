@@ -1,0 +1,68 @@
+# 後端 .dockerignore 文件
+# 排除開發和構建相關文件
+
+# Python 快取和虛擬環境
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 開發工具
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 測試和覆蓋率
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# 編輯器和 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系統文件
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# 文檔 (開發階段排除)
+docs/
+README.md
+*.md
+
+# 腳本 (部分排除)
+scripts/
+tests/
+
+# 日誌和臨時文件
+logs/
+*.log
+*.tmp
+
+# 資料庫文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 遷移 (生產環境可能需要)
+# migrations/

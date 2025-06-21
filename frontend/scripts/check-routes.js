@@ -6,11 +6,17 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const { ROUTES } = require('../src/js/config/routes.js');
+const { ScriptEnvironment } = require('./script-env.js');
 
-// 環境檢測 - 支援 Docker
-const isDocker = process.env.NODE_ENV === 'docker';
-const BASE_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const API_BASE_URL = isDocker ? '' : 'http://localhost:5001';
+// 初始化環境配置
+const scriptEnv = new ScriptEnvironment();
+const { config } = scriptEnv.getEnvironmentInfo();
+
+// 顯示環境信息
+scriptEnv.printEnvironmentInfo();
+
+const BASE_URL = config.urls.frontend;
+const API_BASE_URL = config.urls.backend;
 
 // 從統一配置獲取路徑
 const PATHS_TO_CHECK = [
@@ -109,7 +115,7 @@ function makeRequest(url) {
       port: urlObj.port,
       path: urlObj.pathname + urlObj.search,
       method: 'GET',
-      timeout: 5000,
+      timeout: config.timeout,
     };
 
     const req = client.request(options, (res) => {
