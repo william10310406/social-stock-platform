@@ -2,13 +2,189 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS
+from flask_socketio import disconnect, emit, join_room, leave_room
 from sqlalchemy import and_, desc, or_
 
 from ..decorators import token_required
+from ..extensions import socketio
 from ..models import Conversation, Friendship, Message, User, db
 
 chat_bp = Blueprint("chat_bp", __name__)
 CORS(chat_bp)
+
+# 存儲在線用戶
+online_users = {}
+
+
+# WebSocket 事件處理
+@socketio.on("connect")
+def handle_connect(auth=None):
+    """處理用戶連接"""
+    print(f"用戶連接: {request.sid}")
+    emit("connection_status", {"status": "connected", "message": "連接成功"})
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    """處理用戶斷開連接"""
+    print(f"用戶斷開連接: {request.sid}")
+    # 從在線用戶列表中移除
+    user_id_to_remove = None
+    for user_id, sid in online_users.items():
+        if sid == request.sid:
+            user_id_to_remove = user_id
+            break
+
+    if user_id_to_remove:
+        del online_users[user_id_to_remove]
+        # 通知其他用戶該用戶已離線
+        emit("user_offline", {"user_id": user_id_to_remove}, broadcast=True)
+
+
+@socketio.on("join_chat")
+def handle_join_chat(data):
+    """用戶加入聊天"""
+    try:
+        user_id = data.get("user_id")
+        conversation_id = data.get("conversation_id")
+
+        if not user_id or not conversation_id:
+            emit("error", {"message": "缺少必要參數"})
+            return
+
+        # 將用戶加入到對應的聊天室
+        room = f"conversation_{conversation_id}"
+        join_room(room)
+
+        # 記錄在線用戶
+        online_users[user_id] = request.sid
+
+        print(f"用戶 {user_id} 加入聊天室 {room}")
+        emit("joined_chat", {"conversation_id": conversation_id, "message": "成功加入聊天室"})
+
+        # 通知其他用戶該用戶已上線
+        emit("user_online", {"user_id": user_id}, broadcast=True, include_self=False)
+
+    except Exception as e:
+        print(f"加入聊天室錯誤: {e}")
+        emit("error", {"message": "加入聊天室失敗"})
+
+
+@socketio.on("leave_chat")
+def handle_leave_chat(data):
+    """用戶離開聊天"""
+    try:
+        conversation_id = data.get("conversation_id")
+        if conversation_id:
+            room = f"conversation_{conversation_id}"
+            leave_room(room)
+            emit("left_chat", {"conversation_id": conversation_id})
+            print(f"用戶離開聊天室 {room}")
+    except Exception as e:
+        print(f"離開聊天室錯誤: {e}")
+        emit("error", {"message": "離開聊天室失敗"})
+
+
+@socketio.on("send_message")
+def handle_send_message(data):
+    """處理發送消息"""
+    try:
+        conversation_id = data.get("conversation_id")
+        sender_id = data.get("sender_id")
+        content = data.get("content", "").strip()
+
+        if not conversation_id or not sender_id or not content:
+            emit("error", {"message": "消息內容不能為空"})
+            return
+
+        # 驗證會話是否存在
+        conversation = Conversation.query.get(conversation_id)
+        if not conversation:
+            emit("error", {"message": "聊天會話不存在"})
+            return
+
+        # 驗證發送者
+        sender = User.query.get(sender_id)
+        if not sender:
+            emit("error", {"message": "發送者不存在"})
+            return
+
+        # 檢查用戶是否屬於這個會話
+        if sender_id not in [conversation.user1_id, conversation.user2_id]:
+            emit("error", {"message": "無權訪問此聊天會話"})
+            return
+
+        # 創建新消息
+        message = Message(conversation_id=conversation_id, sender_id=sender_id, content=content)
+
+        # 更新會話的最後更新時間
+        conversation.updated_at = datetime.utcnow()
+
+        db.session.add(message)
+        db.session.commit()
+
+        # 準備消息數據
+        message_data = {
+            "id": message.id,
+            "conversation_id": conversation_id,
+            "content": message.content,
+            "sender_id": message.sender_id,
+            "sender_username": sender.username,
+            "created_at": message.created_at.isoformat(),
+            "is_read": message.is_read,
+        }
+
+        # 發送給聊天室中的所有用戶
+        room = f"conversation_{conversation_id}"
+        emit("new_message", message_data, room=room)
+
+        print(f"消息已發送到聊天室 {room}: {content[:50]}...")
+
+    except Exception as e:
+        print(f"發送消息錯誤: {e}")
+        emit("error", {"message": "發送消息失敗"})
+
+
+@socketio.on("typing")
+def handle_typing(data):
+    """處理正在輸入狀態"""
+    try:
+        conversation_id = data.get("conversation_id")
+        user_id = data.get("user_id")
+        username = data.get("username")
+        is_typing = data.get("is_typing", False)
+
+        if conversation_id and user_id:
+            room = f"conversation_{conversation_id}"
+            emit(
+                "user_typing",
+                {"user_id": user_id, "username": username, "is_typing": is_typing},
+                room=room,
+                include_self=False,
+            )
+
+    except Exception as e:
+        print(f"處理輸入狀態錯誤: {e}")
+
+
+@socketio.on("ping")
+def handle_ping(data):
+    """處理心跳檢測"""
+    emit("pong", {"message": "pong", "timestamp": datetime.utcnow().isoformat(), "data": data})
+
+
+@socketio.on("test_message")
+def handle_test_message(data):
+    """處理測試消息"""
+    print(f"收到測試消息: {data}")
+    emit(
+        "test_response",
+        {
+            "message": "測試消息收到",
+            "timestamp": datetime.utcnow().isoformat(),
+            "original_data": data,
+        },
+    )
 
 
 @chat_bp.route("/conversations", methods=["GET"])

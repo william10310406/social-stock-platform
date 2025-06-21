@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO 後端客戶端測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #log {
+            background: #f5f5f5;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+        }
+        .status.ready {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔌 Socket.IO 後端客戶端測試</h1>
+
+    <div id="status" class="status loading">
+        <strong>📦 正在載入後端提供的 Socket.IO 客戶端...</strong>
+    </div>
+
+    <div class="test-container">
+        <h2>使用後端自動提供的 Socket.IO 客戶端</h2>
+        <p>這個測試直接使用後端 Flask-SocketIO 自動提供的客戶端，確保版本 100% 兼容。</p>
+        <button id="testBtn" onclick="testDirectConnection()" disabled>載入中...</button>
+        <button onclick="clearLog()">清除日誌</button>
+    </div>
+
+    <div class="test-container">
+        <h3>測試日誌</h3>
+        <div id="log"></div>
+    </div>
+
+    <!-- 使用與 Flask-SocketIO 5.x 完全兼容的客戶端版本 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script>
+        let socketIOLoaded = false;
+
+        function updateStatus(message, type = 'loading') {
+            const statusDiv = document.getElementById('status');
+            const testBtn = document.getElementById('testBtn');
+
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<strong>${message}</strong>`;
+
+            if (type === 'ready') {
+                testBtn.disabled = false;
+                testBtn.textContent = '開始測試';
+                socketIOLoaded = true;
+            } else if (type === 'error') {
+                testBtn.disabled = true;
+                testBtn.textContent = '載入失敗';
+            }
+        }
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('log');
+            const className = type || 'info';
+            logDiv.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function testDirectConnection() {
+            if (!socketIOLoaded) {
+                log('❌ Socket.IO 客戶端尚未載入完成', 'error');
+                return;
+            }
+
+            clearLog();
+            log('🚀 開始 Socket.IO 後端客戶端測試...', 'info');
+
+            try {
+                // 檢查 Socket.IO 是否可用
+                if (typeof io === 'undefined') {
+                    throw new Error('Socket.IO 客戶端未載入！');
+                }
+
+                log(`📦 Socket.IO 客戶端已載入，版本: ${io.protocol || 'unknown'}`, 'info');
+                log(`🔧 使用後端自動提供的官方客戶端`, 'info');
+
+                // 使用最相容的設定，減少會話問題
+                const socket = io('/', {
+                    transports: ['polling'],
+                    upgrade: false,
+                    rememberUpgrade: false,
+                    timeout: 30000,
+                    forceNew: true,
+                    autoConnect: true,
+                    reconnection: true,
+                    reconnectionAttempts: 3,
+                    reconnectionDelay: 1000,
+                    randomizationFactor: 0.5
+                });
+
+                let connected = false;
+
+                socket.on('connect', function() {
+                    connected = true;
+                    log('🎉 Socket.IO 連接成功！', 'success');
+                    log(`📋 Session ID: ${socket.id}`, 'info');
+                    log(`🚀 傳輸方式: ${socket.io.engine.transport.name}`, 'info');
+                    log(`🔗 Protocol Version: ${socket.io.protocol || 'N/A'}`, 'info');
+                    log(`🔧 連接狀態: ${socket.connected ? '已連接' : '未連接'}`, 'info');
+
+                    // 等待一下再發送消息，確保連接穩定
+                    setTimeout(() => {
+                        // 發送測試消息
+                        socket.emit('ping', { message: '後端客戶端測試', timestamp: new Date().toISOString() });
+                        log('📤 發送 ping 測試', 'info');
+
+                        socket.emit('test_message', { message: '後端客戶端連接測試成功！' });
+                        log('📤 發送測試消息', 'info');
+
+                        // 加入聊天室
+                        socket.emit('join_chat', { room: 'backend_test_room', user: 'backend_test_user' });
+                        log('📤 加入後端測試聊天室', 'info');
+                    }, 500);
+                });
+
+                socket.on('pong', function(data) {
+                    log(`🏓 收到 pong: ${JSON.stringify(data)}`, 'success');
+                });
+
+                socket.on('connection_status', function(data) {
+                    log(`📡 連接狀態: ${JSON.stringify(data)}`, 'success');
+                });
+
+                socket.on('test_response', function(data) {
+                    log(`📨 測試回應: ${JSON.stringify(data)}`, 'success');
+                });
+
+                socket.on('user_joined', function(data) {
+                    log(`👋 用戶加入: ${JSON.stringify(data)}`, 'success');
+                });
+
+                socket.on('message', function(data) {
+                    log(`💬 收到消息: ${JSON.stringify(data)}`, 'success');
+                });
+
+                socket.on('connect_error', function(error) {
+                    log(`❌ 連接錯誤: ${error.message}`, 'error');
+                    log(`錯誤詳情: ${JSON.stringify(error)}`, 'error');
+                    log(`錯誤類型: ${error.type || 'unknown'}`, 'error');
+                });
+
+                socket.on('disconnect', function(reason) {
+                    log(`🔌 連接斷開: ${reason}`, 'warning');
+                    connected = false;
+                });
+
+                socket.on('reconnect', function(attemptNumber) {
+                    log(`🔄 重新連接成功 (嘗試 ${attemptNumber})`, 'success');
+                });
+
+                socket.on('reconnect_attempt', function(attemptNumber) {
+                    log(`🔄 嘗試重新連接 ${attemptNumber}`, 'info');
+                });
+
+                socket.on('reconnect_error', function(error) {
+                    log(`❌ 重連錯誤: ${error.message}`, 'error');
+                });
+
+                socket.on('error', function(error) {
+                    log(`⚠️ Socket 錯誤: ${error}`, 'error');
+                });
+
+                // 監聽傳輸升級
+                socket.io.on('upgrade', function() {
+                    log(`⬆️ 傳輸升級到: ${socket.io.engine.transport.name}`, 'info');
+                });
+
+                // 10秒後檢查狀態
+                setTimeout(() => {
+                    if (connected) {
+                        log('✅ 後端客戶端測試成功！', 'success');
+                        log('💡 這證明使用後端官方客戶端功能正常', 'success');
+
+                        // 測試完成後斷開
+                        setTimeout(() => {
+                            socket.disconnect();
+                            log('✅ 測試完成，連接已斷開', 'info');
+                        }, 3000);
+                    } else {
+                        log('❌ 後端客戶端測試失敗', 'error');
+                    }
+                }, 10000);
+
+            } catch (error) {
+                log(`❌ 測試初始化失敗: ${error.message}`, 'error');
+                log(`錯誤堆棧: ${error.stack}`, 'error');
+            }
+        }
+
+        // 檢查 Socket.IO 載入狀態
+        function checkSocketIOLoaded() {
+            if (typeof io !== 'undefined') {
+                updateStatus('✅ Socket.IO 後端客戶端載入成功！', 'ready');
+                log('📄 頁面載入完成', 'info');
+                log('💡 點擊 "開始測試" 按鈕進行 Socket.IO 連接測試', 'info');
+                log('🔧 此測試使用後端自動提供的官方 Socket.IO 客戶端', 'info');
+            } else {
+                updateStatus('❌ Socket.IO 後端客戶端載入失敗', 'error');
+                log('❌ Socket.IO 後端客戶端載入失敗', 'error');
+                log('💡 請檢查後端服務是否正常運行', 'error');
+            }
+        }
+
+        // 頁面載入完成後檢查
+        document.addEventListener('DOMContentLoaded', function() {
+            // 給腳本載入一些時間
+            setTimeout(checkSocketIOLoaded, 1000);
+        });
+    </script>
+</body>
+</html>

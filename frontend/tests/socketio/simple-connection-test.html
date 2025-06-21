@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡單 Socket.IO 測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { background: #007cba; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        #log { background: #f5f5f5; padding: 10px; height: 300px; overflow-y: auto; border: 1px solid #ddd; white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🔌 簡單 Socket.IO 連接測試</h1>
+    <button onclick="simpleTest()">開始簡單測試</button>
+    <button onclick="clearLog()">清除日誌</button>
+    <div id="log"></div>
+
+    <!-- 使用確定兼容的 Socket.IO 4.0.1 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `<span class="${type}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function simpleTest() {
+            clearLog();
+            log('🚀 開始簡單 Socket.IO 測試...', 'info');
+
+            try {
+                // 最簡單的連接配置
+                const socket = io('/', {
+                    transports: ['polling'],
+                    timeout: 10000,
+                    forceNew: true
+                });
+
+                let connectionSuccessful = false;
+
+                socket.on('connect', function() {
+                    connectionSuccessful = true;
+                    log('✅ 連接成功！', 'success');
+                    log(`Session ID: ${socket.id}`, 'info');
+
+                    // 發送一個簡單的 ping
+                    socket.emit('ping', { test: true, time: Date.now() });
+                    log('📤 發送 ping', 'info');
+
+                    // 3秒後斷開
+                    setTimeout(() => {
+                        socket.disconnect();
+                        log('✅ 主動斷開連接', 'info');
+                    }, 3000);
+                });
+
+                socket.on('pong', function(data) {
+                    log(`🏓 收到 pong: ${JSON.stringify(data)}`, 'success');
+                });
+
+                socket.on('connect_error', function(error) {
+                    log(`❌ 連接失敗: ${error.message}`, 'error');
+                });
+
+                socket.on('disconnect', function(reason) {
+                    log(`🔌 斷開: ${reason}`, 'info');
+                });
+
+                // 5秒後檢查結果
+                setTimeout(() => {
+                    if (connectionSuccessful) {
+                        log('🎉 簡單測試成功！Socket.IO 基本功能正常！', 'success');
+                    } else {
+                        log('❌ 簡單測試失敗', 'error');
+                    }
+                }, 5000);
+
+            } catch (error) {
+                log(`❌ 測試錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            log('📄 頁面載入完成，點擊按鈕開始測試', 'info');
+        });
+    </script>
+</body>
+</html>

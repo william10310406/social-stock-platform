@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO 測試套件</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .test-title {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .test-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .test-button {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .test-button:hover {
+            background: #005a87;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status.working { background: #d4edda; color: #155724; }
+        .status.dev { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔌 Socket.IO 測試套件</h1>
+        <p>這個測試套件用於驗證 Stock Insight Platform 的 WebSocket/Socket.IO 功能。</p>
+        <p><strong>狀態：</strong> <span class="status working">✅ 正常工作</span></p>
+    </div>
+
+    <div class="test-grid">
+        <div class="test-card">
+            <div class="test-title">🚀 簡單連接測試</div>
+            <div class="test-description">
+                基本的 Socket.IO 連接測試，驗證客戶端能否成功連接到後端，
+                發送 ping 並接收 pong 響應。適合快速驗證系統狀態。
+            </div>
+            <a href="simple-connection-test.html" class="test-button">開始測試</a>
+            <span class="status working">正常</span>
+        </div>
+
+        <div class="test-card">
+            <div class="test-title">🔧 詳細功能測試</div>
+            <div class="test-description">
+                完整的 Socket.IO 功能測試，包括連接管理、事件處理、
+                聊天室功能、錯誤處理等。提供詳細的調試信息。
+            </div>
+            <a href="socketio-direct-test.html" class="test-button">開始測試</a>
+            <span class="status working">正常</span>
+        </div>
+
+        <div class="test-card">
+            <div class="test-title">💬 實際聊天功能</div>
+            <div class="test-description">
+                測試實際的聊天功能，包括用戶連接、消息發送接收、
+                在線狀態管理等實際應用場景。
+            </div>
+            <a href="../../src/pages/dashboard/chat.html" class="test-button">測試聊天</a>
+            <span class="status working">正常</span>
+        </div>
+
+        <div class="test-card">
+            <div class="test-title">📊 完整功能測試</div>
+            <div class="test-description">
+                執行所有 Socket.IO 相關的功能測試，包括單元測試、
+                集成測試和端到端測試。
+            </div>
+            <a href="../complete-test.html" class="test-button">完整測試</a>
+            <span class="status working">正常</span>
+        </div>
+    </div>
+
+    <div class="header" style="margin-top: 30px;">
+        <h2>🔧 技術信息</h2>
+        <ul>
+            <li><strong>後端：</strong> Flask-SocketIO 5.3.6 + python-socketio 5.8.0</li>
+            <li><strong>前端：</strong> Socket.IO Client 4.0.1</li>
+            <li><strong>傳輸：</strong> polling (HTTP 長輪詢)</li>
+            <li><strong>伺服器：</strong> Gunicorn + Eventlet Worker</li>
+            <li><strong>協議：</strong> Engine.IO 4, Socket.IO 5</li>
+        </ul>
+
+        <h2>🚨 故障排除</h2>
+        <p>如果遇到連接問題：</p>
+        <ol>
+            <li>確認後端容器正在運行：<code>docker-compose ps</code></li>
+            <li>檢查後端日誌：<code>docker-compose logs backend</code></li>
+            <li>驗證端口映射：後端 5001 → 容器 5000</li>
+            <li>測試基本 API：<a href="http://localhost:5001/api/health">http://localhost:5001/api/health</a></li>
+        </ol>
+    </div>
+</body>
+</html>

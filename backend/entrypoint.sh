@@ -95,25 +95,57 @@ main() {
     # Step 3: Validate application
     validate_app
 
-    # Step 4: Start the application
-    echo "🚀 Starting application with Gunicorn..."
-    echo "   - Workers: 4"
-    echo "   - Threads per worker: 2"
-    echo "   - Binding: 0.0.0.0:5000"
-    echo "=================================================="
+    # Step 4: Test SocketIO configuration
+    echo "🧪 Testing SocketIO configuration..."
+    python tests/test_socketio.py
+    if [ $? -ne 0 ]; then
+        echo "❌ SocketIO configuration test failed"
+        exit 1
+    fi
 
-    exec gunicorn \
+    # Step 5: Start the application
+    echo "🚀 Starting application with SocketIO support..."
+
+    # Try Gunicorn with eventlet worker first
+    echo "   - Attempting Gunicorn + eventlet worker..."
+
+    # Test if gunicorn eventlet worker works
+    timeout 10s gunicorn \
         --bind 0.0.0.0:5000 \
-        --workers 4 \
-        --threads 2 \
-        --timeout 120 \
-        --keep-alive 5 \
-        --max-requests 1000 \
-        --max-requests-jitter 50 \
-        --access-logfile - \
-        --error-logfile - \
-        --log-level info \
-        "run:create_app()"
+        --worker-class eventlet \
+        --workers 1 \
+        --worker-connections 1000 \
+        --timeout 30 \
+        --preload \
+        --check-config \
+        "run:create_app()" > /tmp/gunicorn_test.log 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "✅ Gunicorn eventlet worker supported"
+        echo "   - Worker: 1 (required for SocketIO + Eventlet)"
+        echo "   - Worker class: eventlet"
+        echo "   - Binding: 0.0.0.0:5000"
+        echo "=================================================="
+
+        exec gunicorn \
+            --bind 0.0.0.0:5000 \
+            --worker-class eventlet \
+            --workers 1 \
+            --worker-connections 1000 \
+            --timeout 120 \
+            --keep-alive 5 \
+            --access-logfile - \
+            --error-logfile - \
+            --log-level info \
+            "run:create_app()"
+    else
+        echo "⚠️ Gunicorn eventlet worker failed, using Flask-SocketIO built-in server"
+        echo "   - Server: Flask-SocketIO + eventlet"
+        echo "   - Binding: 0.0.0.0:5000"
+        echo "=================================================="
+
+        exec python scripts/run_socketio.py
+    fi
 }
 
 # Run main function

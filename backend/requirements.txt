@@ -9,6 +9,7 @@ uvicorn==0.23.2
 requests==2.31.0
 redis==5.0.7
 eventlet==0.33.3
+python-socketio==5.8.0
 # Database & ORM
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.51

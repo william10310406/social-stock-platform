@@ -41,7 +41,25 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     limiter.init_app(app)
-    socketio.init_app(app, cors_allowed_origins="*")
+    socketio.init_app(
+        app,
+        cors_allowed_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://0.0.0.0:5173",
+            "*",  # 允許所有來源（開發環境）
+        ],
+        async_mode="eventlet",
+        logger=True,  # 啟用 Socket.IO 日誌
+        engineio_logger=True,  # 啟用 Engine.IO 日誌
+        ping_timeout=60,
+        ping_interval=25,
+    )
+
+    # 添加調試信息
+    print(f"🔧 Flask-SocketIO 配置完成")
+    print(f"📡 使用 async_mode: eventlet")
+    print(f"🔌 Socket.IO 服務已初始化")
     migrate.init_app(app, db)
 
     # Register blueprints with a common prefix
@@ -68,19 +86,8 @@ def create_app(config_class=Config):
     app.logger.setLevel(logging.INFO)
     app.logger.info("Stock Insight Platform startup")
 
-    # 添加基本的 SocketIO 事件處理器
-    @socketio.on("connect")
-    def handle_connect():
-        app.logger.info(f"Client connected")
-
-    @socketio.on("disconnect")
-    def handle_disconnect():
-        app.logger.info(f"Client disconnected")
-
-    @socketio.on("ping")
-    def handle_ping(data):
-        app.logger.info(f"Received ping: {data}")
-        socketio.emit("pong", {"message": "pong", "timestamp": datetime.utcnow().isoformat()})
+    # SocketIO 事件處理器在各個藍圖中定義
+    # 全局事件由 chat 藍圖處理
 
     @app.route("/")
     def index():

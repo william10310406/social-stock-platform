@@ -58,16 +58,32 @@ export default defineConfig({
           });
         },
       },
+      '/socket.io': {
+        target: 'http://stock-insight-backend:5000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, req, _res) => {
+            console.log('❌ Socket.IO proxy error:', err.message, 'for', req.url);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('🔄 Proxying Socket.IO request:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('📡 Socket.IO response:', proxyRes.statusCode, req.url);
+          });
+          proxy.on('upgrade', (req, socket, head) => {
+            console.log('⬆️ WebSocket upgrade request:', req.url);
+          });
+        },
+      },
+      // 添加通用 WebSocket 代理
       '/ws': {
         target: 'ws://stock-insight-backend:5000',
         ws: true,
         changeOrigin: true,
         secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('WebSocket proxy error', err);
-          });
-        },
       },
     },
   },
