@@ -17,17 +17,21 @@ docs/
 │   └── future-lib-architecture.yaml   # 未來架構規劃
 ├── 🚀 implementation/            # 功能實現文檔
 │   ├── SOCKETIO_IMPLEMENTATION_COMPLETE.md  # Socket.IO 完整實現
+│   ├── STOCKS_FEATURE_IMPLEMENTATION.md    # 股票功能完整實現
 │   ├── ARCHITECTURE_IMPROVEMENTS.md         # 架構改進記錄
 │   ├── PATH_MANAGEMENT_SUMMARY.md          # 路徑管理系統
 │   └── UNIFIED_CONFIG.md                   # 統一配置管理
 ├── 📊 reports/                   # 項目報告
+│   ├── STOCKS_DATA_EXPORT_REPORT.md       # 股票資料匯出報告
 │   ├── MIGRATION_REPORT.md       # 路徑遷移報告
 │   ├── DOCKER_ARCHITECTURE_VALIDATION.md  # Docker 架構驗證
 │   ├── DOCKER_LOCALHOST_FIXES_COMPLETE.md # Docker 修復報告
 │   └── LOCALHOST_CLEANUP_REPORT.md        # 本地清理報告
-└── 📖 guides/                    # 開發指南
-    ├── DEVELOPMENT_SAFETY.md     # 開發安全實踐
-    └── TESTING_STRATEGY.md       # 測試策略
+├── 📖 guides/                    # 開發指南
+│   ├── DEVELOPMENT_SAFETY.md     # 開發安全實踐
+│   └── TESTING_STRATEGY.md       # 測試策略
+└── 🛡️ best-practices/           # 最佳實踐
+    └── DEFENSIVE_PROGRAMMING_SOLUTION.md  # 防禦性編程解決方案
 ```
 
 ---
@@ -64,11 +68,17 @@ docs/
 
 ### 主要功能實現
 
-#### [`SOCKETIO_IMPLEMENTATION_COMPLETE.md`](./implementation/SOCKETIO_IMPLEMENTATION_COMPLETE.md) ⭐ **最新實現**
+#### [`SOCKETIO_IMPLEMENTATION_COMPLETE.md`](./implementation/SOCKETIO_IMPLEMENTATION_COMPLETE.md) ⭐ **Socket.IO 實現**
 - **完整 Socket.IO 實現**: 從 0% 到 100% 的完整歷程
 - **技術解決方案**: Gunicorn Eventlet Worker 配置
 - **測試系統**: 完整的測試套件和驗證
 - **生產就緒**: 企業級穩定性和性能
+
+#### [`STOCKS_FEATURE_IMPLEMENTATION.md`](./implementation/STOCKS_FEATURE_IMPLEMENTATION.md) ⭐ **股票功能實現**
+- **完整股票系統**: 從資料庫修復到前端開發的完整實現
+- **126 支真實台股**: 包含完整價格歷史資料 (2030+ 筆)
+- **API 系統設計**: RESTful API + 搜尋/分頁/關注功能
+- **多格式資料匯出**: 5 種格式滿足不同使用需求
 
 #### [`ARCHITECTURE_IMPROVEMENTS.md`](./implementation/ARCHITECTURE_IMPROVEMENTS.md) 🏢 **企業級改進**
 - **代碼品質工具鏈**: ESLint + Prettier + EditorConfig
@@ -88,6 +98,12 @@ docs/
 ## 📊 項目報告 (`reports/`)
 
 ### 遷移和修復記錄
+
+#### [`STOCKS_DATA_EXPORT_REPORT.md`](./reports/STOCKS_DATA_EXPORT_REPORT.md) 📊 **股票資料匯出**
+- **多格式匯出**: PostgreSQL, CSV, JSON, SQLite, ZIP 共 5 種格式
+- **資料統計**: 126 支股票, 2030+ 筆價格記錄, 221KB 壓縮檔
+- **使用指南**: 各格式的詳細使用說明和查詢範例
+- **品質保證**: 完整性、一致性、可用性三重驗證
 
 #### [`MIGRATION_REPORT.md`](./reports/MIGRATION_REPORT.md) 📋 **路徑遷移**
 - **遷移執行記錄**: 11 個文件的完整遷移
@@ -121,6 +137,18 @@ docs/
 
 ---
 
+## 🛡️ 最佳實踐 (`best-practices/`)
+
+### 編程規範與解決方案
+
+#### [`DEFENSIVE_PROGRAMMING_SOLUTION.md`](./best-practices/DEFENSIVE_PROGRAMMING_SOLUTION.md) 🛡️ **防禦性編程**
+- **路徑管理最佳實踐**: 如何正確處理硬編碼路徑問題
+- **智能檢查腳本**: 既滿足代碼規範又保持系統健壯性
+- **防禦性編程模式**: fallback 機制和錯誤處理最佳實踐
+- **資安和維護考量**: 避免單點失效風險的完整解決方案
+
+---
+
 ## 🎯 快速導航
 
 ### 🔍 **我想了解...**
@@ -128,11 +156,14 @@ docs/
 | 需求 | 推薦文檔 | 路徑 |
 |------|----------|------|
 | 系統整體架構 | 主架構文檔 | `architecture/stock-architecture.yaml` |
+| 股票功能實現 | 股票系統文檔 | `implementation/STOCKS_FEATURE_IMPLEMENTATION.md` |
+| 資料匯出使用 | 資料匯出報告 | `reports/STOCKS_DATA_EXPORT_REPORT.md` |
 | Socket.IO 實現 | 實時功能實現 | `implementation/SOCKETIO_IMPLEMENTATION_COMPLETE.md` |
 | JavaScript 模組關係 | 依賴關係圖 | `architecture/javascript-dependencies.yaml` |
 | 路徑管理系統 | 路徑架構 | `architecture/path-config-architecture.yaml` |
 | 開發規範 | 安全指南 | `guides/DEVELOPMENT_SAFETY.md` |
 | 測試策略 | 測試指南 | `guides/TESTING_STRATEGY.md` |
+| 防禦性編程 | 最佳實踐 | `best-practices/DEFENSIVE_PROGRAMMING_SOLUTION.md` |
 | 項目歷程 | 遷移報告 | `reports/MIGRATION_REPORT.md` |
 
 ### 🛠️ **我想開發...**
@@ -163,10 +194,12 @@ docs/
 
 ## 🎉 最新更新
 
+- ✅ **2025年6月**: 股票功能完整實現 - 126支真實台股 + 2030+筆價格資料
+- ✅ **2025年6月**: 多格式資料匯出系統 - 5種格式滿足不同需求
 - ✅ **2025年1月**: Socket.IO 實時功能完全實現
 - ✅ **文檔重組**: 按類別重新組織，提升可維護性
 - ✅ **架構同步**: 所有文檔已同步最新技術棧
 
-**版本**: 2.0.0  
-**最後更新**: 2025年1月  
+**版本**: 2.1.0  
+**最後更新**: 2025年6月21日  
 **維護團隊**: Frontend Development Team

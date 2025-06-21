@@ -71,11 +71,84 @@ class UserStock(db.Model):
 class Stock(db.Model):
     __tablename__ = "stocks"
     id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.String(20), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    exchange = db.Column(db.String(50))
+    symbol = db.Column(db.String(20), unique=True, nullable=False)  # 股票代號
+    name = db.Column(db.String(100), nullable=False)  # 股票名稱
+    exchange = db.Column(db.String(50))  # 交易所 (上市/上櫃)
+    market_type = db.Column(db.String(20))  # 市場類型 (一般/創新板等)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     users = relationship("UserStock", back_populates="stock")
+    prices = relationship("StockPrice", back_populates="stock", cascade="all, delete-orphan")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "symbol": self.symbol,
+            "name": self.name,
+            "exchange": self.exchange,
+            "market_type": self.market_type,
+        }
+
+    def get_latest_price(self):
+        """獲取最新價格資訊"""
+        latest = (
+            StockPrice.query.filter_by(stock_id=self.id)
+            .order_by(StockPrice.trade_date.desc())
+            .first()
+        )
+        return latest
+
+
+class StockPrice(db.Model):
+    __tablename__ = "stock_prices"
+    id = db.Column(db.Integer, primary_key=True)
+    stock_id = db.Column(db.Integer, db.ForeignKey("stocks.id"), nullable=False)
+    trade_date = db.Column(db.Date, nullable=False)  # 交易日期
+
+    # 價格資訊
+    open_price = db.Column(db.Numeric(10, 2))  # 開盤價
+    high_price = db.Column(db.Numeric(10, 2))  # 最高價
+    low_price = db.Column(db.Numeric(10, 2))  # 最低價
+    close_price = db.Column(db.Numeric(10, 2))  # 收盤價
+    change_amount = db.Column(db.Numeric(10, 2))  # 漲跌價差
+
+    # 交易資訊
+    volume = db.Column(db.BigInteger)  # 成交股數
+    turnover = db.Column(db.BigInteger)  # 成交金額
+    transaction_count = db.Column(db.Integer)  # 成交筆數
+
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    # 關聯
+    stock = relationship("Stock", back_populates="prices")
+
+    # 唯一約束：每個股票每個交易日只能有一筆記錄
+    __table_args__ = (db.UniqueConstraint("stock_id", "trade_date", name="uq_stock_date"),)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "stock_id": self.stock_id,
+            "trade_date": self.trade_date.isoformat() if self.trade_date else None,
+            "open_price": float(self.open_price) if self.open_price else None,
+            "high_price": float(self.high_price) if self.high_price else None,
+            "low_price": float(self.low_price) if self.low_price else None,
+            "close_price": float(self.close_price) if self.close_price else None,
+            "change_amount": float(self.change_amount) if self.change_amount else None,
+            "volume": self.volume,
+            "turnover": self.turnover,
+            "transaction_count": self.transaction_count,
+        }
+
+    @property
+    def change_percentage(self):
+        """計算漲跌幅百分比"""
+        if self.close_price and self.change_amount:
+            prev_close = float(self.close_price) - float(self.change_amount)
+            if prev_close != 0:
+                return round((float(self.change_amount) / prev_close) * 100, 2)
+        return 0
 
 
 class News(db.Model):

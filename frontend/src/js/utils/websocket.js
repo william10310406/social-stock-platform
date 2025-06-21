@@ -248,7 +248,9 @@ class WebSocketManager {
           badge: '/icons/badge-72x72.png',
           tag: 'chat-message',
           data: {
-            url: '/src/pages/dashboard/chat.html',
+            url: window.RouteUtils
+              ? window.RouteUtils.getPagePath('dashboard', 'chat')
+              : '/src/pages/dashboard/chat.html',
             conversationId: message.conversation_id,
           },
         });

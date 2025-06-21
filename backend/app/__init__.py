@@ -17,7 +17,7 @@ from .blueprints.stocks import stocks_bp
 # from .models import User, Post # Temporarily import only existing models
 from .config import Config
 from .extensions import db, limiter, socketio
-from .models import Comment, Conversation, Message, News, Post, Stock, User, UserStock
+from .models import Comment, Conversation, Message, News, Post, Stock, StockPrice, User, UserStock
 
 migrate = Migrate()
 
@@ -49,7 +49,7 @@ def create_app(config_class=Config):
             "http://0.0.0.0:5173",
             "*",  # 允許所有來源（開發環境）
         ],
-        async_mode="eventlet",
+        async_mode="threading",  # 使用 threading 模式，更兼容
         logger=True,  # 啟用 Socket.IO 日誌
         engineio_logger=True,  # 啟用 Engine.IO 日誌
         ping_timeout=60,
@@ -58,7 +58,7 @@ def create_app(config_class=Config):
 
     # 添加調試信息
     print(f"🔧 Flask-SocketIO 配置完成")
-    print(f"📡 使用 async_mode: eventlet")
+    print(f"📡 使用 async_mode: threading")
     print(f"🔌 Socket.IO 服務已初始化")
     migrate.init_app(app, db)
 

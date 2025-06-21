@@ -205,7 +205,12 @@ const handleDeleteComment = async (event) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('token')) {
-    window.location.href = '/src/pages/auth/login.html';
+    if (window.RouteUtils) {
+      window.RouteUtils.redirectToLogin();
+    } else {
+      console.warn('RouteUtils not available, using fallback');
+      window.location.href = '/src/pages/auth/login.html';
+    }
     return;
   }
 

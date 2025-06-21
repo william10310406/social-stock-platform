@@ -32,7 +32,12 @@ const handleLogout = async () => {
     if (window.RouteUtils) {
       window.RouteUtils.redirectToLogin();
     } else {
-      window.location.href = '/src/pages/auth/login.html';
+      if (window.RouteUtils) {
+        window.RouteUtils.redirectToLogin();
+      } else {
+        console.warn('RouteUtils not available, using fallback');
+        window.location.href = '/src/pages/auth/login.html';
+      }
     }
   }
 };
@@ -172,6 +177,7 @@ if (loginForm) {
         if (window.RouteUtils) {
           window.RouteUtils.redirectToDashboard();
         } else {
+          console.warn('RouteUtils not available, using fallback');
           window.location.href = '/src/pages/dashboard/index.html';
         }
       } else {
@@ -217,6 +223,7 @@ if (registerForm) {
         if (window.RouteUtils) {
           window.RouteUtils.redirectToDashboard();
         } else {
+          console.warn('RouteUtils not available, using fallback');
           window.location.href = '/src/pages/dashboard/index.html';
         }
       } else {

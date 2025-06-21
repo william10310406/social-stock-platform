@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="page-title" content="股票" />
+    <title>股票 - Stock Insight Platform</title>
+    <link rel="stylesheet" href="/src/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- 導航欄容器 -->
+    <div id="navbar-container"></div>
+
+    <main class="container mx-auto px-4 py-8">
+      <!-- 標題區域 -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">股票分析</h1>
+        <p class="text-gray-600">查看即時股票資訊、價格走勢和市場統計</p>
+      </div>
+
+      <!-- 搜尋區域 -->
+      <div class="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <input
+              type="text"
+              id="stock-search"
+              placeholder="搜尋股票代號或名稱 (例如：2330, 台積電)"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div class="flex gap-2">
+            <select id="exchange-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">所有交易所</option>
+              <option value="上市">上市</option>
+              <option value="上櫃">上櫃</option>
+            </select>
+            <button
+              id="search-btn"
+              class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+            >
+              搜尋
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 我的關注股票 -->
+      <div class="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">我的關注股票</h2>
+        <div id="watched-stocks" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="text-center text-gray-500 py-8 col-span-full">載入中...</div>
+        </div>
+      </div>
+
+      <!-- 股票列表 -->
+      <div class="bg-white rounded-lg shadow-sm mb-8">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900">股票列表</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票代號</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">股票名稱</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">交易所</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最新價格</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">漲跌</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+              </tr>
+            </thead>
+            <tbody id="stocks-table-body" class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td colspan="6" class="text-center text-gray-500 py-8">載入中...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- 分頁控制 -->
+        <div id="pagination" class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+          <div class="text-sm text-gray-700">
+            顯示 <span id="page-info">1-20</span> 共 <span id="total-count">0</span> 筆
+          </div>
+          <div class="flex gap-2">
+            <button id="prev-page" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors" disabled>
+              上一頁
+            </button>
+            <button id="next-page" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors">
+              下一頁
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 市場統計 -->
+      <div class="bg-white p-6 rounded-lg shadow-sm">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">市場統計</h2>
+        <div id="market-stats" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="text-center text-gray-500 py-8 col-span-full">載入中...</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 股票詳情模態框 -->
+    <div id="stock-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 id="modal-title" class="text-xl font-semibold text-gray-900">股票詳情</h3>
+            <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div id="modal-content" class="p-6">
+            <!-- 股票詳情內容將動態載入 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/src/js/config/routes-docker.js"></script>
+    <script type="module" src="/src/js/utils/pathManager.js"></script>
+    <script type="module" src="/src/js/utils/pwa.js"></script>
+    <script type="module" src="/src/js/template.js"></script>
+    <script type="module" src="/src/js/api.js"></script>
+    <script type="module" src="/src/js/auth.js"></script>
+    <script type="module" src="/src/js/stocks.js"></script>
+  </body>
+</html>

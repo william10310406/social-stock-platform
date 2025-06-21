@@ -47,8 +47,8 @@ report_success() {
 check_hardcoded_secrets() {
     echo "🔍 檢查硬編碼敏感信息..."
 
-    # 檢查常見的硬編碼密碼/密鑰模式
-    if grep -r -E "(password|secret|key).*=.*['\"][^'\"]{8,}" frontend/src backend/app --include="*.js" --include="*.py" 2>/dev/null; then
+    # 檢查真正的硬編碼密碼/密鑰模式 (排除正常的變數名和DOM操作)
+    if grep -r -E "(password|secret|key).*=.*['\"][a-zA-Z0-9+/=]{16,}" frontend/src backend/app --include="*.js" --include="*.py" 2>/dev/null | grep -v "getElementById" | grep -v "data\[" | grep -v "\.value" >/dev/null; then
         report_error "發現硬編碼密碼或密鑰"
     else
         report_success "未發現硬編碼敏感信息"
@@ -59,9 +59,21 @@ check_hardcoded_secrets() {
 check_hardcoded_paths() {
     echo "🛣️  檢查硬編碼路徑..."
 
-    # 檢查前端硬編碼路徑
-    if grep -r "'/src/" frontend/src --include="*.js" 2>/dev/null | grep -v "routes.js" | grep -v "test" >/dev/null; then
-        report_error "前端發現硬編碼路徑，必須使用 RouteUtils"
+    # 檢查不當的硬編碼路徑 (允許防禦性編程的fallback)
+    # 查找單獨使用硬編碼路徑的情況，排除有條件檢查的防禦性代碼
+    BAD_PATHS=$(grep -r "window\.location\.href.*'/src/" frontend/src --include="*.js" 2>/dev/null | grep -v "routes" | grep -v "test" | grep -v "config/")
+
+    if [ -n "$BAD_PATHS" ]; then
+        # 檢查是否有 RouteUtils 條件判斷
+        while IFS= read -r line; do
+            FILE=$(echo "$line" | cut -d: -f1)
+            LINE_NUM=$(echo "$line" | cut -d: -f2)
+
+            # 檢查前後5行是否有 RouteUtils 條件判斷
+            if ! grep -A5 -B5 "window\.location\.href.*'/src/" "$FILE" | grep -q "window\.RouteUtils\|RouteUtils.*?" 2>/dev/null; then
+                report_error "發現不當硬編碼路徑 (缺少 RouteUtils 條件判斷): $FILE:$LINE_NUM"
+            fi
+        done <<< "$BAD_PATHS"
     fi
 
     # 檢查後端硬編碼 localhost

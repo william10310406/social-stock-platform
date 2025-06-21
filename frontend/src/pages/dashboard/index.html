@@ -25,9 +25,12 @@
         <!-- 股票圖表 -->
         <div class="lg:col-span-2">
           <div class="bg-white p-6 rounded-lg shadow-sm">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">股票走勢圖</h2>
-            <div style="height: 300px">
-              <canvas id="stockChart"></canvas>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-semibold text-gray-900">熱門股票</h2>
+              <a href="/src/pages/dashboard/stocks.html" class="text-indigo-600 hover:text-indigo-800 text-sm">查看全部 →</a>
+            </div>
+            <div id="hot-stocks" class="space-y-4">
+              <div class="text-center text-gray-500 py-8">載入中...</div>
             </div>
           </div>
         </div>
@@ -72,10 +75,24 @@
             </form>
           </div>
 
+          <!-- 市場統計 -->
+          <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">市場概況</h3>
+            <div id="market-overview" class="grid grid-cols-2 gap-4">
+              <div class="text-center text-gray-500 py-4 col-span-2">載入中...</div>
+            </div>
+          </div>
+
           <!-- 快速功能 -->
           <div class="bg-white p-6 rounded-lg shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">快速功能</h3>
             <div class="space-y-3">
+              <a
+                href="/src/pages/dashboard/stocks.html"
+                class="block w-full text-left px-4 py-2 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors text-indigo-700"
+              >
+                📊 股票分析
+              </a>
               <a
                 href="/src/pages/dashboard/profile.html"
                 class="block w-full text-left px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors"
