@@ -76,10 +76,11 @@ class ScriptEnvironment:
             # 資料庫配置
             "database": {
                 "host": "db" if is_docker else "localhost",
-                "port": int(os.environ.get("DB_PORT", "5433")),
-                "name": os.environ.get("DB_NAME", "stock_insight"),
-                "user": os.environ.get("DB_USER", "stock_user"),
-                "password": os.environ.get("DB_PASSWORD", "stock_password123"),
+                "port": int(os.environ.get("DB_PORT", "1433")),  # MSSQL 預設端口
+                "name": os.environ.get("MSSQL_DATABASE", "StockInsight"),
+                "user": os.environ.get("MSSQL_USER", "sa"),
+                "password": os.environ.get("MSSQL_SA_PASSWORD", "YourStrong!Password123"),
+                "driver": "ODBC+Driver+18+for+SQL+Server",
             },
             # Redis 配置
             "redis": {
@@ -100,7 +101,7 @@ class ScriptEnvironment:
             or f"{base_config['backend']['protocol']}://{base_config['backend']['host']}:{base_config['backend']['port']}",
             "database": os.environ.get("DATABASE_URL")
             or (
-                f"postgresql://{base_config['database']['user']}:{base_config['database']['password']}@{base_config['database']['host']}:{base_config['database']['port']}/{base_config['database']['name']}"
+                f"mssql+pyodbc://{base_config['database']['user']}:{base_config['database']['password']}@{base_config['database']['host']}:{base_config['database']['port']}/{base_config['database']['name']}?driver={base_config['database']['driver']}&TrustServerCertificate=yes"
                 if is_docker
                 else "sqlite:///app.db"
             ),

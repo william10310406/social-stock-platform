@@ -53,6 +53,19 @@ class DevelopmentConfig(Config):
     DEBUG = True
 
 
+class DevelopmentMSSQLConfig(Config):
+    DEBUG = True
+    # MSSQL specific configuration
+    SQLALCHEMY_DATABASE_URI = (
+        f"mssql+pyodbc://{os.environ.get('MSSQL_USER', 'sa')}:"
+        f"{os.environ.get('MSSQL_SA_PASSWORD')}@"
+        f"{os.environ.get('MSSQL_HOST', 'localhost')}:"
+        f"{os.environ.get('MSSQL_PORT', '1433')}/"
+        f"{os.environ.get('MSSQL_DATABASE', 'StockInsight')}"
+        f"?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+    )
+
+
 class ProductionConfig(Config):
     DEBUG = False
 
@@ -64,6 +77,7 @@ class TestingConfig(Config):
 
 config = {
     "development": DevelopmentConfig,
+    "development_mssql": DevelopmentMSSQLConfig,
     "production": ProductionConfig,
     "testing": TestingConfig,
     "default": DevelopmentConfig,

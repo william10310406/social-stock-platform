@@ -103,7 +103,7 @@ fi
 # 檢查硬編碼問題 (快速檢查)
 echo "🔍 檢查硬編碼問題..."
 for file in $STAGED_JS_FILES; do
-    if git show :"$file" | grep -q "'/src/" && [[ $file != *"routes.js"* ]]; then
+    if git show :"$file" | grep -q "'/src/" && [[ $file != *"routes.js"* ]] && [[ $file != *"routes-docker.js"* ]]; then
         echo "❌ 發現硬編碼路徑: $file"
         echo "💡 提示: 使用 RouteUtils 代替硬編碼路徑"
         exit 1

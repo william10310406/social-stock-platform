@@ -7,6 +7,10 @@ services:
     ports:
       - "5173:5173"
       - "5174:5174"  # HMR WebSocket port
+    environment:
+      - NODE_ENV=development
+      - DOCKER_ENV=true
+      - BACKEND_URL=http://stock-insight-backend:5000
     networks:
       - stock-insight-net
     volumes:
@@ -39,21 +43,25 @@ services:
       - ./backend:/app
 
   db:
-    image: postgres:alpine
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: stock-insight-db
     ports:
-      - "5433:5432"
+      - "1433:1433"
     env_file:
       - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=Express
+    user: "0:0"  # Run as root to avoid permission issues
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${MSSQL_SA_PASSWORD}", "-Q", "SELECT 1", "-C"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/opt/mssql
     networks:
       - stock-insight-net
 

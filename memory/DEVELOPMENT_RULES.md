@@ -48,10 +48,24 @@ import { Toast } from './lib/index.js';
 Toast.show(message, 'success');
 ```
 
-### 5️⃣ **文檔同步更新**
-- 重大功能 → 更新 `docs/implementation/`
-- 架構變更 → 更新 `docs/architecture/`
-- 問題修復 → 記錄在 `docs/reports/`
+### 5️⃣ **文檔放置規則** ⭐ **強制性要求**
+```bash
+# ✅ 正確的文檔位置 - 所有文檔必須放在 frontend/docs/
+frontend/docs/reports/         # 項目報告
+frontend/docs/guides/          # 開發指南  
+frontend/docs/architecture/    # 系統架構
+frontend/docs/implementation/  # 功能實現記錄
+frontend/docs/best-practices/  # 最佳實踐
+
+# ❌ 錯誤位置 - 絕對禁止
+docs/                         # 項目根目錄的 docs 禁用
+```
+> 🚨 **強制性規定**: 用戶明確要求所有未來的文檔都必須寫在 `frontend/docs/` 位置
+
+### 6️⃣ **文檔同步更新**
+- 重大功能 → 更新 `frontend/docs/implementation/`
+- 架構變更 → 更新 `frontend/docs/architecture/`
+- 問題修復 → 記錄在 `frontend/docs/reports/`
 
 ---
 

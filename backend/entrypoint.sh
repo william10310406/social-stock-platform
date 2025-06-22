@@ -11,6 +11,7 @@ check_database() {
     python -c "
 import os
 import time
+import pyodbc
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 
@@ -22,6 +23,46 @@ if not database_url:
     print('❌ DATABASE_URL not set')
     exit(1)
 
+# 首先嘗試創建數據庫（如果不存在）
+try:
+    print('🛠️ Ensuring database exists...')
+    
+    # 解析數據庫連接字符串
+    if 'mssql' in database_url:
+        # 提取連接參數
+        import re
+        pattern = r'mssql\+pyodbc://(.+?):(.+?)@(.+?):(\d+)/(.+?)\?'
+        match = re.match(pattern, database_url)
+        if match:
+            user, password, host, port, db_name = match.groups()
+            
+            # 連接到 master 數據庫來創建目標數據庫
+            master_conn_str = f'DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={host};PORT={port};DATABASE=master;UID={user};PWD={password};TrustServerCertificate=yes'
+            
+            try:
+                conn = pyodbc.connect(master_conn_str)
+                conn.autocommit = True  # 設置自動提交，避免事務問題
+                cursor = conn.cursor()
+                
+                # 檢查數據庫是否存在
+                cursor.execute(\"SELECT name FROM sys.databases WHERE name = ?\", db_name)
+                if not cursor.fetchone():
+                    print(f'🏗️ Creating database {db_name}...')
+                    cursor.execute(f'CREATE DATABASE [{db_name}]')
+                    print(f'✅ Database {db_name} created successfully!')
+                else:
+                    print(f'✅ Database {db_name} already exists')
+                
+                conn.close()
+            except Exception as db_create_error:
+                print(f'⚠️ Could not create database: {db_create_error}')
+                print('📝 Continuing with connection test...')
+    
+except Exception as e:
+    print(f'⚠️ Database creation check failed: {e}')
+    print('📝 Continuing with connection test...')
+
+# 現在測試實際的數據庫連接
 while retry_count < max_retries:
     try:
         engine = create_engine(database_url)
@@ -32,7 +73,11 @@ while retry_count < max_retries:
     except OperationalError as e:
         retry_count += 1
         print(f'⏳ Database not ready (attempt {retry_count}/{max_retries})')
-        time.sleep(2)
+        if 'Cannot open database' in str(e) and retry_count < 5:
+            print('🔄 Database might be initializing, waiting longer...')
+            time.sleep(5)
+        else:
+            time.sleep(2)
 
 if retry_count == max_retries:
     print('❌ Failed to connect to database after maximum retries')

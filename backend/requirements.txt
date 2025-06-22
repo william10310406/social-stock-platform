@@ -14,7 +14,7 @@ python-socketio==5.8.0
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.51
 SQLAlchemy-Utils==0.38.3
-psycopg2==2.9.9
+pyodbc==5.0.1
 Werkzeug==2.3.8
 cryptography==42.0.8
 Flask-Migrate==4.0.7

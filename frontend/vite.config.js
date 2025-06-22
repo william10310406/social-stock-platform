@@ -43,18 +43,24 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://stock-insight-backend:5000',
+        target: process.env.DOCKER_ENV === 'true'
+          ? 'http://stock-insight-backend:5000'
+          : 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => {
+          console.log('API proxy rewrite:', path);
+          return path;
+        },
         configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
+          proxy.on('error', (err, req, _res) => {
+            console.log('❌ API proxy error:', err.message, 'for', req.url);
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
+            console.log('🔄 Proxying API request:', req.method, req.url, '→', proxyReq.getHeader('host'));
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+            console.log('✅ API response:', proxyRes.statusCode, req.url);
           });
         },
       },
@@ -73,7 +79,7 @@ export default defineConfig({
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('📡 Socket.IO response:', proxyRes.statusCode, req.url);
           });
-          proxy.on('upgrade', (req, socket, head) => {
+          proxy.on('upgrade', (req, _socket, _head) => {
             console.log('⬆️ WebSocket upgrade request:', req.url);
           });
         },

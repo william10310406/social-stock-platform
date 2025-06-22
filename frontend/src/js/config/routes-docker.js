@@ -22,7 +22,7 @@ const ROUTES = {
     home: '/index.html',
   },
   api: {
-    base: '', // 使用相對路徑，通過 Vite 代理
+    base: '', // 使用 Vite 代理，通過 /api 路徑
     endpoints: {
       auth: {
         login: '/api/auth/login',

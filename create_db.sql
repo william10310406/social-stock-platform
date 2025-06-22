@@ -1,0 +1,6 @@
+CREATE DATABASE StockInsight;
+GO
+USE StockInsight;
+GO
+SELECT @@VERSION;
+GO

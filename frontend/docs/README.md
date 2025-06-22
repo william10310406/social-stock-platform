@@ -23,6 +23,7 @@ docs/
 │   ├── PATH_MANAGEMENT_SUMMARY.md          # 路徑管理系統
 │   └── UNIFIED_CONFIG.md                   # 統一配置管理
 ├── 📊 reports/                   # 項目報告
+│   ├── COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md    # **最新** 116支台股完整導入報告
 │   ├── STOCKS_DATA_EXPORT_REPORT.md       # 股票資料匯出報告
 │   ├── STOCK_SCHEMA_VALIDATION_REPORT.md  # 股票架構驗證報告
 │   ├── LIB_DOCKER_TEST_COMPLETE.md        # 組件庫 Docker 測試報告
@@ -182,6 +183,7 @@ docs/
 
 | 需求 | 推薦文檔 | 路徑 |
 |------|----------|------|
+| **🎯 台股數據導入完成** | **台股導入報告** | `reports/COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md` |
 | 系統整體架構 | 主架構文檔 | `architecture/stock-architecture.yaml` |
 | 股票功能實現 | 股票系統文檔 | `implementation/STOCKS_FEATURE_IMPLEMENTATION.md` |
 | 組件庫使用 | 組件庫實現 | `implementation/LIB_IMPLEMENTATION_COMPLETE.md` |
