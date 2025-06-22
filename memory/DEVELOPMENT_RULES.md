@@ -60,12 +60,23 @@ Toast.show(message, 'success');
 ### 📂 **目錄結構規則**
 ```
 src/
+├── proto/         # Level 0 - 協議定義、API契約、數據類型 📋 第一階段已完成
+├── services/      # Level 1 - 業務服務層、緩存管理 📋 第一階段已完成
+├── core/          # Level 0-1 - 核心系統功能、引擎 📋 第一階段已完成
 ├── lib/           # Level 0 - 基礎組件庫
 ├── js/
 │   ├── utils/     # Level 1 - 工具函數
 │   ├── api/       # Level 1 - API 封裝
 │   └── modules/   # Level 2 - 業務模組
+├── hooks/         # Level 1 - 可重用邏輯鉤子 🔄 第二階段規劃中
+├── constants/     # Level 0 - 常量管理 🔄 第二階段規劃中
+└── middleware/    # Level 1 - 中間件處理層 🔄 第二階段規劃中
 ```
+
+### 📋 **新功能開發規則** ⭐ **重要**
+- **文件放置指南**: 必須參考 `docs/guides/NEW_FEATURE_DEVELOPMENT_GUIDE.md`
+- **決策流程**: 協議定義 → 服務層 → 組件層 → 頁面整合
+- **強制性標準**: 這是團隊必須遵循的開發規範
 
 ### 🔗 **依賴層級規則**
 - **Level 0** (lib): 不依賴任何內部模組

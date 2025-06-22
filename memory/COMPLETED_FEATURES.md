@@ -103,6 +103,13 @@
 - **COMMON_COMMANDS.md** 命令速查
 - **AI 工具支持** 完整指引
 
+### 📋 **開發指南系統** ✅ **100% 完成**
+- **NEW_FEATURE_DEVELOPMENT_GUIDE.md** 新功能開發指南
+- **企業級目錄結構規則** (proto/services/core 等)
+- **文件放置決策流程** 和決策樹
+- **標準化開發檢查清單**
+- **第二階段規劃** (hooks/constants/middleware)
+
 ---
 
 ## 🏗️ **架構優化**

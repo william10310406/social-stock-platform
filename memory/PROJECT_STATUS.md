@@ -45,8 +45,11 @@ frontend/
 │   ├── architecture/             # 系統架構 (YAML)
 │   ├── implementation/           # 功能實現記錄
 │   ├── reports/                  # 測試和驗證報告
-│   └── guides/                   # 開發指南
+│   └── guides/                   # 開發指南 (含新功能開發指南)
 ├── 🎨 src/                       # 源代碼
+│   ├── proto/                    # 📋 協議定義、API契約 (第一階段已完成)
+│   ├── services/                 # 📋 業務服務層 (第一階段已完成)
+│   ├── core/                     # 📋 核心系統功能 (第一階段已完成)
 │   ├── lib/                      # 組件庫 (4個核心組件)
 │   ├── js/                       # JavaScript 模組
 │   ├── css/                      # 樣式文件
@@ -67,6 +70,7 @@ frontend/
 3. **組件庫系統** - 4個核心組件 + 85% 重用率
 4. **路徑管理系統** - 統一路徑管理 + RouteUtils API
 5. **Docker 環境** - 100% 容器兼容性
+6. **企業級目錄結構** - proto/services/core 第一階段完成
 
 ### 📊 **數據和 API**
 - RESTful API 設計
@@ -122,6 +126,7 @@ npm run docker:test     # Docker 環境測試
 2. **統一路徑管理** - 使用 RouteUtils，避免硬編碼
 3. **組件重用** - 優先使用 `src/lib/` 組件
 4. **文檔同步** - 重大修改需更新文檔
+5. **新功能開發指南** - 必須遵循 `docs/guides/NEW_FEATURE_DEVELOPMENT_GUIDE.md`
 
 ### 🎯 **代碼標準**
 - ES6+ 語法標準

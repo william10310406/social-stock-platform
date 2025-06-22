@@ -88,18 +88,29 @@ memory/
 > - 測試失敗會強制阻止推送
 > - 敏感文件檢查和提交品質保證
 
+### 📋 **新功能開發規則** ⭐ **最重要**
+> 🚨 **強制性指南**: `docs/guides/NEW_FEATURE_DEVELOPMENT_GUIDE.md`
+> 
+> 🎯 **核心要求**:
+> - 必須遵循企業級目錄結構規則
+> - 協議定義 → 服務層 → 組件層 → 頁面整合
+> - proto/services/core 第一階段已完成
+> - hooks/constants/middleware 第二階段規劃中
+
 ### ⚠️ **開發前必讀**
 - **上傳檢查**: 提交前必須運行 `./scripts/enforce-rules.sh`
 - **測試優先**: 所有修改必須先測試通過才能提交
 - **路徑管理**: 使用統一路徑管理系統，避免硬編碼
 - **組件重用**: 優先使用 `src/lib/` 組件庫
 - **文檔同步**: 重大修改需更新對應文檔
+- **新功能開發**: 必須遵循新功能開發指南的文件放置規則
 
 ### 🎯 **AI 工具使用指南**
 1. 開始任何任務前先讀取 `PROJECT_STATUS.md`
 2. 遵循 `DEVELOPMENT_RULES.md` 中的編碼規範
-3. 使用 `TESTING_CHECKLIST.md` 確保代碼品質
-4. 參考 `TROUBLESHOOTING.md` 解決常見問題
+3. **必讀** `docs/guides/NEW_FEATURE_DEVELOPMENT_GUIDE.md` 了解文件放置規則
+4. 使用 `TESTING_CHECKLIST.md` 確保代碼品質
+5. 參考 `TROUBLESHOOTING.md` 解決常見問題
 
 ---
 
