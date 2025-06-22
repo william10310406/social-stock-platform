@@ -2,18 +2,22 @@
 
 ## 🚨 **核心原則 - 必須遵循**
 
-### 1️⃣ **上傳檢查腳本 - 強制執行** ⭐ **最重要**
+### 1️⃣ **強制防呆機制 - Git Hooks** ⭐ **最重要**
 ```bash
-# 任何提交前都必須運行上傳檢查腳本
+# 團隊成員必須安裝 Git hooks (強制要求)
+./scripts/install-git-hooks.sh
+
+# 檢查 hooks 是否正確安裝
+./scripts/check-hooks-installation.sh
+
+# 手動運行上傳檢查腳本
 ./scripts/enforce-rules.sh
-
-# 如果檢查失敗，嘗試自動修復
-./scripts/enforce-rules.sh --fix
-
-# 嚴格模式 (警告也會導致失敗)
-./scripts/enforce-rules.sh --strict
 ```
-> 🔒 **強制規則**: 包含8大類檢查 - 硬編碼檢查、路徑管理、Docker兼容性、測試覆蓋率、代碼風格、安全漏洞、依賴關係、文檔同步
+> 🔒 **防呆保護**: 
+> - 無法使用 `--no-verify` 跳過檢查
+> - 推送前自動運行完整檢查 (8大類)
+> - 測試失敗會強制阻止推送
+> - 敏感文件檢查和提交品質保證
 
 ### 2️⃣ **測試優先原則** ⭐ **最重要**
 ```bash

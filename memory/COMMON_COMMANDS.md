@@ -202,6 +202,26 @@ npm run docs:validate
 ./scripts/enforce-rules.sh --help
 ```
 
+### 🔒 **強制防呆機制 - Git Hooks**
+
+🚨 **團隊必須安裝**: 所有成員都必須安裝 Git hooks 防呆系統！
+
+```bash
+# 安裝強制 Git hooks (團隊必須執行)
+./scripts/install-git-hooks.sh
+
+# 檢查 hooks 是否正確安裝
+./scripts/check-hooks-installation.sh
+```
+
+#### 🛡️ **防呆機制特性**
+- **🚫 無法跳過**: 不允許使用 `--no-verify` 跳過檢查
+- **🔒 強制執行**: 推送前必須通過所有檢查
+- **📋 完整檢查**: 自動運行 8大類規則檢查
+- **🧪 測試保護**: 強制運行項目測試
+- **🔐 安全檢查**: 防止敏感文件推送
+- **📝 品質保證**: 檢查提交訊息品質
+
 #### 📋 **檢查項目詳情**
 1. **🔍 硬編碼敏感信息檢查** - 防止密碼、密鑰洩露
 2. **🛣️ 硬編碼路徑檢查** - 確保使用統一路徑管理 (RouteUtils)
