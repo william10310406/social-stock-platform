@@ -1,0 +1,317 @@
+# Advanced Directory Expansion Architecture
+# Stock Insight Platform - 高級目錄擴展架構
+#
+# 基於現有的 /lib 基礎，規劃更多專業級目錄結構
+
+advanced_directory_expansion:
+  description: "企業級前端架構的完整目錄擴展方案"
+  version: "3.0.0"
+  current_status: "已有 /lib 組件庫基礎"
+
+  # 建議新增的目錄結構
+  proposed_directories:
+
+    # 1. /proto - 協議和接口定義
+    proto:
+      description: "協議定義、API 接口規範和類型定義"
+      priority: "高 - 提升代碼品質和類型安全"
+      structure:
+        - "proto/api/"              # API 接口定義
+        - "proto/types/"            # TypeScript 類型定義
+        - "proto/schemas/"          # 數據模型和驗證規則
+        - "proto/contracts/"        # 前後端契約定義
+        - "proto/events/"           # 事件類型定義
+
+      benefits:
+        - "類型安全和 IntelliSense 支持"
+        - "前後端接口一致性保證"
+        - "自動化 API 文檔生成"
+        - "運行時類型檢查"
+
+      use_cases:
+        api_definitions:
+          description: "定義所有 API 接口的請求和響應格式"
+          example: |
+            // proto/api/stocks.js
+            export const StocksAPI = {
+              getStockList: {
+                method: 'GET',
+                path: '/api/stocks',
+                params: ['page', 'limit', 'search'],
+                response: 'StockListResponse'
+              },
+              getStockDetail: {
+                method: 'GET',
+                path: '/api/stocks/{symbol}',
+                params: ['symbol'],
+                response: 'StockDetail'
+              }
+            };
+
+        type_definitions:
+          description: "定義數據類型和接口"
+          example: |
+            // proto/types/stock.js
+            export const StockTypes = {
+              Stock: {
+                symbol: 'string',
+                name: 'string',
+                price: 'number',
+                change: 'number',
+                changePercent: 'number',
+                volume: 'number',
+                marketType: 'string'
+              },
+              StockListResponse: {
+                stocks: 'Stock[]',
+                total: 'number',
+                page: 'number',
+                hasMore: 'boolean'
+              }
+            };
+
+    # 2. /core - 核心系統功能
+    core:
+      description: "核心系統功能和基礎設施"
+      priority: "高 - 系統穩定性的基石"
+      structure:
+        - "core/store/"             # 狀態管理
+        - "core/router/"            # 路由管理
+        - "core/events/"            # 事件系統
+        - "core/cache/"             # 緩存管理
+        - "core/security/"          # 安全工具
+        - "core/performance/"       # 性能監控
+
+      features:
+        state_management:
+          description: "統一的狀態管理系統"
+          implementation: "基於 Proxy 的響應式狀態管理"
+
+        event_system:
+          description: "全局事件匯流排"
+          implementation: "發布訂閱模式的事件系統"
+
+        cache_layer:
+          description: "多層緩存系統"
+          implementation: "內存緩存 + localStorage + sessionStorage"
+
+    # 3. /services - 業務服務層
+    services:
+      description: "業務邏輯服務和數據訪問層"
+      priority: "高 - 業務邏輯集中管理"
+      structure:
+        - "services/api/"           # API 服務封裝
+        - "services/auth/"          # 認證服務
+        - "services/chat/"          # 聊天服務
+        - "services/stocks/"        # 股票服務
+        - "services/notifications/" # 通知服務
+        - "services/analytics/"     # 分析服務
+
+      architecture:
+        service_pattern: "Service Layer Pattern"
+        dependency_injection: "簡化的依賴注入"
+        error_handling: "統一錯誤處理機制"
+        caching_strategy: "服務級別的智能緩存"
+
+    # 4. /hooks - 可重用邏輯鉤子
+    hooks:
+      description: "可重用的業務邏輯鉤子 (類似 React Hooks)"
+      priority: "中高 - 提升代碼重用性"
+      structure:
+        - "hooks/data/"             # 數據相關鉤子
+        - "hooks/ui/"               # UI 狀態鉤子
+        - "hooks/auth/"             # 認證相關鉤子
+        - "hooks/websocket/"        # WebSocket 鉤子
+        - "hooks/form/"             # 表單處理鉤子
+
+      examples:
+        useStockData: "股票數據獲取和緩存"
+        useAuth: "認證狀態管理"
+        useWebSocket: "WebSocket 連接管理"
+        useForm: "表單驗證和提交"
+
+    # 5. /middleware - 中間件系統
+    middleware:
+      description: "請求/響應中間件和攔截器"
+      priority: "中高 - 橫切關注點處理"
+      structure:
+        - "middleware/auth/"        # 認證中間件
+        - "middleware/logging/"     # 日誌中間件
+        - "middleware/cache/"       # 緩存中間件
+        - "middleware/validation/"  # 驗證中間件
+        - "middleware/transform/"   # 數據轉換中間件
+
+      capabilities:
+        request_interceptors: "統一請求預處理"
+        response_transformers: "響應數據標準化"
+        error_handlers: "全局錯誤處理"
+        performance_monitoring: "性能指標收集"
+
+    # 6. /adapters - 適配器模式
+    adapters:
+      description: "第三方服務和外部系統適配器"
+      priority: "中 - 系統集成和擴展性"
+      structure:
+        - "adapters/storage/"       # 存儲適配器
+        - "adapters/analytics/"     # 分析工具適配器
+        - "adapters/payment/"       # 支付系統適配器
+        - "adapters/social/"        # 社交平台適配器
+        - "adapters/charts/"        # 圖表庫適配器
+
+      design_pattern: "Adapter Pattern"
+      benefits:
+        - "第三方依賴解耦"
+        - "統一接口規範"
+        - "易於測試和模擬"
+        - "供應商鎖定風險降低"
+
+    # 7. /workers - Web Workers 和後台任務
+    workers:
+      description: "Web Workers 和後台處理任務"
+      priority: "中 - 性能優化和用戶體驗"
+      structure:
+        - "workers/data/"           # 數據處理 Worker
+        - "workers/calculations/"   # 計算密集型任務
+        - "workers/sync/"           # 數據同步 Worker
+        - "workers/crypto/"         # 加密解密 Worker
+
+      use_cases:
+        - "大量股票數據處理"
+        - "技術指標計算"
+        - "離線數據同步"
+        - "圖像處理和壓縮"
+
+    # 8. /plugins - 插件系統
+    plugins:
+      description: "可擴展的插件架構 (基於 /lib 擴展)"
+      priority: "中低 - 長期擴展性"
+      structure:
+        - "plugins/core/"           # 核心插件
+        - "plugins/ui/"             # UI 擴展插件
+        - "plugins/integrations/"   # 集成插件
+        - "plugins/analytics/"      # 分析插件
+        - "plugins/custom/"         # 客戶自定義插件
+
+      architecture:
+        plugin_registry: "插件註冊和管理系統"
+        lifecycle_hooks: "插件生命週期管理"
+        dependency_resolution: "插件依賴解析"
+        hot_reload: "插件熱重載支持"
+
+    # 9. /constants - 常量和配置
+    constants:
+      description: "系統常量、枚舉和靜態配置"
+      priority: "中 - 配置集中管理"
+      structure:
+        - "constants/api/"          # API 相關常量
+        - "constants/ui/"           # UI 常量
+        - "constants/business/"     # 業務常量
+        - "constants/config/"       # 配置常量
+
+      benefits:
+        - "魔法數字消除"
+        - "配置集中管理"
+        - "類型安全的枚舉"
+        - "環境特定配置"
+
+    # 10. /validators - 驗證器系統
+    validators:
+      description: "數據驗證和業務規則驗證"
+      priority: "中 - 數據品質保證"
+      structure:
+        - "validators/forms/"       # 表單驗證器
+        - "validators/api/"         # API 數據驗證
+        - "validators/business/"    # 業務規則驗證
+        - "validators/security/"    # 安全驗證
+
+      features:
+        schema_validation: "基於 Schema 的驗證"
+        async_validation: "異步驗證支持"
+        custom_rules: "自定義驗證規則"
+        error_messages: "國際化錯誤消息"
+
+  # 實施優先級和時程
+  implementation_priority:
+    phase_1_immediate:
+      timeline: "立即開始 (1-2 週)"
+      directories: ["/proto", "/core", "/services"]
+      rationale: "這些是架構的基石，優先建立"
+
+    phase_2_enhancement:
+      timeline: "第 2-4 週"
+      directories: ["/hooks", "/middleware", "/constants"]
+      rationale: "提升開發體驗和代碼品質"
+
+    phase_3_optimization:
+      timeline: "第 1-2 個月"
+      directories: ["/adapters", "/validators", "/workers"]
+      rationale: "性能優化和系統集成"
+
+    phase_4_ecosystem:
+      timeline: "第 2-3 個月"
+      directories: ["/plugins"]
+      rationale: "生態系統建設和長期擴展性"
+
+  # 與現有架構的整合
+  integration_with_existing:
+    lib_directory:
+      relationship: "Core UI Components"
+      interaction: "/services 調用 /lib 組件"
+
+    js_directory:
+      migration_strategy: "逐步遷移到新架構"
+      timeline: "保持向後兼容，漸進式重構"
+
+    config_directory:
+      enhancement: "擴展為 /constants 和 /core/config"
+
+    utils_directory:
+      reorganization: "重新組織到 /core 和 /hooks"
+
+  # 技術收益評估
+  technical_benefits:
+    code_organization:
+      improvement: "90% 提升"
+      metrics: ["模組內聚性", "職責分離", "依賴管理"]
+
+    development_experience:
+      improvement: "70% 提升"
+      metrics: ["開發效率", "代碼重用", "錯誤減少"]
+
+    maintenance_cost:
+      reduction: "60% 降低"
+      metrics: ["Bug 修復時間", "新功能開發", "重構成本"]
+
+    scalability:
+      improvement: "無限制"
+      metrics: ["團隊協作", "功能擴展", "性能優化"]
+
+  # 商業價值
+  business_value:
+    time_to_market:
+      improvement: "50% 加速"
+      description: "新功能開發和部署速度"
+
+    product_quality:
+      improvement: "80% 提升"
+      description: "Bug 減少、性能提升、用戶體驗"
+
+    team_productivity:
+      improvement: "60% 提升"
+      description: "開發者效率和協作能力"
+
+    technical_debt:
+      reduction: "70% 降低"
+      description: "架構清晰度和代碼品質"
+
+# 成功案例參考
+success_references:
+  enterprise_projects:
+    - "Vue.js 3.x 架構設計"
+    - "Angular 企業級項目結構"
+    - "React 大型應用最佳實踐"
+
+  financial_platforms:
+    - "Bloomberg Terminal 前端架構"
+    - "Trading View 模組化設計"
+    - "Robinhood 可擴展架構"
