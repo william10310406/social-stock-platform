@@ -67,8 +67,8 @@ docker-compose up --build -d
 - **錯誤訊息**: 完全消除
 
 ### 功能驗證
-- **主頁**: http://localhost:5173 ✓
-- **儀表板**: http://localhost:5173/src/pages/dashboard/ ✓
+- **主頁**: http://0.0.0.0:5173 ✓ (Docker 外部訪問)
+- **儀表板**: http://0.0.0.0:5173/src/pages/dashboard/ ✓
 - **樣式渲染**: 漸變背景、卡片設計、動畫效果 ✓
 
 ### 技術指標
@@ -109,7 +109,7 @@ dist/assets/index-f78d4c53.js          23.44 kB │ gzip: 7.51 kB │ map: 53.22
 - **前端美化**: 完全功能
 
 ### 開發環境
-- **主要環境**: Docker (localhost:5173)
+- **主要環境**: Docker (0.0.0.0:5173)
 - **備用環境**: 本地開發 (localhost:5173)
 - **統一配置**: 路徑管理、組件庫、Socket.IO
 
