@@ -5,6 +5,117 @@
 # 用於避免循環依賴並提供清晰的模組結構
 
 javascript_dependencies:
+  # 組件庫 (新增層級)
+  lib/index.js:
+    description: "組件庫統一入口 - 導出所有可重用組件"
+    type: "library"
+    level: 0  # 基礎庫層級，不依賴其他模組
+    imports: []
+    exports:
+      - "toast"
+      - "Toast"
+      - "Modal"
+      - "loading"
+      - "Loading"
+      - "formatter"
+      - "Formatter"
+    global_variables:
+      - "window.lib"
+      - "window.toast"
+      - "window.Modal"
+      - "window.loading"
+      - "window.formatter"
+    purpose: "提供統一的組件庫接口，替代分散的 UI 邏輯"
+    features:
+      - "向後兼容性"
+      - "全局註冊"
+      - "ES6 模組導出"
+      - "組件版本管理"
+    used_by:
+      - "所有需要 UI 組件的模組"
+
+  lib/components/Toast.js:
+    description: "統一 Toast 組件 - 取代 errorManager 和 pwa 中的分散實現"
+    type: "component"
+    level: 0
+    imports: []
+    exports:
+      - "toast (default)"
+      - "Toast"
+    global_variables:
+      - "window.toast"
+      - "window.Toast"
+    purpose: "統一的提示訊息組件"
+    features:
+      - "多種類型 (success, error, warning, info)"
+      - "自動消失"
+      - "點擊關閉"
+      - "可配置選項"
+    replaces:
+      - "errorManager.js 中的 Toast 實現"
+      - "pwa.js 中的 showToast 方法"
+
+  lib/components/Modal.js:
+    description: "統一 Modal 組件 - 取代各頁面分散的模態框邏輯"
+    type: "component"
+    level: 0
+    imports: []
+    exports:
+      - "Modal (default)"
+    global_variables:
+      - "window.Modal"
+    purpose: "統一的模態框組件"
+    features:
+      - "多種尺寸 (small, default, large, xl)"
+      - "可滾動內容"
+      - "ESC 鍵關閉"
+      - "背景點擊關閉"
+      - "靜態方法 (confirm, alert)"
+    replaces:
+      - "stocks.js 中的模態框邏輯"
+      - "chat.js 中的模態框邏輯"
+
+  lib/components/Loading.js:
+    description: "統一 Loading 組件 - 取代 loadingManager 中的分散邏輯"
+    type: "component"
+    level: 0
+    imports: []
+    exports:
+      - "loading (default)"
+      - "Loading"
+    global_variables:
+      - "window.loading"
+      - "window.Loading"
+    purpose: "統一的載入狀態組件"
+    features:
+      - "全屏載入器"
+      - "容器載入狀態"
+      - "骨架屏"
+      - "多種動畫 (spinner, dots, bar)"
+      - "錯誤狀態顯示"
+    replaces:
+      - "loadingManager.js 中的載入邏輯"
+
+  lib/data/Formatter.js:
+    description: "數據格式化工具 - 處理日期、貨幣、數字等格式化"
+    type: "utility"
+    level: 0
+    imports: []
+    exports:
+      - "formatter (default)"
+      - "Formatter"
+    global_variables:
+      - "window.formatter"
+      - "window.Formatter"
+    purpose: "統一的數據格式化工具"
+    features:
+      - "貨幣格式化"
+      - "數字格式化"
+      - "日期時間格式化"
+      - "相對時間"
+      - "股票專用格式化"
+      - "台灣本地化"
+
   # 核心配置模組
   config/routes.js:
     description: "統一路徑配置文件 - 所有路徑的單一真實來源"

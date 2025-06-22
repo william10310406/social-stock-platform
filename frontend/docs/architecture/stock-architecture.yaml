@@ -152,8 +152,14 @@ components:
         stocks:
           prefix: /api/stocks
           endpoints:
-            - path: /watchlist      # GET/POST - user stock watchlist
-            - path: /<symbol>/data  # GET - stock data (placeholder)
+            - path: /               # GET - 股票列表 (搜尋/分頁/篩選)
+            - path: /<symbol>       # GET - 股票詳情
+            - path: /<symbol>/history # GET - 股票歷史價格
+            - path: /user           # GET - 用戶關注股票
+            - path: /<symbol>/follow # POST - 關注股票
+            - path: /<symbol>/unfollow # DELETE - 取消關注股票
+            - path: /search         # GET - 快速搜尋
+            - path: /statistics     # GET - 市場統計
         news:
           prefix: /api/news
           endpoints:
@@ -318,6 +324,7 @@ components:
           - symbol: VARCHAR(20) UNIQUE NOT NULL
           - name: VARCHAR(100) NOT NULL
           - exchange: VARCHAR(50) NULL
+          - market_type: VARCHAR(20) NULL  # 市場類型 (一般/創新板等)
           - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
           - updated_at: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         constraints:
@@ -328,6 +335,33 @@ components:
           - symbol_idx: (symbol) # primary lookup
           - exchange_idx: (exchange) # filter by exchange
           - name_search_idx: (name) # for name-based search
+          - market_type_idx: (market_type) # filter by market type
+        relationships:
+          - user_stocks: UserStock[] (cascade delete)
+          - stock_prices: StockPrice[] (cascade delete)
+      stock_prices:
+        columns:
+          - id: INTEGER PRIMARY KEY AUTO_INCREMENT
+          - stock_id: INTEGER FK stocks(id) NOT NULL
+          - trade_date: DATE NOT NULL
+          - open_price: NUMERIC(10,2) NULL    # 開盤價
+          - high_price: NUMERIC(10,2) NULL    # 最高價
+          - low_price: NUMERIC(10,2) NULL     # 最低價
+          - close_price: NUMERIC(10,2) NULL   # 收盤價
+          - change_amount: NUMERIC(10,2) NULL # 漲跌價差
+          - volume: BIGINT NULL               # 成交股數
+          - turnover: BIGINT NULL             # 成交金額
+          - transaction_count: INTEGER NULL   # 成交筆數
+          - created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+        constraints:
+          - FOREIGN KEY (stock_id) REFERENCES stocks(id) ON DELETE CASCADE
+          - UNIQUE(stock_id, trade_date) # 每支股票每日只能有一筆記錄
+        indexes:
+          - stock_id_idx: (stock_id) # 按股票查詢
+          - trade_date_idx: (trade_date DESC) # 按日期查詢
+          - stock_date_idx: (stock_id, trade_date DESC) # 複合索引
+        relationships:
+          - stock: Stock
       user_stocks:
         columns:
           - user_id: INTEGER FK users(id) NOT NULL

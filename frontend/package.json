@@ -35,7 +35,11 @@
     "pre-commit": "npm run quality && npm run test:basic",
     "organize": "node scripts/organize-project.js",
     "organize:fix": "node scripts/organize-project.js --fix",
-    "setup": "npm install && npm run organize:fix && npm run quality:fix"
+    "setup": "npm install && npm run organize:fix && npm run quality:fix",
+    "lib:check": "node scripts/check-lib.js",
+    "lib:test": "echo '請在瀏覽器中打開 src/pages/test/lib-test.html 進行測試'",
+    "lib:console": "echo '請複製 scripts/browser-lib-test.js 內容到瀏覽器控制台運行'",
+    "lib:docker": "./scripts/docker-lib-test.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",

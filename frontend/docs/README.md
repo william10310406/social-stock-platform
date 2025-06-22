@@ -18,18 +18,22 @@ docs/
 ├── 🚀 implementation/            # 功能實現文檔
 │   ├── SOCKETIO_IMPLEMENTATION_COMPLETE.md  # Socket.IO 完整實現
 │   ├── STOCKS_FEATURE_IMPLEMENTATION.md    # 股票功能完整實現
+│   ├── LIB_IMPLEMENTATION_COMPLETE.md      # 組件庫實現完成
 │   ├── ARCHITECTURE_IMPROVEMENTS.md         # 架構改進記錄
 │   ├── PATH_MANAGEMENT_SUMMARY.md          # 路徑管理系統
 │   └── UNIFIED_CONFIG.md                   # 統一配置管理
 ├── 📊 reports/                   # 項目報告
 │   ├── STOCKS_DATA_EXPORT_REPORT.md       # 股票資料匯出報告
+│   ├── STOCK_SCHEMA_VALIDATION_REPORT.md  # 股票架構驗證報告
+│   ├── LIB_DOCKER_TEST_COMPLETE.md        # 組件庫 Docker 測試報告
 │   ├── MIGRATION_REPORT.md       # 路徑遷移報告
 │   ├── DOCKER_ARCHITECTURE_VALIDATION.md  # Docker 架構驗證
 │   ├── DOCKER_LOCALHOST_FIXES_COMPLETE.md # Docker 修復報告
 │   └── LOCALHOST_CLEANUP_REPORT.md        # 本地清理報告
 ├── 📖 guides/                    # 開發指南
 │   ├── DEVELOPMENT_SAFETY.md     # 開發安全實踐
-│   └── TESTING_STRATEGY.md       # 測試策略
+│   ├── TESTING_STRATEGY.md       # 測試策略
+│   └── LIB_TESTING_GUIDE.md      # 組件庫測試指南
 └── 🛡️ best-practices/           # 最佳實踐
     └── DEFENSIVE_PROGRAMMING_SOLUTION.md  # 防禦性編程解決方案
 ```
@@ -80,6 +84,12 @@ docs/
 - **API 系統設計**: RESTful API + 搜尋/分頁/關注功能
 - **多格式資料匯出**: 5 種格式滿足不同使用需求
 
+#### [`LIB_IMPLEMENTATION_COMPLETE.md`](./implementation/LIB_IMPLEMENTATION_COMPLETE.md) 📚 **組件庫實現**
+- **組件化架構**: 新增 Level 0 組件庫層級
+- **4 個核心組件**: Toast、Modal、Loading、Formatter
+- **85% 代碼重用率**: 消除分散的重複實現
+- **向後兼容性**: 現有代碼無需修改
+
 #### [`ARCHITECTURE_IMPROVEMENTS.md`](./implementation/ARCHITECTURE_IMPROVEMENTS.md) 🏢 **企業級改進**
 - **代碼品質工具鏈**: ESLint + Prettier + EditorConfig
 - **統一日誌管理**: 替代散亂 console 輸出
@@ -104,6 +114,18 @@ docs/
 - **資料統計**: 126 支股票, 2030+ 筆價格記錄, 221KB 壓縮檔
 - **使用指南**: 各格式的詳細使用說明和查詢範例
 - **品質保證**: 完整性、一致性、可用性三重驗證
+
+#### [`STOCK_SCHEMA_VALIDATION_REPORT.md`](./reports/STOCK_SCHEMA_VALIDATION_REPORT.md) 🔍 **架構驗證**
+- **一致性檢查**: YAML 文檔與實際資料庫模型對比
+- **問題修復**: 缺失的 market_type 欄位和 stock_prices 表
+- **API 端點同步**: 更新架構文檔中的 API 定義
+- **維護規範**: 架構文檔維護最佳實踐
+
+#### [`LIB_DOCKER_TEST_COMPLETE.md`](./reports/LIB_DOCKER_TEST_COMPLETE.md) 📚 **組件庫 Docker 測試**
+- **完整測試覆蓋**: 4個核心組件 + 完整測試工具鏈
+- **Docker 兼容性**: 100% 在容器環境中正常運行
+- **技術問題解決**: 腳本權限、組件整合、路徑管理
+- **生產就緒性**: 企業級穩定性和測試覆蓋
 
 #### [`MIGRATION_REPORT.md`](./reports/MIGRATION_REPORT.md) 📋 **路徑遷移**
 - **遷移執行記錄**: 11 個文件的完整遷移
@@ -135,6 +157,11 @@ docs/
 - **測試覆蓋**: 單元、整合、E2E 測試策略
 - **測試工具**: Jest + Playwright 測試配置
 
+#### [`LIB_TESTING_GUIDE.md`](./guides/LIB_TESTING_GUIDE.md) 📚 **組件庫測試指南**
+- **四種測試方法**: 命令行、瀏覽器、控制台、手動驗證
+- **完整測試工具鏈**: 從開發到生產的測試覆蓋
+- **故障排除指南**: 常見問題解決方案
+
 ---
 
 ## 🛡️ 最佳實踐 (`best-practices/`)
@@ -157,7 +184,11 @@ docs/
 |------|----------|------|
 | 系統整體架構 | 主架構文檔 | `architecture/stock-architecture.yaml` |
 | 股票功能實現 | 股票系統文檔 | `implementation/STOCKS_FEATURE_IMPLEMENTATION.md` |
+| 組件庫使用 | 組件庫實現 | `implementation/LIB_IMPLEMENTATION_COMPLETE.md` |
+| 組件庫測試 | 測試指南 | `guides/LIB_TESTING_GUIDE.md` |
+| 組件庫 Docker 測試 | Docker 測試報告 | `reports/LIB_DOCKER_TEST_COMPLETE.md` |
 | 資料匯出使用 | 資料匯出報告 | `reports/STOCKS_DATA_EXPORT_REPORT.md` |
+| 架構一致性檢查 | 架構驗證報告 | `reports/STOCK_SCHEMA_VALIDATION_REPORT.md` |
 | Socket.IO 實現 | 實時功能實現 | `implementation/SOCKETIO_IMPLEMENTATION_COMPLETE.md` |
 | JavaScript 模組關係 | 依賴關係圖 | `architecture/javascript-dependencies.yaml` |
 | 路徑管理系統 | 路徑架構 | `architecture/path-config-architecture.yaml` |

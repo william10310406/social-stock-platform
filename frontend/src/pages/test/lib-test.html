@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Component Library Test - Stock Insight Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .test-section {
+        @apply mb-8 p-6 bg-white rounded-lg shadow-md border;
+      }
+      .test-button {
+        @apply px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mr-2 mb-2 transition-colors;
+      }
+      .test-result {
+        @apply mt-4 p-3 rounded-md;
+      }
+      .test-success {
+        @apply bg-green-100 text-green-800 border border-green-200;
+      }
+      .test-error {
+        @apply bg-red-100 text-red-800 border border-red-200;
+      }
+      .code-block {
+        @apply bg-gray-100 p-3 rounded text-sm font-mono text-gray-800 mt-2;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">📚 Component Library Test</h1>
+        <p class="text-gray-600">測試 Stock Insight Platform 組件庫功能</p>
+        <div id="lib-status" class="mt-4 p-3 rounded-md bg-yellow-100 text-yellow-800">
+          正在載入組件庫...
+        </div>
+      </div>
+
+      <!-- Toast 組件測試 -->
+      <div class="test-section">
+        <h2 class="text-xl font-semibold mb-4">🍞 Toast 組件測試</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <button id="test-toast-success" class="test-button">Success Toast</button>
+          <button id="test-toast-error" class="test-button">Error Toast</button>
+          <button id="test-toast-warning" class="test-button">Warning Toast</button>
+          <button id="test-toast-info" class="test-button">Info Toast</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <button id="test-toast-custom" class="test-button">Custom Toast</button>
+          <button id="test-toast-clear" class="test-button bg-red-600 hover:bg-red-700">
+            Clear All
+          </button>
+        </div>
+        <div id="toast-result" class="test-result hidden"></div>
+        <div class="code-block">
+          <strong>測試代碼:</strong><br />
+          toast.success('操作成功！');<br />
+          toast.error('發生錯誤');<br />
+          toast.warning('警告訊息');<br />
+          toast.info('提示訊息');
+        </div>
+      </div>
+
+      <!-- Modal 組件測試 -->
+      <div class="test-section">
+        <h2 class="text-xl font-semibold mb-4">🪟 Modal 組件測試</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <button id="test-modal-small" class="test-button">Small Modal</button>
+          <button id="test-modal-default" class="test-button">Default Modal</button>
+          <button id="test-modal-large" class="test-button">Large Modal</button>
+          <button id="test-modal-xl" class="test-button">XL Modal</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <button id="test-modal-confirm" class="test-button">Confirm Dialog</button>
+          <button id="test-modal-alert" class="test-button">Alert Dialog</button>
+        </div>
+        <div id="modal-result" class="test-result hidden"></div>
+        <div class="code-block">
+          <strong>測試代碼:</strong><br />
+          const modal = new Modal({ size: 'large' });<br />
+          modal.open({ title: '測試', body: '內容' });<br />
+          Modal.confirm({ message: '確認嗎？' });
+        </div>
+      </div>
+
+      <!-- Loading 組件測試 -->
+      <div class="test-section">
+        <h2 class="text-xl font-semibold mb-4">⏳ Loading 組件測試</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <button id="test-loading-fullscreen" class="test-button">Fullscreen Loading</button>
+          <button id="test-loading-container" class="test-button">Container Loading</button>
+          <button id="test-loading-skeleton" class="test-button">Skeleton Loading</button>
+          <button id="test-loading-error" class="test-button">Error State</button>
+        </div>
+        <div id="loading-test-container" class="mt-4 p-4 border rounded bg-gray-50 min-h-[100px]">
+          <p>這是測試容器，點擊上方按鈕測試載入效果</p>
+        </div>
+        <div id="loading-result" class="test-result hidden"></div>
+        <div class="code-block">
+          <strong>測試代碼:</strong><br />
+          loading.showFullscreen('載入中...');<br />
+          loading.showInContainer('#container', 'skeleton');<br />
+          loading.showError('#container', '載入失敗');
+        </div>
+      </div>
+
+      <!-- Formatter 工具測試 -->
+      <div class="test-section">
+        <h2 class="text-xl font-semibold mb-4">🔧 Formatter 工具測試</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <button id="test-formatter-currency" class="test-button">Currency Format</button>
+          <button id="test-formatter-number" class="test-button">Number Format</button>
+          <button id="test-formatter-date" class="test-button">Date Format</button>
+          <button id="test-formatter-stock" class="test-button">Stock Format</button>
+        </div>
+        <div id="formatter-output" class="mt-4 p-4 border rounded bg-gray-50 min-h-[100px]">
+          <p class="text-gray-600">點擊上方按鈕查看格式化結果</p>
+        </div>
+        <div id="formatter-result" class="test-result hidden"></div>
+        <div class="code-block">
+          <strong>測試代碼:</strong><br />
+          formatter.currency(1234.56); // "NT$1,234.56"<br />
+          formatter.stockChange(0.15); // 紅漲綠跌<br />
+          formatter.volume(12340000); // "1,234萬"
+        </div>
+      </div>
+
+      <!-- 全局變數測試 -->
+      <div class="test-section">
+        <h2 class="text-xl font-semibold mb-4">🌐 全局變數測試</h2>
+        <button id="test-global-vars" class="test-button">檢查全局變數</button>
+        <div id="global-vars-output" class="mt-4 p-4 border rounded bg-gray-50 min-h-[100px]">
+          <p class="text-gray-600">點擊按鈕檢查全局變數是否正確註冊</p>
+        </div>
+      </div>
+
+      <!-- 測試總結 -->
+      <div class="test-section">
+        <h2 class="text-xl font-semibold mb-4">📊 測試總結</h2>
+        <button id="run-all-tests" class="test-button bg-green-600 hover:bg-green-700">
+          執行所有測試
+        </button>
+        <div id="test-summary" class="mt-4 p-4 border rounded bg-gray-50">
+          <p class="text-gray-600">點擊「執行所有測試」查看完整測試結果</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/src/js/config/routes-docker.js"></script>
+    <script type="module" src="/src/js/utils/pathManager.js"></script>
+    <script type="module" src="/src/lib/index.js"></script>
+
+    <script type="module">
+      // 等待組件庫載入
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initTests, 100);
+      });
+
+      function initTests() {
+        const statusEl = document.getElementById('lib-status');
+
+        // 檢查組件庫是否載入
+        if (window.lib && window.toast && window.Modal && window.loading && window.formatter) {
+          statusEl.className = 'mt-4 p-3 rounded-md bg-green-100 text-green-800';
+          statusEl.textContent = '✅ 組件庫載入成功！';
+          setupTests();
+        } else {
+          statusEl.className = 'mt-4 p-3 rounded-md bg-red-100 text-red-800';
+          statusEl.textContent = '❌ 組件庫載入失敗！';
+          console.error('Component library not loaded properly');
+        }
+      }
+
+      function setupTests() {
+        // Toast 測試
+        document.getElementById('test-toast-success').onclick = () => {
+          toast.success('這是成功訊息！');
+          showResult('toast-result', '✅ Success Toast 測試通過', 'success');
+        };
+
+        document.getElementById('test-toast-error').onclick = () => {
+          toast.error('這是錯誤訊息！');
+          showResult('toast-result', '✅ Error Toast 測試通過', 'success');
+        };
+
+        document.getElementById('test-toast-warning').onclick = () => {
+          toast.warning('這是警告訊息！');
+          showResult('toast-result', '✅ Warning Toast 測試通過', 'success');
+        };
+
+        document.getElementById('test-toast-info').onclick = () => {
+          toast.info('這是提示訊息！');
+          showResult('toast-result', '✅ Info Toast 測試通過', 'success');
+        };
+
+        document.getElementById('test-toast-custom').onclick = () => {
+          toast.show('自定義訊息', 'info', {
+            title: '自定義標題',
+            duration: 8000,
+            onClick: () => console.log('Toast 被點擊'),
+          });
+          showResult('toast-result', '✅ Custom Toast 測試通過', 'success');
+        };
+
+        document.getElementById('test-toast-clear').onclick = () => {
+          toast.clearAll();
+          showResult('toast-result', '✅ Clear All 測試通過', 'success');
+        };
+
+        // Modal 測試
+        document.getElementById('test-modal-small').onclick = () => {
+          const modal = new Modal({ size: 'small' });
+          modal.open({
+            title: 'Small Modal',
+            body: '<p>這是一個小尺寸的模態框</p>',
+          });
+          showResult('modal-result', '✅ Small Modal 測試通過', 'success');
+        };
+
+        document.getElementById('test-modal-default').onclick = () => {
+          const modal = new Modal();
+          modal.open({
+            title: 'Default Modal',
+            body: '<p>這是一個預設尺寸的模態框</p>',
+          });
+          showResult('modal-result', '✅ Default Modal 測試通過', 'success');
+        };
+
+        document.getElementById('test-modal-large').onclick = () => {
+          const modal = new Modal({ size: 'large' });
+          modal.open({
+            title: 'Large Modal',
+            body: '<p>這是一個大尺寸的模態框</p><p>可以包含更多內容...</p>',
+          });
+          showResult('modal-result', '✅ Large Modal 測試通過', 'success');
+        };
+
+        document.getElementById('test-modal-xl').onclick = () => {
+          const modal = new Modal({ size: 'xl' });
+          modal.open({
+            title: 'Extra Large Modal',
+            body: '<p>這是一個超大尺寸的模態框</p><p>適合顯示大量內容</p>',
+          });
+          showResult('modal-result', '✅ XL Modal 測試通過', 'success');
+        };
+
+        document.getElementById('test-modal-confirm').onclick = () => {
+          Modal.confirm({
+            title: '確認測試',
+            message: '這是一個確認對話框，您要繼續嗎？',
+            onConfirm: () => toast.success('您點擊了確認'),
+            onCancel: () => toast.info('您點擊了取消'),
+          });
+          showResult('modal-result', '✅ Confirm Dialog 測試通過', 'success');
+        };
+
+        document.getElementById('test-modal-alert').onclick = () => {
+          Modal.alert({
+            title: '提示測試',
+            message: '這是一個提示對話框',
+            onClose: () => toast.info('Alert 對話框已關閉'),
+          });
+          showResult('modal-result', '✅ Alert Dialog 測試通過', 'success');
+        };
+
+        // Loading 測試
+        document.getElementById('test-loading-fullscreen').onclick = () => {
+          loading.showFullscreen('測試全屏載入...', 'test');
+          setTimeout(() => {
+            loading.hideFullscreen('test');
+            showResult('loading-result', '✅ Fullscreen Loading 測試通過', 'success');
+          }, 2000);
+        };
+
+        document.getElementById('test-loading-container').onclick = () => {
+          const container = document.getElementById('loading-test-container');
+          loading.showInContainer(container, 'spinner', '容器載入中...');
+          setTimeout(() => {
+            loading.hideInContainer(container);
+            showResult('loading-result', '✅ Container Loading 測試通過', 'success');
+          }, 3000);
+        };
+
+        document.getElementById('test-loading-skeleton').onclick = () => {
+          const container = document.getElementById('loading-test-container');
+          loading.showInContainer(container, 'skeleton');
+          setTimeout(() => {
+            loading.hideInContainer(container);
+            showResult('loading-result', '✅ Skeleton Loading 測試通過', 'success');
+          }, 3000);
+        };
+
+        document.getElementById('test-loading-error').onclick = () => {
+          const container = document.getElementById('loading-test-container');
+          loading.showError(container, '載入失敗，請重試', () => {
+            toast.info('重試按鈕被點擊');
+            loading.hideInContainer(container);
+          });
+          showResult('loading-result', '✅ Error State 測試通過', 'success');
+        };
+
+        // Formatter 測試
+        document.getElementById('test-formatter-currency').onclick = () => {
+          const output = document.getElementById('formatter-output');
+          const results = [
+            `Currency: ${formatter.currency(1234.56)}`,
+            `Currency (USD): ${formatter.currency(1234.56, 'USD')}`,
+            `Number only: ${formatter.currency(1234.56, 'TWD', { showSymbol: false })}`,
+          ];
+          output.innerHTML = `<h4 class="font-semibold mb-2">貨幣格式化結果:</h4>${results.map((r) => `<p>${r}</p>`).join('')}`;
+          showResult('formatter-result', '✅ Currency Format 測試通過', 'success');
+        };
+
+        document.getElementById('test-formatter-number').onclick = () => {
+          const output = document.getElementById('formatter-output');
+          const results = [
+            `Number: ${formatter.number(1234567.89)}`,
+            `Percentage: ${formatter.percentage(0.1234)}`,
+            `Short Number: ${formatter.shortNumber(1234567)}`,
+          ];
+          output.innerHTML = `<h4 class="font-semibold mb-2">數字格式化結果:</h4>${results.map((r) => `<p>${r}</p>`).join('')}`;
+          showResult('formatter-result', '✅ Number Format 測試通過', 'success');
+        };
+
+        document.getElementById('test-formatter-date').onclick = () => {
+          const output = document.getElementById('formatter-output');
+          const now = new Date();
+          const results = [
+            `Date (short): ${formatter.date(now, 'short')}`,
+            `Date (medium): ${formatter.date(now, 'medium')}`,
+            `Time: ${formatter.time(now)}`,
+            `Relative: ${formatter.relativeTime(new Date(Date.now() - 3600000))}`,
+          ];
+          output.innerHTML = `<h4 class="font-semibold mb-2">日期格式化結果:</h4>${results.map((r) => `<p>${r}</p>`).join('')}`;
+          showResult('formatter-result', '✅ Date Format 測試通過', 'success');
+        };
+
+        document.getElementById('test-formatter-stock').onclick = () => {
+          const output = document.getElementById('formatter-output');
+          const change1 = formatter.stockChange(0.15);
+          const change2 = formatter.stockChange(-0.25);
+          const results = [
+            `Stock Change (+): ${change1.value} (${change1.color})`,
+            `Stock Change (-): ${change2.value} (${change2.color})`,
+            `Volume: ${formatter.volume(12340000)}`,
+            `Volume (億): ${formatter.volume(123400000)}`,
+          ];
+          output.innerHTML = `<h4 class="font-semibold mb-2">股票格式化結果:</h4>${results.map((r) => `<p>${r}</p>`).join('')}`;
+          showResult('formatter-result', '✅ Stock Format 測試通過', 'success');
+        };
+
+        // 全局變數測試
+        document.getElementById('test-global-vars').onclick = () => {
+          const output = document.getElementById('global-vars-output');
+          const checks = [
+            { name: 'window.lib', exists: !!window.lib },
+            { name: 'window.toast', exists: !!window.toast },
+            { name: 'window.Toast', exists: !!window.Toast },
+            { name: 'window.Modal', exists: !!window.Modal },
+            { name: 'window.loading', exists: !!window.loading },
+            { name: 'window.Loading', exists: !!window.Loading },
+            { name: 'window.formatter', exists: !!window.formatter },
+            { name: 'window.Formatter', exists: !!window.Formatter },
+          ];
+
+          const results = checks
+            .map(
+              (check) =>
+                `<p class="${check.exists ? 'text-green-600' : 'text-red-600'}">
+                        ${check.exists ? '✅' : '❌'} ${check.name}
+                    </p>`,
+            )
+            .join('');
+
+          output.innerHTML = `<h4 class="font-semibold mb-2">全局變數檢查:</h4>${results}`;
+        };
+
+        // 執行所有測試
+        document.getElementById('run-all-tests').onclick = () => {
+          runAllTests();
+        };
+      }
+
+      function showResult(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.className = `test-result test-${type}`;
+        element.textContent = message;
+        element.classList.remove('hidden');
+      }
+
+      function runAllTests() {
+        const summary = document.getElementById('test-summary');
+        let results = [];
+
+        // 檢查所有組件是否存在
+        const components = [
+          {
+            name: 'Toast',
+            check: () => window.toast && typeof window.toast.success === 'function',
+          },
+          { name: 'Modal', check: () => window.Modal && typeof window.Modal === 'function' },
+          {
+            name: 'Loading',
+            check: () => window.loading && typeof window.loading.showFullscreen === 'function',
+          },
+          {
+            name: 'Formatter',
+            check: () => window.formatter && typeof window.formatter.currency === 'function',
+          },
+        ];
+
+        components.forEach((comp) => {
+          try {
+            const passed = comp.check();
+            results.push(`<p class="${passed ? 'text-green-600' : 'text-red-600'}">
+                        ${passed ? '✅' : '❌'} ${comp.name} 組件
+                    </p>`);
+          } catch (error) {
+            results.push(
+              `<p class="text-red-600">❌ ${comp.name} 組件 (錯誤: ${error.message})</p>`,
+            );
+          }
+        });
+
+        const passedCount = results.filter((r) => r.includes('✅')).length;
+        const totalCount = results.length;
+
+        summary.innerHTML = `
+                <h4 class="font-semibold mb-2">測試結果總覽:</h4>
+                <p class="mb-2"><strong>通過率: ${passedCount}/${totalCount} (${Math.round((passedCount / totalCount) * 100)}%)</strong></p>
+                ${results.join('')}
+                <div class="mt-4 p-3 rounded ${passedCount === totalCount ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                    ${
+                      passedCount === totalCount
+                        ? '🎉 所有組件測試通過！組件庫運行正常。'
+                        : '⚠️ 部分組件測試失敗，請檢查控制台錯誤訊息。'
+                    }
+                </div>
+            `;
+
+        // 顯示成功提示
+        if (passedCount === totalCount) {
+          toast.success('所有測試通過！組件庫運行正常 🎉');
+        } else {
+          toast.warning(`${passedCount}/${totalCount} 測試通過，請檢查失敗項目`);
+        }
+      }
+    </script>
+  </body>
+</html>
