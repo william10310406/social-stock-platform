@@ -10,6 +10,7 @@
 
 | 文檔 | 範圍 | 狀態 | 重要性 |
 |------|------|------|--------|
+| [`NEW_FEATURE_DEVELOPMENT_GUIDE.md`](./NEW_FEATURE_DEVELOPMENT_GUIDE.md) | 新功能開發指南 | ✅ 最新 | ⭐⭐⭐ |
 | [`DEVELOPMENT_SAFETY.md`](./DEVELOPMENT_SAFETY.md) | 開發安全實踐 | ✅ 最新 | ⭐⭐⭐ |
 | [`TESTING_STRATEGY.md`](./TESTING_STRATEGY.md) | 測試策略指南 | ✅ 最新 | ⭐⭐⭐ |
 
@@ -46,8 +47,9 @@
 ### 📖 必讀指南
 新加入的開發者應該按順序閱讀：
 
-1. **[開發安全實踐](./DEVELOPMENT_SAFETY.md)** - 了解基本開發規範
-2. **[測試策略指南](./TESTING_STRATEGY.md)** - 掌握測試編寫方法
+1. **[新功能開發指南](./NEW_FEATURE_DEVELOPMENT_GUIDE.md)** - 文件放置規則和開發流程
+2. **[開發安全實踐](./DEVELOPMENT_SAFETY.md)** - 了解基本開發規範
+3. **[測試策略指南](./TESTING_STRATEGY.md)** - 掌握測試編寫方法
 
 ### ✅ 開發檢查清單
 每次開發新功能時：
