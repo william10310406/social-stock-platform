@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Stock Insight Platform - 股票數據分析平台
+# 允許搜索引擎索引公開內容
+
+# 禁止訪問敏感路徑
+Disallow: /api/
+Disallow: /src/pages/auth/
+Disallow: /admin/
+
+# 網站地圖
+Sitemap: /sitemap.xml
+
+# 爬蟲延遲 (禮貌爬蟲)
+Crawl-delay: 1 

@@ -1,0 +1,9 @@
+Contact: mailto:security@stockinsight.platform
+Expires: 2025-12-31T23:59:59.000Z
+Acknowledgments: https://stockinsight.platform/security/hall-of-fame
+Preferred-Languages: zh-TW, en
+Canonical: https://stockinsight.platform/.well-known/security.txt
+
+# Stock Insight Platform 安全政策
+# 如果您發現安全漏洞，請通過上述聯繫方式報告
+# 我們承諾在收到報告後 24 小時內回覆 

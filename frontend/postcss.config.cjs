@@ -1,7 +1,7 @@
-// PostCSS 配置 - Docker 兼容版本
+// PostCSS 配置 - Tailwind CSS v3
 module.exports = {
-  plugins: [
-    require('@tailwindcss/postcss'),
-    require('autoprefixer'),
-  ],
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
 };

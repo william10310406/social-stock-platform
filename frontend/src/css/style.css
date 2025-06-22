@@ -1,3 +1,229 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 🎨 Stock Insight Platform - 現代化 UI 樣式 */
+
+/* 自定義 CSS 變數 */
+@layer base {
+  :root {
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-dark: linear-gradient(135deg, #667db6 0%, #0082c8 100%);
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* 全局樣式增強 */
+@layer base {
+  body {
+    @apply font-sans;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' 32;
+  }
+  
+  /* 漸變背景 */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-success {
+    background: var(--gradient-success);
+  }
+  
+  .bg-gradient-dark {
+    background: var(--gradient-dark);
+  }
+}
+
+/* 組件樣式 */
+@layer components {
+  /* 現代化卡片 */
+  .card-modern {
+    @apply bg-white rounded-xl shadow-lg border border-gray-100;
+    box-shadow: var(--shadow-medium);
+    transition: all 0.3s ease;
+  }
+  
+  .card-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-large);
+  }
+  
+  /* 玻璃效果卡片 */
+  .card-glass {
+    @apply bg-white bg-opacity-90 rounded-xl border border-gray-200;
+    box-shadow: var(--shadow-soft);
+  }
+  
+  /* 漸變按鈕 */
+  .btn-gradient {
+    @apply text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .btn-gradient:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-1px);
+  }
+  
+  .btn-gradient-secondary {
+    @apply text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200;
+    background: var(--gradient-secondary);
+    box-shadow: var(--shadow-soft);
+  }
+  
+  /* 現代化輸入框 */
+  .input-modern {
+    @apply w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200;
+  }
+  
+  /* 統計卡片 */
+  .stat-card {
+    @apply bg-white rounded-xl p-6 shadow-lg border border-gray-100 transform transition-all duration-200 hover:scale-105;
+  }
+  
+  /* 導航增強 */
+  .nav-modern {
+    @apply bg-white bg-opacity-95 backdrop-blur-md border-b border-gray-200;
+    box-shadow: var(--shadow-soft);
+  }
+}
+
+/* 動畫和效果 */
+@layer utilities {
+  /* 載入動畫 */
+  .animate-pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .7;
+    }
+  }
+  
+  /* 浮動動畫 */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  /* 淡入動畫 */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* 縮放動畫 */
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* 滑入動畫 */
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+  }
+  
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* 文字漸變 */
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-secondary {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* 響應式優化 */
+@media (max-width: 768px) {
+  .card-modern {
+    @apply mx-2;
+  }
+  
+  .btn-gradient,
+  .btn-gradient-secondary {
+    @apply w-full text-center;
+  }
+}
+
+/* 深色模式支援 (預留) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+}

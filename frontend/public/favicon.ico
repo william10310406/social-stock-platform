@@ -1,0 +1,11 @@
+# Favicon 說明
+# 此文件應該被替換為真正的 favicon.ico 文件
+# 
+# 建議生成方式：
+# 1. 使用 frontend/public/icons/icon.svg 作為源文件
+# 2. 轉換為 32x32 的 .ico 格式
+# 3. 替換此說明文件
+#
+# 線上工具推薦：
+# - https://favicon.io/
+# - https://realfavicongenerator.net/ 
