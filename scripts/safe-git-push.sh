@@ -96,8 +96,8 @@ BRANCH=${2:-$CURRENT_BRANCH}
 echo "推送目標: $REMOTE/$BRANCH"
 echo ""
 
-# 執行推送 (這裡會觸發 pre-push hook)
-if git push "$REMOTE" "$BRANCH"; then
+# 執行推送 (設置環境變數告知 pre-push hook 這是安全推送)
+if SAFE_PUSH=1 git push "$REMOTE" "$BRANCH"; then
     echo ""
     echo -e "${GREEN}🎉 ========================================${NC}"
     echo -e "${GREEN}🎉   安全推送成功完成！                 ${NC}"
