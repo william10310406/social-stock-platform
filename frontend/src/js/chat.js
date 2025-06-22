@@ -22,19 +22,81 @@ const cancelNewChatBtn = document.getElementById('cancel-new-chat');
 
 // 工具函數
 const formatTime = (dateString) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  try {
+    // 處理各種時間格式
+    let date;
+    if (dateString.includes('T')) {
+      // ISO 8601 格式，可能包含時區信息
+      date = new Date(dateString);
+    } else {
+      // 其他格式
+      date = new Date(dateString);
+    }
+    
+    // 驗證日期是否有效
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date string:', dateString);
+      return '無效時間';
+    }
+    
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
-  if (diffDays === 0) {
-    return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
-  } else if (diffDays === 1) {
-    return '昨天';
-  } else if (diffDays < 7) {
-    return `${diffDays}天前`;
-  } else {
-    return date.toLocaleDateString('zh-TW');
+    // 如果是今天
+    if (diffDays === 0) {
+      if (diffMinutes < 1) {
+        return '剛剛';
+      } else if (diffMinutes < 60) {
+        return `${diffMinutes}分鐘前`;
+      } else if (diffHours < 24) {
+        return date.toLocaleTimeString('zh-TW', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: false, 
+        });
+      }
+    } 
+    // 如果是昨天
+    else if (diffDays === 1) {
+      return `昨天 ${date.toLocaleTimeString('zh-TW', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false, 
+      })}`;
+    } 
+    // 如果是這週內
+    else if (diffDays < 7) {
+      const weekdays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      return `${weekdays[date.getDay()]} ${date.toLocaleTimeString('zh-TW', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false, 
+      })}`;
+    } 
+    // 如果是今年
+    else if (date.getFullYear() === now.getFullYear()) {
+      return date.toLocaleDateString('zh-TW', { 
+        month: 'numeric', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+    }
+    // 更早的時間
+    else {
+      return date.toLocaleDateString('zh-TW', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+      });
+    }
+  } catch (error) {
+    console.error('Error formatting time:', error, 'for dateString:', dateString);
+    return '時間錯誤';
   }
 };
 

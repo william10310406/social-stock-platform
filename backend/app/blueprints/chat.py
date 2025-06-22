@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS
@@ -15,6 +15,19 @@ CORS(chat_bp)
 # 存儲在線用戶
 online_users = {}
 
+# 時間工具函數
+def get_utc_now():
+    """獲取當前 UTC 時間"""
+    return datetime.now(timezone.utc)
+
+def format_datetime_for_response(dt):
+    """格式化時間用於 API 回應"""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        # 如果沒有時區信息，假設是 UTC
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.isoformat()
 
 # WebSocket 事件處理
 @socketio.on("connect")
@@ -118,7 +131,7 @@ def handle_send_message(data):
         message = Message(conversation_id=conversation_id, sender_id=sender_id, content=content)
 
         # 更新會話的最後更新時間
-        conversation.updated_at = datetime.utcnow()
+        conversation.updated_at = get_utc_now()
 
         db.session.add(message)
         db.session.commit()
@@ -130,7 +143,7 @@ def handle_send_message(data):
             "content": message.content,
             "sender_id": message.sender_id,
             "sender_username": sender.username,
-            "created_at": message.created_at.isoformat(),
+            "created_at": format_datetime_for_response(message.created_at),
             "is_read": message.is_read,
         }
 
@@ -170,7 +183,7 @@ def handle_typing(data):
 @socketio.on("ping")
 def handle_ping(data):
     """處理心跳檢測"""
-    emit("pong", {"message": "pong", "timestamp": datetime.utcnow().isoformat(), "data": data})
+    emit("pong", {"message": "pong", "timestamp": format_datetime_for_response(get_utc_now()), "data": data})
 
 
 @socketio.on("test_message")
@@ -181,7 +194,7 @@ def handle_test_message(data):
         "test_response",
         {
             "message": "測試消息收到",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": format_datetime_for_response(get_utc_now()),
             "original_data": data,
         },
     )
@@ -224,18 +237,16 @@ def get_conversations(current_user):
                 "last_message": (
                     {
                         "content": last_message.content if last_message else "",
-                        "created_at": (
-                            last_message.created_at.isoformat()
-                            if last_message
-                            else conv.created_at.isoformat()
-                        ),
+                        "created_at": format_datetime_for_response(last_message.created_at)
+                        if last_message
+                        else format_datetime_for_response(conv.created_at),
                         "sender_id": last_message.sender_id if last_message else None,
                     }
                     if last_message
                     else None
                 ),
                 "unread_count": unread_count,
-                "updated_at": conv.updated_at.isoformat(),
+                "updated_at": format_datetime_for_response(conv.updated_at),
             }
         )
 
@@ -307,7 +318,7 @@ def get_messages(current_user, conversation_id):
                 "content": message.content,
                 "sender_id": message.sender_id,
                 "sender_username": message.sender.username,
-                "created_at": message.created_at.isoformat(),
+                "created_at": format_datetime_for_response(message.created_at),
                 "is_read": message.is_read,
             }
         )
@@ -362,7 +373,7 @@ def send_message(current_user, conversation_id):
     message = Message(conversation_id=conversation_id, sender_id=current_user.id, content=content)
 
     # 更新會話的最後更新時間
-    conversation.updated_at = datetime.utcnow()
+    conversation.updated_at = get_utc_now()
 
     db.session.add(message)
     db.session.commit()
@@ -374,7 +385,7 @@ def send_message(current_user, conversation_id):
                 "content": message.content,
                 "sender_id": message.sender_id,
                 "sender_username": current_user.username,
-                "created_at": message.created_at.isoformat(),
+                "created_at": format_datetime_for_response(message.created_at),
                 "is_read": message.is_read,
             }
         ),

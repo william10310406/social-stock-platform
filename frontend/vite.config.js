@@ -25,18 +25,25 @@ export default defineConfig({
     },
     cors: {
       origin: (origin, callback) => {
-        // 允許 Docker 和本地開發環境
+        // 允許 Docker、本地開發環境和網路訪問
         const allowedOrigins = [
           'http://localhost:5173',
           'http://127.0.0.1:5173',
           'http://0.0.0.0:5173',
+          'http://192.168.1.106:5173',  // 手機訪問
         ];
 
         // 如果沒有 origin（同源請求）或在允許列表中，則允許
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
-          callback(new Error('Not allowed by CORS'));
+          // 開發模式下允許所有本地網路請求
+          if (origin && origin.match(/^http:\/\/(192\.168\.|172\.16\.|10\.|localhost|127\.0\.0\.1)/)) {
+            callback(null, true);
+          } else {
+            console.log('❌ CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+          }
         }
       },
       credentials: true,
@@ -44,7 +51,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: process.env.DOCKER_ENV === 'true'
-          ? 'http://stock-insight-backend:5000'
+          ? 'http://host.docker.internal:5001'  // 讓容器能訪問主機映射的端口
           : 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
