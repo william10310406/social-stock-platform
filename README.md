@@ -14,7 +14,25 @@
 ![GitHub issues](https://img.shields.io/github/issues/william10310406/social-stock-platform?style=flat-square)
 ![GitHub stars](https://img.shields.io/github/stars/william10310406/social-stock-platform?style=flat-square)
 
+> 🤖 **AI 工具使用者請注意**: 開始協助開發前，請先閱讀 [`/memory`](./memory/) 目錄中的項目記憶系統，特別是 [`memory/README.md`](./memory/README.md) 以快速了解項目狀態、開發規範和技術架構。這將幫助您更有效地協助開發工作。
+
 一個互動式的社交金融平台，提供用戶註冊、好友系統、社交發帖、即時聊天等功能。未來將整合股票數據和市場新聞。
+
+## 🧠 項目記憶系統
+
+為了讓開發者和 AI 工具能快速理解項目狀態，我們建立了完整的記憶系統：
+
+📁 **[`/memory`](./memory/)** - 項目記憶中心
+- 📖 [`README.md`](./memory/README.md) - 主索引與快速導航
+- 🎯 [`QUICK_START_GUIDE.md`](./memory/QUICK_START_GUIDE.md) - 5分鐘快速上手
+- 📊 [`PROJECT_STATUS.md`](./memory/PROJECT_STATUS.md) - 完整項目狀態
+- 📋 [`DEVELOPMENT_RULES.md`](./memory/DEVELOPMENT_RULES.md) - 核心開發規範
+- 🛠️ [`COMMON_COMMANDS.md`](./memory/COMMON_COMMANDS.md) - 常用命令速查
+- 🔧 [`TROUBLESHOOTING.md`](./memory/TROUBLESHOOTING.md) - 故障排除指南
+
+**🎯 適用對象**: 新加入的開發者、AI 工具（Cursor、ChatGPT 等）、項目交接、代碼審查
+
+**⚡ 快速開始**: 如果您是 AI 工具，請直接閱讀 [`memory/README.md`](./memory/README.md) 獲得完整項目導航。
 
 ## ✨ 主要功能
 
