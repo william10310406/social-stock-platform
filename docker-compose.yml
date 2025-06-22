@@ -41,6 +41,8 @@ services:
       - stock-insight-net
     volumes:
       - ./backend:/app
+      - ./exports:/app/exports
+      - ./scripts:/app/scripts
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -62,6 +64,8 @@ services:
       start_period: 60s
     volumes:
       - db_data:/var/opt/mssql
+      - ./mssql_backup:/mssql_backup
+      - ./scripts:/app/scripts
     networks:
       - stock-insight-net
 

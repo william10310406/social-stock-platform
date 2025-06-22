@@ -1,0 +1,1073 @@
+{
+  "metadata": {
+    "export_time": "
+2025-06-22T13:44:09Z
+",
+    "source_database": "StockInsight",
+    "format_version": "1.0"
+  },
+  "stocks": [
+    {
+      "id": Changed database context to 'StockInsight'.,
+      "symbol": "",
+      "name": "",
+      "exchange": "",
+      "market_type": "",
+      "created_at": "",
+      "updated_at": ""
+    },
+    {
+      "id": 95,
+      "symbol": "1101",
+      "name": "台泥",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.343",
+      "updated_at": "2025-06-22 12:41:28.343"
+    },
+    {
+      "id": 114,
+      "symbol": "1101B",
+      "name": "台泥乙特",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.790",
+      "updated_at": "2025-06-22 12:41:28.790"
+    },
+    {
+      "id": 63,
+      "symbol": "1102",
+      "name": "亞泥",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.630",
+      "updated_at": "2025-06-22 12:41:27.630"
+    },
+    {
+      "id": 105,
+      "symbol": "1103",
+      "name": "嘉泥",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.577",
+      "updated_at": "2025-06-22 12:41:28.577"
+    },
+    {
+      "id": 38,
+      "symbol": "1104",
+      "name": "環泥",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.067",
+      "updated_at": "2025-06-22 12:41:27.067"
+    },
+    {
+      "id": 54,
+      "symbol": "1108",
+      "name": "幸福",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.443",
+      "updated_at": "2025-06-22 12:41:27.443"
+    },
+    {
+      "id": 36,
+      "symbol": "1109",
+      "name": "信大",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.020",
+      "updated_at": "2025-06-22 12:41:27.020"
+    },
+    {
+      "id": 34,
+      "symbol": "1110",
+      "name": "東泥",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.970",
+      "updated_at": "2025-06-22 12:41:26.970"
+    },
+    {
+      "id": 46,
+      "symbol": "1201",
+      "name": "味全",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.257",
+      "updated_at": "2025-06-22 12:41:27.257"
+    },
+    {
+      "id": 57,
+      "symbol": "1203",
+      "name": "味王",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.510",
+      "updated_at": "2025-06-22 12:41:27.510"
+    },
+    {
+      "id": 67,
+      "symbol": "1210",
+      "name": "大成",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.717",
+      "updated_at": "2025-06-22 12:41:27.717"
+    },
+    {
+      "id": 18,
+      "symbol": "1213",
+      "name": "大飲",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.507",
+      "updated_at": "2025-06-22 12:41:26.507"
+    },
+    {
+      "id": 110,
+      "symbol": "1215",
+      "name": "卜蜂",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.683",
+      "updated_at": "2025-06-22 12:41:28.683"
+    },
+    {
+      "id": 30,
+      "symbol": "1216",
+      "name": "統一",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.863",
+      "updated_at": "2025-06-22 12:41:26.863"
+    },
+    {
+      "id": 13,
+      "symbol": "1217",
+      "name": "愛之味",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.333",
+      "updated_at": "2025-06-22 12:41:26.333"
+    },
+    {
+      "id": 60,
+      "symbol": "1218",
+      "name": "泰山",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.570",
+      "updated_at": "2025-06-22 12:41:27.570"
+    },
+    {
+      "id": 103,
+      "symbol": "1219",
+      "name": "福壽",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.527",
+      "updated_at": "2025-06-22 12:41:28.527"
+    },
+    {
+      "id": 69,
+      "symbol": "1220",
+      "name": "台榮",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.760",
+      "updated_at": "2025-06-22 12:41:27.760"
+    },
+    {
+      "id": 77,
+      "symbol": "1227",
+      "name": "佳格",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.947",
+      "updated_at": "2025-06-22 12:41:27.947"
+    },
+    {
+      "id": 118,
+      "symbol": "1229",
+      "name": "聯華",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.897",
+      "updated_at": "2025-06-22 12:41:28.897"
+    },
+    {
+      "id": 87,
+      "symbol": "1231",
+      "name": "聯華食",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.170",
+      "updated_at": "2025-06-22 12:41:28.170"
+    },
+    {
+      "id": 90,
+      "symbol": "1232",
+      "name": "大統益",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.233",
+      "updated_at": "2025-06-22 12:41:28.233"
+    },
+    {
+      "id": 53,
+      "symbol": "1233",
+      "name": "天仁",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.420",
+      "updated_at": "2025-06-22 12:41:27.420"
+    },
+    {
+      "id": 12,
+      "symbol": "1234",
+      "name": "黑松",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.300",
+      "updated_at": "2025-06-22 12:41:26.300"
+    },
+    {
+      "id": 59,
+      "symbol": "1235",
+      "name": "興泰",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.550",
+      "updated_at": "2025-06-22 12:41:27.550"
+    },
+    {
+      "id": 23,
+      "symbol": "1236",
+      "name": "宏亞",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.677",
+      "updated_at": "2025-06-22 12:41:26.677"
+    },
+    {
+      "id": 47,
+      "symbol": "1256",
+      "name": "鮮活果汁",
+      "exchange": "上市",
+      "market_type": "KY",
+      "created_at": "2025-06-22 12:41:27.283",
+      "updated_at": "2025-06-22 12:41:27.283"
+    },
+    {
+      "id": 52,
+      "symbol": "1259",
+      "name": "安心",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.400",
+      "updated_at": "2025-06-22 12:41:27.400"
+    },
+    {
+      "id": 48,
+      "symbol": "1264",
+      "name": "德麥",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.307",
+      "updated_at": "2025-06-22 12:41:27.307"
+    },
+    {
+      "id": 79,
+      "symbol": "1268",
+      "name": "漢來美食",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.000",
+      "updated_at": "2025-06-22 12:41:28.000"
+    },
+    {
+      "id": 85,
+      "symbol": "1294",
+      "name": "漢田生技",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.123",
+      "updated_at": "2025-06-22 12:41:28.123"
+    },
+    {
+      "id": 78,
+      "symbol": "1295",
+      "name": "生合",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.970",
+      "updated_at": "2025-06-22 12:41:27.970"
+    },
+    {
+      "id": 65,
+      "symbol": "1570",
+      "name": "力肯",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.673",
+      "updated_at": "2025-06-22 12:41:27.673"
+    },
+    {
+      "id": 81,
+      "symbol": "1580",
+      "name": "新麥",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.043",
+      "updated_at": "2025-06-22 12:41:28.043"
+    },
+    {
+      "id": 8,
+      "symbol": "1586",
+      "name": "和勤",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.153",
+      "updated_at": "2025-06-22 12:41:26.153"
+    },
+    {
+      "id": 88,
+      "symbol": "1591",
+      "name": "駿吉",
+      "exchange": "上櫃",
+      "market_type": "KY",
+      "created_at": "2025-06-22 12:41:28.190",
+      "updated_at": "2025-06-22 12:41:28.190"
+    },
+    {
+      "id": 29,
+      "symbol": "1599",
+      "name": "宏佳騰",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.837",
+      "updated_at": "2025-06-22 12:41:26.837"
+    },
+    {
+      "id": 26,
+      "symbol": "1702",
+      "name": "南僑",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.763",
+      "updated_at": "2025-06-22 12:41:26.763"
+    },
+    {
+      "id": 97,
+      "symbol": "1737",
+      "name": "臺鹽",
+      "exchange": "上市",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.387",
+      "updated_at": "2025-06-22 12:41:28.387"
+    },
+    {
+      "id": 74,
+      "symbol": "1796",
+      "name": "金穎生技",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.880",
+      "updated_at": "2025-06-22 12:41:27.880"
+    },
+    {
+      "id": 91,
+      "symbol": "2035",
+      "name": "唐榮公司",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.257",
+      "updated_at": "2025-06-22 12:41:28.257"
+    },
+    {
+      "id": 106,
+      "symbol": "2061",
+      "name": "風青",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.600",
+      "updated_at": "2025-06-22 12:41:28.600"
+    },
+    {
+      "id": 99,
+      "symbol": "2063",
+      "name": "世鎧",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.433",
+      "updated_at": "2025-06-22 12:41:28.433"
+    },
+    {
+      "id": 64,
+      "symbol": "2064",
+      "name": "晉椿",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.653",
+      "updated_at": "2025-06-22 12:41:27.653"
+    },
+    {
+      "id": 7,
+      "symbol": "2065",
+      "name": "世豐",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.103",
+      "updated_at": "2025-06-22 12:41:26.103"
+    },
+    {
+      "id": 76,
+      "symbol": "2066",
+      "name": "世德",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.923",
+      "updated_at": "2025-06-22 12:41:27.923"
+    },
+    {
+      "id": 11,
+      "symbol": "2067",
+      "name": "嘉鋼",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.267",
+      "updated_at": "2025-06-22 12:41:26.267"
+    },
+    {
+      "id": 51,
+      "symbol": "2070",
+      "name": "精湛",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.380",
+      "updated_at": "2025-06-22 12:41:27.380"
+    },
+    {
+      "id": 68,
+      "symbol": "2073",
+      "name": "雄順",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.737",
+      "updated_at": "2025-06-22 12:41:27.737"
+    },
+    {
+      "id": 94,
+      "symbol": "2230",
+      "name": "泰茂",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.323",
+      "updated_at": "2025-06-22 12:41:28.323"
+    },
+    {
+      "id": 32,
+      "symbol": "2235",
+      "name": "謚源",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.917",
+      "updated_at": "2025-06-22 12:41:26.917"
+    },
+    {
+      "id": 75,
+      "symbol": "2254",
+      "name": "巨鎧精密",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:27.900",
+      "updated_at": "2025-06-22 12:41:27.900"
+    },
+    {
+      "id": 25,
+      "symbol": "2258",
+      "name": "鴻華先進",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:26.737",
+      "updated_at": "2025-06-22 12:41:26.737"
+    },
+    {
+      "id": 112,
+      "symbol": "2432",
+      "name": "倚天酷碁",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.723",
+      "updated_at": "2025-06-22 12:41:28.723"
+    },
+    {
+      "id": 40,
+      "symbol": "2596",
+      "name": "綠意",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.120",
+      "updated_at": "2025-06-22 12:41:27.120"
+    },
+    {
+      "id": 71,
+      "symbol": "2641",
+      "name": "正德",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.810",
+      "updated_at": "2025-06-22 12:41:27.810"
+    },
+    {
+      "id": 44,
+      "symbol": "2643",
+      "name": "捷迅",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.213",
+      "updated_at": "2025-06-22 12:41:27.213"
+    },
+    {
+      "id": 86,
+      "symbol": "2718",
+      "name": "全心投控",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.147",
+      "updated_at": "2025-06-22 12:41:28.147"
+    },
+    {
+      "id": 27,
+      "symbol": "2719",
+      "name": "燦星旅",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.787",
+      "updated_at": "2025-06-22 12:41:26.787"
+    },
+    {
+      "id": 35,
+      "symbol": "2726",
+      "name": "雅茗",
+      "exchange": "上櫃",
+      "market_type": "KY",
+      "created_at": "2025-06-22 12:41:26.997",
+      "updated_at": "2025-06-22 12:41:26.997"
+    },
+    {
+      "id": 9,
+      "symbol": "2729",
+      "name": "瓦城",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.190",
+      "updated_at": "2025-06-22 12:41:26.190"
+    },
+    {
+      "id": 10,
+      "symbol": "2732",
+      "name": "六角",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.230",
+      "updated_at": "2025-06-22 12:41:26.230"
+    },
+    {
+      "id": 62,
+      "symbol": "2734",
+      "name": "易飛網",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.610",
+      "updated_at": "2025-06-22 12:41:27.610"
+    },
+    {
+      "id": 82,
+      "symbol": "2736",
+      "name": "富野",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.063",
+      "updated_at": "2025-06-22 12:41:28.063"
+    },
+    {
+      "id": 43,
+      "symbol": "2740",
+      "name": "天蔥",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.190",
+      "updated_at": "2025-06-22 12:41:27.190"
+    },
+    {
+      "id": 117,
+      "symbol": "3150",
+      "name": "鈺寶",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.873",
+      "updated_at": "2025-06-22 12:41:28.873"
+    },
+    {
+      "id": 111,
+      "symbol": "3188",
+      "name": "鑫龍騰",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.703",
+      "updated_at": "2025-06-22 12:41:28.703"
+    },
+    {
+      "id": 108,
+      "symbol": "3489",
+      "name": "森寶",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.640",
+      "updated_at": "2025-06-22 12:41:28.640"
+    },
+    {
+      "id": 24,
+      "symbol": "3512",
+      "name": "皇龍",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.707",
+      "updated_at": "2025-06-22 12:41:26.707"
+    },
+    {
+      "id": 119,
+      "symbol": "3521",
+      "name": "鴻翊",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.920",
+      "updated_at": "2025-06-22 12:41:28.920"
+    },
+    {
+      "id": 107,
+      "symbol": "4113",
+      "name": "聯上",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.620",
+      "updated_at": "2025-06-22 12:41:28.620"
+    },
+    {
+      "id": 50,
+      "symbol": "4205",
+      "name": "中華食",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.357",
+      "updated_at": "2025-06-22 12:41:27.357"
+    },
+    {
+      "id": 96,
+      "symbol": "4207",
+      "name": "環泰",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.367",
+      "updated_at": "2025-06-22 12:41:28.367"
+    },
+    {
+      "id": 73,
+      "symbol": "4303",
+      "name": "信立",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.853",
+      "updated_at": "2025-06-22 12:41:27.853"
+    },
+    {
+      "id": 122,
+      "symbol": "4304",
+      "name": "勝昱",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.990",
+      "updated_at": "2025-06-22 12:41:28.990"
+    },
+    {
+      "id": 49,
+      "symbol": "4305",
+      "name": "世坤",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.330",
+      "updated_at": "2025-06-22 12:41:27.330"
+    },
+    {
+      "id": 83,
+      "symbol": "4401",
+      "name": "東隆興",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.087",
+      "updated_at": "2025-06-22 12:41:28.087"
+    },
+    {
+      "id": 19,
+      "symbol": "4402",
+      "name": "郡都開發",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.547",
+      "updated_at": "2025-06-22 12:41:26.547"
+    },
+    {
+      "id": 113,
+      "symbol": "4406",
+      "name": "新昕纖",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.747",
+      "updated_at": "2025-06-22 12:41:28.747"
+    },
+    {
+      "id": 66,
+      "symbol": "4413",
+      "name": "飛寶企業",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.693",
+      "updated_at": "2025-06-22 12:41:27.693"
+    },
+    {
+      "id": 104,
+      "symbol": "4416",
+      "name": "三圓",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.550",
+      "updated_at": "2025-06-22 12:41:28.550"
+    },
+    {
+      "id": 28,
+      "symbol": "4417",
+      "name": "金洲",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.813",
+      "updated_at": "2025-06-22 12:41:26.813"
+    },
+    {
+      "id": 70,
+      "symbol": "4420",
+      "name": "光明",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.783",
+      "updated_at": "2025-06-22 12:41:27.783"
+    },
+    {
+      "id": 115,
+      "symbol": "4432",
+      "name": "銘旺實",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.827",
+      "updated_at": "2025-06-22 12:41:28.827"
+    },
+    {
+      "id": 120,
+      "symbol": "4433",
+      "name": "興采",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.943",
+      "updated_at": "2025-06-22 12:41:28.943"
+    },
+    {
+      "id": 58,
+      "symbol": "4442",
+      "name": "竣邦",
+      "exchange": "上櫃",
+      "market_type": "KY",
+      "created_at": "2025-06-22 12:41:27.530",
+      "updated_at": "2025-06-22 12:41:27.530"
+    },
+    {
+      "id": 93,
+      "symbol": "4907",
+      "name": "富宇",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.300",
+      "updated_at": "2025-06-22 12:41:28.300"
+    },
+    {
+      "id": 15,
+      "symbol": "4950",
+      "name": "金耘國際",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.407",
+      "updated_at": "2025-06-22 12:41:26.407"
+    },
+    {
+      "id": 80,
+      "symbol": "5009",
+      "name": "榮剛",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.020",
+      "updated_at": "2025-06-22 12:41:28.020"
+    },
+    {
+      "id": 37,
+      "symbol": "5011",
+      "name": "久陽",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.043",
+      "updated_at": "2025-06-22 12:41:27.043"
+    },
+    {
+      "id": 116,
+      "symbol": "5013",
+      "name": "強新",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.850",
+      "updated_at": "2025-06-22 12:41:28.850"
+    },
+    {
+      "id": 20,
+      "symbol": "5014",
+      "name": "建錩",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.577",
+      "updated_at": "2025-06-22 12:41:26.577"
+    },
+    {
+      "id": 72,
+      "symbol": "5206",
+      "name": "坤悅",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.833",
+      "updated_at": "2025-06-22 12:41:27.833"
+    },
+    {
+      "id": 39,
+      "symbol": "5601",
+      "name": "台聯櫃",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.090",
+      "updated_at": "2025-06-22 12:41:27.090"
+    },
+    {
+      "id": 98,
+      "symbol": "5603",
+      "name": "陸海",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.413",
+      "updated_at": "2025-06-22 12:41:28.413"
+    },
+    {
+      "id": 61,
+      "symbol": "5609",
+      "name": "中菲行",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:27.590",
+      "updated_at": "2025-06-22 12:41:27.590"
+    },
+    {
+      "id": 55,
+      "symbol": "6423",
+      "name": "億而得",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:27.463",
+      "updated_at": "2025-06-22 12:41:27.463"
+    },
+    {
+      "id": 31,
+      "symbol": "6506",
+      "name": "雙邦",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.890",
+      "updated_at": "2025-06-22 12:41:26.890"
+    },
+    {
+      "id": 45,
+      "symbol": "6534",
+      "name": "正瀚",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:27.233",
+      "updated_at": "2025-06-22 12:41:27.233"
+    },
+    {
+      "id": 14,
+      "symbol": "6645",
+      "name": "金萬林",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:26.370",
+      "updated_at": "2025-06-22 12:41:26.370"
+    },
+    {
+      "id": 92,
+      "symbol": "6771",
+      "name": "平和環保",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.280",
+      "updated_at": "2025-06-22 12:41:28.280"
+    },
+    {
+      "id": 102,
+      "symbol": "6794",
+      "name": "向榮生技",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.503",
+      "updated_at": "2025-06-22 12:41:28.503"
+    },
+    {
+      "id": 84,
+      "symbol": "6846",
+      "name": "綠茵",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:28.103",
+      "updated_at": "2025-06-22 12:41:28.103"
+    },
+    {
+      "id": 89,
+      "symbol": "6854",
+      "name": "錼創科技創",
+      "exchange": "上市",
+      "market_type": "KY",
+      "created_at": "2025-06-22 12:41:28.213",
+      "updated_at": "2025-06-22 12:41:28.213"
+    },
+    {
+      "id": 56,
+      "symbol": "6924",
+      "name": "榮惠創",
+      "exchange": "上市",
+      "market_type": "KY",
+      "created_at": "2025-06-22 12:41:27.487",
+      "updated_at": "2025-06-22 12:41:27.487"
+    },
+    {
+      "id": 100,
+      "symbol": "6949",
+      "name": "沛爾生醫",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.457",
+      "updated_at": "2025-06-22 12:41:28.457"
+    },
+    {
+      "id": 33,
+      "symbol": "6951",
+      "name": "青新",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:26.947",
+      "updated_at": "2025-06-22 12:41:26.947"
+    },
+    {
+      "id": 42,
+      "symbol": "6955",
+      "name": "邦睿生技",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:27.167",
+      "updated_at": "2025-06-22 12:41:27.167"
+    },
+    {
+      "id": 21,
+      "symbol": "6969",
+      "name": "成信實業*",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:26.610",
+      "updated_at": "2025-06-22 12:41:26.610"
+    },
+    {
+      "id": 101,
+      "symbol": "6988",
+      "name": "威力暘",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.477",
+      "updated_at": "2025-06-22 12:41:28.477"
+    },
+    {
+      "id": 109,
+      "symbol": "7631",
+      "name": "聚賢研發",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.660",
+      "updated_at": "2025-06-22 12:41:28.660"
+    },
+    {
+      "id": 41,
+      "symbol": "7740",
+      "name": "熙特爾",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:27.140",
+      "updated_at": "2025-06-22 12:41:27.140"
+    },
+    {
+      "id": 17,
+      "symbol": "7743",
+      "name": "金利食安",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.473",
+      "updated_at": "2025-06-22 12:41:26.473"
+    },
+    {
+      "id": 22,
+      "symbol": "8162",
+      "name": "微矽電子",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:26.643",
+      "updated_at": "2025-06-22 12:41:26.643"
+    },
+    {
+      "id": 121,
+      "symbol": "8487",
+      "name": "愛爾達",
+      "exchange": "上市",
+      "market_type": "創新板",
+      "created_at": "2025-06-22 12:41:28.967",
+      "updated_at": "2025-06-22 12:41:28.967"
+    },
+    {
+      "id": 16,
+      "symbol": "9950",
+      "name": "萬國通",
+      "exchange": "上櫃",
+      "market_type": "NULL",
+      "created_at": "2025-06-22 12:41:26.440",
+      "updated_at": "2025-06-22 12:41:26.440"
+    },
+    {
+      "id": (116 rows affected),
+      "symbol": "",
+      "name": "",
+      "exchange": "",
+      "market_type": "",
+      "created_at": "",
+      "updated_at": ""
+    }
+  ]
+}

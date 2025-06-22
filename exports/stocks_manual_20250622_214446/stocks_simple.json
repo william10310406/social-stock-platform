@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "export_time": "2025-06-22T13:46:55Z",
+    "source_database": "StockInsight",
+    "format_version": "1.0",
+    "total_stocks": 116,
+    "description": "Stock Insight Platform 股票資料導出"
+  },
+  "statistics": {
+    "total": 116,
+    "上市": 49,
+    "上櫃": 67,
+    "創新板": 18,
+    "KY股": 6
+  },
+  "note": "完整股票資料請參閱 stocks_complete.csv 文件"
+}

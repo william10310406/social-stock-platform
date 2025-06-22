@@ -1,0 +1,6 @@
+Changed database context to 'StockInsight'.
+total_stocks
+------------
+         116
+
+(1 rows affected)

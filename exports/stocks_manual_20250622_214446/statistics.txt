@@ -1,0 +1,6 @@
+Changed database context to 'StockInsight'.
+總股票數        上市          上櫃          創新板         KY股        
+----------- ----------- ----------- ----------- -----------
+        116          49          67          18           6
+
+(1 rows affected)
