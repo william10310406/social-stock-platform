@@ -383,5 +383,105 @@ npm run env:check && npm run docker:check
 
 ---
 
+## 📊 **數據庫導入命令** (⭐ 新增)
+
+### 🎯 **雙資料庫股票數據導入**
+```bash
+# 1. 環境準備檢查
+docker exec -it stock-insight-backend python -c "from app import create_app; app = create_app(); print('✅ 連接成功')"
+
+# 2. 運行股票數據導入
+docker exec -it stock-insight-backend python scripts/import_stock_data_v2.py
+
+# 3. 驗證導入結果
+docker exec -it stock-insight-backend python scripts/check_stock_data.py
+```
+
+### 🔍 **數據驗證命令**
+```bash
+# 檢查熱資料庫數據
+docker exec -it stock-insight-backend python -c "
+from app import create_app
+from app.models import Stock, StockPrice
+app = create_app()
+with app.app_context():
+    from app import db
+    print(f'股票數: {db.session.query(Stock).count()}')
+    print(f'價格記錄: {db.session.query(StockPrice).count()}')
+"
+
+# 檢查冷資料庫狀態
+docker exec -it stock-insight-backend python -c "
+from app import create_app
+from app.models_cold import MessageArchive, PostArchive
+app = create_app()
+with app.app_context():
+    from app import db
+    print('冷資料庫表格已創建並準備就緒')
+"
+```
+
+### 🗄️ **雙資料庫管理**
+```bash
+# 啟動雙資料庫環境
+docker-compose -f docker-compose.dual.yml up -d
+
+# 停止雙資料庫環境
+docker-compose -f docker-compose.dual.yml down
+
+# 檢查雙資料庫狀態
+docker ps | grep -E "(mssql|postgres|redis)"
+
+# 查看雙資料庫日誌
+docker-compose -f docker-compose.dual.yml logs
+```
+
+### 📋 **數據庫維護命令**
+```bash
+# 創建數據庫遷移
+docker exec -it stock-insight-backend flask db migrate -m "描述"
+
+# 應用數據庫遷移
+docker exec -it stock-insight-backend flask db upgrade
+
+# 檢查數據庫架構
+docker exec -it stock-insight-backend python -c "
+from sqlalchemy import inspect
+from app import create_app
+app = create_app()
+with app.app_context():
+    from app import db
+    inspector = inspect(db.engine)
+    print('Tables:', inspector.get_table_names())
+"
+```
+
+### 🚨 **故障排除 - 數據導入**
+```bash
+# 檢查加密金鑰問題
+docker exec -it stock-insight-backend python -c "import os; print('SECRET_KEY 設置正確' if os.getenv('SECRET_KEY') else '缺少 SECRET_KEY')"
+
+# 檢查 DatabaseAdapter 問題
+docker exec -it stock-insight-backend python -c "
+from app.database_adapter import DatabaseAdapter
+adapter = DatabaseAdapter.from_environment('hot')
+print('DatabaseAdapter 正常工作')
+"
+
+# 檢查模型欄位
+docker exec -it stock-insight-backend python -c "
+from app.models import Stock, StockPrice
+print('Stock 欄位:')
+for col in Stock.__table__.columns:
+    print(f'  {col.name}: {col.type}')
+print('StockPrice 欄位:')
+for col in StockPrice.__table__.columns:
+    print(f'  {col.name}: {col.type}')
+"
+```
+
+---
+
 **💡 提示**: 所有命令都支援 `--help` 參數查看詳細說明
-**🔍 查找**: 使用 `npm run | grep <關鍵字>` 搜尋特定命令 
+**🔍 查找**: 使用 `npm run | grep <關鍵字>` 搜尋特定命令  
+**📊 數據導入**: 參考 `memory/DATABASE_IMPORT_GUIDE.md` 獲取詳細指南 

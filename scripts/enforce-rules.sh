@@ -69,9 +69,9 @@ check_hardcoded_paths() {
             FILE=$(echo "$line" | cut -d: -f1)
             LINE_NUM=$(echo "$line" | cut -d: -f2)
 
-            # 檢查前後5行是否有 RouteUtils 條件判斷
-            if ! grep -A5 -B5 "window\.location\.href.*'/src/" "$FILE" | grep -q "window\.RouteUtils\|RouteUtils.*?" 2>/dev/null; then
-                report_error "發現不當硬編碼路徑 (缺少 RouteUtils 條件判斷): $FILE:$LINE_NUM"
+            # 檢查前後5行是否有 RouteUtils 或 globalRoutes 條件判斷
+            if ! grep -A5 -B5 "window\.location\.href.*'/src/" "$FILE" | grep -q "window\.RouteUtils\|RouteUtils.*?\|window\.globalRoutes\|globalRoutes.*?" 2>/dev/null; then
+                report_error "發現不當硬編碼路徑 (缺少 RouteUtils 或 globalRoutes 條件判斷): $FILE:$LINE_NUM"
             fi
         done <<< "$BAD_PATHS"
     fi

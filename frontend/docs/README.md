@@ -11,6 +11,7 @@ docs/
 ├── README.md                     # 文檔中心主索引
 ├── 📐 architecture/              # 系統架構文檔
 │   ├── stock-architecture.yaml   # 完整系統架構
+│   ├── dual-database-hot-cold-architecture.yaml  # **NEW** 雙資料庫冷熱分離架構
 │   ├── javascript-dependencies.yaml  # JS 模組依賴關係
 │   ├── html-dependencies.yaml    # HTML 文件依賴映射
 │   ├── path-config-architecture.yaml  # 路徑管理架構
@@ -23,7 +24,8 @@ docs/
 │   ├── PATH_MANAGEMENT_SUMMARY.md          # 路徑管理系統
 │   └── UNIFIED_CONFIG.md                   # 統一配置管理
 ├── 📊 reports/                   # 項目報告
-│   ├── COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md    # **最新** 116支台股完整導入報告
+│   ├── STOCK_DATA_IMPORT_CONFIRMATION_REPORT.md    # **最新** 雙資料庫股票數據導入確認報告
+│   ├── COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md    # 116支台股完整導入報告
 │   ├── STOCKS_DATA_EXPORT_REPORT.md       # 股票資料匯出報告
 │   ├── STOCK_SCHEMA_VALIDATION_REPORT.md  # 股票架構驗證報告
 │   ├── LIB_DOCKER_TEST_COMPLETE.md        # 組件庫 Docker 測試報告
@@ -183,7 +185,8 @@ docs/
 
 | 需求 | 推薦文檔 | 路徑 |
 |------|----------|------|
-| **🎯 台股數據導入完成** | **台股導入報告** | `reports/COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md` |
+| **🎯 雙資料庫股票數據導入** | **股票數據導入確認報告** | `reports/STOCK_DATA_IMPORT_CONFIRMATION_REPORT.md` |
+| 台股數據導入完成 | 台股導入報告 | `reports/COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md` |
 | 系統整體架構 | 主架構文檔 | `architecture/stock-architecture.yaml` |
 | 股票功能實現 | 股票系統文檔 | `implementation/STOCKS_FEATURE_IMPLEMENTATION.md` |
 | 組件庫使用 | 組件庫實現 | `implementation/LIB_IMPLEMENTATION_COMPLETE.md` |

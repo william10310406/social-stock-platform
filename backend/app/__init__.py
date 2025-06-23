@@ -15,14 +15,23 @@ from .blueprints.posts import posts_bp
 from .blueprints.stocks import stocks_bp
 
 # from .models import User, Post # Temporarily import only existing models
-from .config import Config
+from .config import config
 from .extensions import db, limiter, socketio
 from .models import Comment, Conversation, Message, News, Post, Stock, StockPrice, User, UserStock
 
 migrate = Migrate()
 
 
-def create_app(config_class=Config):
+def create_app(config_name=None):
+    if config_name is None:
+        config_name = os.environ.get('FLASK_CONFIG', 'default')
+    
+    config_class = config.get(config_name)
+    if not config_class:
+        raise ValueError(f"Unknown configuration: {config_name}")
+    
+    print(f"🚀 Loading configuration: {config_name} ({config_class.__name__})")
+    print(f"🔧 DUAL_DATABASE_ENABLED: {os.environ.get('DUAL_DATABASE_ENABLED', 'Not set')}")
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -100,18 +109,28 @@ def create_app(config_class=Config):
         try:
             from datetime import datetime
 
-            from sqlalchemy import text
+            database_status = "unknown"
+            services = {}
+            
+            # Test database connection (non-blocking)
+            try:
+                from sqlalchemy import text
+                with db.engine.connect() as connection:
+                    connection.execute(text("SELECT 1"))
+                database_status = "connected"
+                services["database"] = "ok"
+            except Exception as db_e:
+                app.logger.warning(f"Database not available: {db_e}")
+                database_status = "disconnected"
+                services["database"] = "unavailable"
 
-            # Test database connection
-            with db.engine.connect() as connection:
-                connection.execute(text("SELECT 1"))
-
+            # Basic health check - app is running
             return {
-                "status": "healthy",
+                "status": "healthy",  # App is healthy even if DB is down
                 "timestamp": datetime.utcnow().isoformat(),
                 "version": "1.0.0",
-                "database": "connected",
-                "services": {"database": "ok", "redis": "ok"},
+                "database": database_status,
+                "services": services,
             }, 200
 
         except Exception as e:

@@ -1,0 +1,370 @@
+project_name: Stock Insight Platform - Dual Database Architecture
+architecture_type: Hot-Cold Data Separation (冷熱數據分離型)
+purpose: >-
+  實現冷熱數據分離的雙資料庫架構，優化性能、成本和維護效率。
+  熱數據庫處理高頻訪問的即時數據，冷數據庫存儲歷史數據和分析型數據。
+
+architecture_overview:
+  strategy: Hot-Cold Data Separation
+  primary_benefits:
+    - performance_optimization: "熱數據快速訪問，冷數據成本優化"
+    - cost_efficiency: "根據數據特性選擇合適的存儲方案"
+    - scalability: "獨立擴展熱數據和冷數據存儲"
+    - maintenance_efficiency: "分離維護窗口，降低業務影響"
+    - backup_strategy: "差異化備份策略，提高效率"
+
+database_configuration:
+  hot_database:
+    name: "StockInsight_Hot"
+    engine: "MSSQL Server 2022"
+    purpose: "活躍數據和即時操作"
+    retention_policy: "最近30天的活躍數據"
+    characteristics:
+      - high_performance_ssd: "SSD 存儲確保低延遲"
+      - frequent_access: "高頻訪問數據"
+      - real_time_operations: "即時讀寫操作"
+      - small_data_volume: "相對較小的數據量"
+      - automated_maintenance: "自動化維護和優化"
+    
+  cold_database:
+    name: "StockInsight_Cold"
+    engine: "PostgreSQL 14 / ClickHouse"
+    purpose: "歷史數據和分析型數據"
+    retention_policy: "30天以上的歷史數據"
+    characteristics:
+      - cost_optimized_storage: "成本優化的存儲方案"
+      - analytical_workloads: "分析和報表工作負載"
+      - large_data_volume: "大容量數據存儲"
+      - compression_enabled: "啟用數據壓縮"
+      - batch_operations: "批量操作優化"
+
+data_distribution:
+  hot_data_tables:
+    user_management:
+      - users: "活躍用戶資料 (最近30天登入)"
+      - user_sessions: "用戶會話數據"
+      - friendships: "好友關係 (活躍用戶)"
+    
+    real_time_interactions:
+      - conversations: "活躍聊天會話 (最近30天)"
+      - messages: "最近30天聊天記錄"
+      - posts: "最近30天的貼文"
+      - comments: "最近30天的評論"
+      - likes: "最近30天的按讚記錄"
+    
+    current_market_data:
+      - stocks: "股票基本資料 (完整保留)"
+      - stock_prices: "最近30天股價數據"
+      - user_stocks: "用戶關注清單 (活躍用戶)"
+      - news: "最近7天新聞"
+    
+    system_operations:
+      - user_activities: "用戶活動日誌 (最近30天)"
+      - api_logs: "API 調用日誌 (最近7天)"
+      - system_metrics: "系統監控指標 (最近24小時)"
+
+  cold_data_tables:
+    historical_user_data:
+      - users_archive: "非活躍用戶檔案"
+      - user_activities_archive: "歷史用戶活動"
+      - deleted_users: "已刪除用戶備份"
+    
+    historical_interactions:
+      - messages_archive: "30天以上聊天記錄"
+      - posts_archive: "30天以上貼文"
+      - comments_archive: "30天以上評論"
+      - likes_archive: "30天以上按讚記錄"
+    
+    market_data_warehouse:
+      - stock_prices_history: "30天以上股價歷史"
+      - market_statistics: "市場統計分析數據"
+      - trading_patterns: "交易模式分析"
+      - price_indicators: "技術指標計算結果"
+    
+    analytics_and_reporting:
+      - user_behavior_analytics: "用戶行為分析數據"
+      - market_trend_analysis: "市場趨勢分析"
+      - system_performance_logs: "系統性能歷史記錄"
+      - audit_trails: "審計軌跡記錄"
+
+flask_configuration:
+  database_binds:
+    hot_db:
+      bind_key: "hot"
+      connection_string: >-
+        mssql+pyodbc://${MSSQL_USER}:${MSSQL_SA_PASSWORD}@
+        ${MSSQL_HOST}:${MSSQL_PORT}/${MSSQL_HOT_DATABASE}
+        ?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+      pool_settings:
+        pool_size: 20
+        max_overflow: 30
+        pool_timeout: 30
+        pool_recycle: 3600
+    
+    cold_db:
+      bind_key: "cold"
+      connection_string: >-
+        postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@
+        ${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_COLD_DATABASE}
+      pool_settings:
+        pool_size: 10
+        max_overflow: 20
+        pool_timeout: 60
+        pool_recycle: 7200
+
+model_binding_strategy:
+  hot_models:
+    user_models:
+      - "User": "__bind_key__ = 'hot'"
+      - "UserSession": "__bind_key__ = 'hot'"
+      - "Friendship": "__bind_key__ = 'hot'"
+    
+    interaction_models:
+      - "Conversation": "__bind_key__ = 'hot'"
+      - "Message": "__bind_key__ = 'hot'"
+      - "Post": "__bind_key__ = 'hot'"
+      - "Comment": "__bind_key__ = 'hot'"
+      - "Like": "__bind_key__ = 'hot'"
+    
+    market_models:
+      - "Stock": "__bind_key__ = 'hot'"
+      - "StockPrice": "__bind_key__ = 'hot'"
+      - "UserStock": "__bind_key__ = 'hot'"
+      - "News": "__bind_key__ = 'hot'"
+
+  cold_models:
+    archive_models:
+      - "UserArchive": "__bind_key__ = 'cold'"
+      - "MessageArchive": "__bind_key__ = 'cold'"
+      - "PostArchive": "__bind_key__ = 'cold'"
+      - "StockPriceHistory": "__bind_key__ = 'cold'"
+    
+    analytics_models:
+      - "UserBehaviorAnalytics": "__bind_key__ = 'cold'"
+      - "MarketTrendAnalysis": "__bind_key__ = 'cold'"
+      - "TradingPattern": "__bind_key__ = 'cold'"
+      - "SystemPerformanceLog": "__bind_key__ = 'cold'"
+
+data_migration_strategy:
+  automated_archival:
+    schedule: "每日 02:00 執行"
+    retention_rules:
+      messages: "30天後遷移到冷數據庫"
+      posts: "30天後遷移到冷數據庫"
+      stock_prices: "30天後遷移到冷數據庫"
+      user_activities: "30天後遷移到冷數據庫"
+      api_logs: "7天後遷移到冷數據庫"
+    
+    migration_process:
+      step_1: "識別符合遷移條件的數據"
+      step_2: "批量複製到冷數據庫"
+      step_3: "驗證數據完整性"
+      step_4: "從熱數據庫刪除已遷移數據"
+      step_5: "更新索引和統計信息"
+    
+    rollback_strategy:
+      hot_data_restoration: "提供7天內的熱數據恢復"
+      emergency_access: "緊急情況下的跨庫查詢"
+
+query_optimization:
+  hot_database_optimization:
+    indexing_strategy:
+      - "主鍵和外鍵自動索引"
+      - "頻繁查詢欄位的複合索引"
+      - "時間範圍查詢的日期索引"
+    
+    connection_pooling:
+      - "連接池優化配置"
+      - "連接復用策略"
+      - "超時和重試機制"
+  
+  cold_database_optimization:
+    compression_settings:
+      - "啟用表級數據壓縮"
+      - "列式存儲優化 (ClickHouse)"
+      - "分區表設計"
+    
+    analytical_indexes:
+      - "分析查詢優化索引"
+      - "聚合查詢加速"
+      - "時間序列索引"
+
+cross_database_operations:
+  unified_service_layer:
+    description: "服務層統一處理跨庫操作"
+    implementation: "frontend/src/services/"
+    features:
+      - "自動路由到正確的數據庫"
+      - "跨庫關聯查詢處理"
+      - "數據一致性保證"
+      - "錯誤處理和降級"
+  
+  data_access_patterns:
+    recent_data_first:
+      - "優先查詢熱數據庫"
+      - "找不到時自動查詢冷數據庫"
+      - "結果合併和排序"
+    
+    historical_analysis:
+      - "直接查詢冷數據庫"
+      - "大數據分析優化"
+      - "結果緩存策略"
+
+backup_and_recovery:
+  hot_database_backup:
+    frequency: "每4小時增量備份"
+    full_backup: "每日完整備份"
+    retention: "保留30天完整備份"
+    rto_target: "15分鐘內恢復"
+  
+  cold_database_backup:
+    frequency: "每日增量備份"
+    full_backup: "每週完整備份"
+    retention: "保留1年完整備份"
+    rto_target: "4小時內恢復"
+
+monitoring_and_alerting:
+  performance_metrics:
+    hot_database:
+      - "查詢響應時間 < 100ms"
+      - "連接池使用率 < 80%"
+      - "CPU 使用率 < 70%"
+      - "磁盤 I/O 延遲 < 10ms"
+    
+    cold_database:
+      - "分析查詢完成時間"
+      - "存儲使用率監控"
+      - "壓縮率統計"
+      - "數據遷移進度"
+  
+  alert_thresholds:
+    critical_alerts:
+      - "數據庫連接失敗"
+      - "數據遷移失敗"
+      - "磁盤空間不足 (< 10%)"
+    
+    warning_alerts:
+      - "查詢性能下降 (> 500ms)"
+      - "連接池使用率過高 (> 85%)"
+      - "數據遷移延遲"
+
+docker_configuration:
+  hot_database_container:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: "stock-insight-hot-db"
+    ports: ["1433:1433"]
+    environment:
+      - "MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}"
+      - "ACCEPT_EULA=Y"
+      - "MSSQL_PID=Express"
+    volumes:
+      - "hot_db_data:/var/opt/mssql"
+      - "./mssql_backup:/mssql_backup"
+    resources:
+      memory: "2GB"
+      cpus: "1.0"
+  
+  cold_database_container:
+    image: "postgres:14"
+    container_name: "stock-insight-cold-db"
+    ports: ["5432:5432"]
+    environment:
+      - "POSTGRES_DB=${POSTGRES_COLD_DATABASE}"
+      - "POSTGRES_USER=${POSTGRES_USER}"
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+    volumes:
+      - "cold_db_data:/var/lib/postgresql/data"
+      - "./postgres_backup:/postgres_backup"
+    resources:
+      memory: "1GB"
+      cpus: "0.5"
+
+implementation_phases:
+  phase_1_foundation:
+    duration: "1-2 weeks"
+    deliverables:
+      - "雙數據庫 Docker 配置"
+      - "Flask 多數據庫綁定設置"
+      - "基本模型遷移"
+      - "連接測試和驗證"
+  
+  phase_2_data_migration:
+    duration: "1 week"
+    deliverables:
+      - "歷史數據識別和分類"
+      - "數據遷移腳本開發"
+      - "冷數據庫初始化"
+      - "數據完整性驗證"
+  
+  phase_3_service_integration:
+    duration: "1-2 weeks"
+    deliverables:
+      - "服務層跨庫支持"
+      - "API 層適配"
+      - "查詢路由實現"
+      - "錯誤處理機制"
+  
+  phase_4_automation:
+    duration: "1 week"
+    deliverables:
+      - "自動化數據歸檔"
+      - "監控和告警設置"
+      - "性能優化"
+      - "備份策略實施"
+
+testing_strategy:
+  unit_tests:
+    - "模型綁定測試"
+    - "數據庫連接測試"
+    - "查詢路由測試"
+    - "數據遷移測試"
+  
+  integration_tests:
+    - "跨庫查詢測試"
+    - "服務層集成測試"
+    - "API 端點測試"
+    - "錯誤處理測試"
+  
+  performance_tests:
+    - "熱數據庫性能基準"
+    - "冷數據庫分析查詢"
+    - "跨庫操作性能"
+    - "數據遷移性能"
+
+rollback_plan:
+  emergency_procedures:
+    single_database_fallback:
+      - "快速切換到單一數據庫模式"
+      - "數據同步回熱數據庫"
+      - "服務層降級處理"
+    
+    data_recovery:
+      - "從備份恢復數據"
+      - "跨庫數據一致性檢查"
+      - "手動數據修復程序"
+
+success_metrics:
+  performance_improvements:
+    - "熱數據查詢響應時間提升 50%"
+    - "存儲成本降低 30%"
+    - "備份時間縮短 60%"
+    - "分析查詢性能提升 200%"
+  
+  operational_benefits:
+    - "維護窗口影響降低 80%"
+    - "數據庫管理複雜度可控"
+    - "災難恢復時間縮短 70%"
+    - "系統可擴展性提升"
+
+future_enhancements:
+  advanced_features:
+    - "智能數據分層"
+    - "機器學習驅動的數據歸檔"
+    - "實時數據同步優化"
+    - "多雲部署支持"
+  
+  alternative_technologies:
+    - "ClickHouse 作為冷數據庫"
+    - "Redis 作為緩存層"
+    - "Elasticsearch 作為搜索引擎"
+    - "Apache Kafka 作為數據流處理" 

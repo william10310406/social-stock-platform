@@ -34,8 +34,10 @@ const handleLogout = async () => {
     } else {
       if (window.RouteUtils) {
         window.RouteUtils.redirectToLogin();
+      } else if (window.globalRoutes) {
+        window.location.href = window.globalRoutes.getPageUrl('login');
       } else {
-        console.warn('RouteUtils not available, using fallback');
+        console.warn('Neither RouteUtils nor globalRoutes available, using fallback');
         window.location.href = '/src/pages/auth/login.html';
       }
     }
@@ -173,15 +175,20 @@ if (loginForm) {
         const expiresAt = new Date().getTime() + data.expires_in * 1000;
         localStorage.setItem('tokenExpires', expiresAt.toString());
 
+
+
         // Redirect using route config
         if (window.RouteUtils) {
           window.RouteUtils.redirectToDashboard();
+        } else if (window.globalRoutes) {
+          window.location.href = window.globalRoutes.getPageUrl('dashboard');
         } else {
-          console.warn('RouteUtils not available, using fallback');
+          console.warn('Neither RouteUtils nor globalRoutes available, using fallback');
           window.location.href = '/src/pages/dashboard/index.html';
         }
       } else {
         errorDiv.textContent = data.message || 'Login failed.';
+        errorDiv.classList.remove('hidden');
         errorDiv.style.display = 'block';
       }
     } catch (error) {
@@ -190,6 +197,8 @@ if (loginForm) {
     }
   });
 }
+
+
 
 const registerForm = document.getElementById('register-form');
 if (registerForm) {
@@ -222,8 +231,10 @@ if (registerForm) {
         // Redirect using route config
         if (window.RouteUtils) {
           window.RouteUtils.redirectToDashboard();
+        } else if (window.globalRoutes) {
+          window.location.href = window.globalRoutes.getPageUrl('dashboard');
         } else {
-          console.warn('RouteUtils not available, using fallback');
+          console.warn('Neither RouteUtils nor globalRoutes available, using fallback');
           window.location.href = '/src/pages/dashboard/index.html';
         }
       } else {

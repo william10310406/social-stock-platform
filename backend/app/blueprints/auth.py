@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 import jwt
 from flask import Blueprint, current_app, jsonify, request
@@ -181,3 +181,6 @@ def logout_all(current_user):
     TokenManager.revoke_refresh_token(current_user.id)
 
     return jsonify({"message": "Logged out from all devices successfully"}), 200
+
+
+

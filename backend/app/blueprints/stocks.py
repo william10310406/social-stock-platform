@@ -15,65 +15,61 @@ CORS(stocks_bp)
 @token_required
 def get_stocks(current_user):
     """獲取股票列表，支援搜尋和分頁"""
-    try:
-        # 獲取查詢參數
-        page = request.args.get("page", 1, type=int)
-        per_page = min(request.args.get("per_page", 20, type=int), 100)
-        search = request.args.get("search", "").strip()
-        exchange = request.args.get("exchange", "").strip()
-        market_type = request.args.get("market_type", "").strip()
+    # 獲取查詢參數
+    page = request.args.get("page", 1, type=int)
+    per_page = min(request.args.get("per_page", 20, type=int), 100)
+    search = request.args.get("search", "").strip()
+    exchange = request.args.get("exchange", "").strip()
+    market_type = request.args.get("market_type", "").strip()
 
-        # 構建查詢
-        query = Stock.query
+    # 構建查詢
+    query = Stock.query
 
-        # 搜尋條件
-        if search:
-            query = query.filter(
-                db.or_(Stock.symbol.like(f"%{search}%"), Stock.name.like(f"%{search}%"))
-            )
-
-        if exchange:
-            query = query.filter(Stock.exchange == exchange)
-
-        if market_type:
-            query = query.filter(Stock.market_type == market_type)
-
-        # 排序和分頁
-        query = query.order_by(Stock.symbol)
-        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-
-        stocks = []
-        for stock in pagination.items:
-            stock_data = stock.to_dict()
-
-            # 獲取最新價格
-            latest_price = stock.get_latest_price()
-            if latest_price:
-                stock_data.update(
-                    {
-                        "latest_price": latest_price.to_dict(),
-                        "last_updated": latest_price.trade_date.isoformat(),
-                    }
-                )
-
-            stocks.append(stock_data)
-
-        return jsonify(
-            {
-                "stocks": stocks,
-                "pagination": {
-                    "page": page,
-                    "pages": pagination.pages,
-                    "per_page": per_page,
-                    "total": pagination.total,
-                    "has_next": pagination.has_next,
-                    "has_prev": pagination.has_prev,
-                },
-            }
+    # 搜尋條件
+    if search:
+        query = query.filter(
+            db.or_(Stock.symbol.like(f"%{search}%"), Stock.name.like(f"%{search}%"))
         )
 
-    except Exception as e:
-        return jsonify({"error": f"獲取股票列表失敗: {str(e)}"}), 500
+    if exchange:
+        query = query.filter(Stock.exchange == exchange)
+
+    if market_type:
+        query = query.filter(Stock.market_type == market_type)
+
+    # 排序和分頁
+    query = query.order_by(Stock.symbol)
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    stocks = []
+    for stock in pagination.items:
+        stock_data = stock.to_dict()
+
+        # 獲取最新價格
+        latest_price = stock.get_latest_price()
+        if latest_price:
+            stock_data.update(
+                {
+                    "latest_price": latest_price.to_dict(),
+                    "last_updated": latest_price.trade_date.isoformat(),
+                }
+            )
+
+        stocks.append(stock_data)
+
+    return jsonify(
+        {
+            "stocks": stocks,
+            "pagination": {
+                "page": page,
+                "pages": pagination.pages,
+                "per_page": per_page,
+                "total": pagination.total,
+                "has_next": pagination.has_next,
+                "has_prev": pagination.has_prev,
+            },
+        }
+    )
 
 
 @stocks_bp.route("/<symbol>", methods=["GET"])
@@ -382,4 +378,4 @@ def get_market_statistics(current_user):
         )
 
     except Exception as e:
-        return jsonify({"error": f"獲取統計資訊失敗: {str(e)}"}), 500
+        return jsonify({"error": f"獲取統計資料失敗: {str(e)}"}), 500

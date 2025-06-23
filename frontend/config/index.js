@@ -106,6 +106,62 @@ const TEST_CONFIG = {
   mobile: ['Pixel 5', 'iPhone 12'],
 };
 
+// 雙資料庫配置
+const DUAL_DATABASE_CONFIG = {
+  architecture_type: 'hot-cold-separation',
+  hot_database: {
+    name: 'StockInsight_Hot',
+    engine: 'MSSQL Server 2022',
+    purpose: 'real-time and active data',
+    retention_days: 30,
+    host: process.env.MSSQL_HOST || 'stock-insight-hot-db',
+    port: process.env.MSSQL_PORT || 1433,
+    database: process.env.MSSQL_HOT_DATABASE || 'StockInsight_Hot',
+    connection_pool: {
+      size: 20,
+      max_overflow: 30,
+      timeout: 30,
+      recycle: 3600,
+    },
+  },
+  cold_database: {
+    name: 'StockInsight_Cold',
+    engine: 'PostgreSQL 14',
+    purpose: 'historical and analytical data',
+    retention_policy: 'permanent',
+    host: process.env.POSTGRES_HOST || 'stock-insight-cold-db',
+    port: process.env.POSTGRES_PORT || 5432,
+    database: process.env.POSTGRES_COLD_DATABASE || 'StockInsight_Cold',
+    connection_pool: {
+      size: 10,
+      max_overflow: 20,
+      timeout: 60,
+      recycle: 7200,
+    },
+  },
+  data_distribution: {
+    hot_tables: [
+      'users', 'conversations', 'messages', 'posts', 'comments', 
+      'likes', 'stocks', 'stock_prices', 'user_stocks', 'news',
+    ],
+    cold_tables: [
+      'messages_archive', 'posts_archive', 'stock_prices_history',
+      'user_behavior_analytics', 'market_trend_analysis',
+    ],
+  },
+  archival_settings: {
+    enabled: process.env.ARCHIVAL_ENABLED === 'true',
+    cutoff_days: parseInt(process.env.ARCHIVAL_CUTOFF_DAYS) || 30,
+    schedule: process.env.ARCHIVAL_SCHEDULE || '0 2 * * *',
+    batch_size: 1000,
+  },
+  monitoring: {
+    enabled: process.env.MONITORING_ENABLED === 'true',
+    performance_threshold_ms: parseInt(process.env.PERFORMANCE_THRESHOLD_MS) || 100,
+    storage_alert_threshold: parseInt(process.env.STORAGE_ALERT_THRESHOLD) || 85,
+  },
+};
+
 // =============================================================================
 // 配置生成器函數
 // =============================================================================
@@ -279,6 +335,67 @@ export function createPlaywrightConfig() {
 }
 
 // =============================================================================
+// 雙資料庫配置生成器
+// =============================================================================
+export function getDualDatabaseConfig(mode = 'development') {
+  return {
+    ...DUAL_DATABASE_CONFIG,
+    environment: mode,
+    isEnabled: mode === 'dual_database' || process.env.DUAL_DATABASE_ENABLED === 'true',
+  };
+}
+
+// 獲取熱資料庫配置
+export function getHotDatabaseConfig() {
+  return DUAL_DATABASE_CONFIG.hot_database;
+}
+
+// 獲取冷資料庫配置
+export function getColdDatabaseConfig() {
+  return DUAL_DATABASE_CONFIG.cold_database;
+}
+
+// 獲取數據歸檔配置
+export function getArchivalConfig() {
+  return DUAL_DATABASE_CONFIG.archival_settings;
+}
+
+// 獲取監控配置
+export function getMonitoringConfig() {
+  return DUAL_DATABASE_CONFIG.monitoring;
+}
+
+// 生成後端 Flask 配置
+export function createFlaskDualDatabaseConfig() {
+  const hotConfig = getHotDatabaseConfig();
+  const coldConfig = getColdDatabaseConfig();
+  
+  return {
+    SQLALCHEMY_DATABASE_URI: `mssql+pyodbc://${process.env.MSSQL_USER || 'sa'}:${process.env.MSSQL_SA_PASSWORD}@${hotConfig.host}:${hotConfig.port}/${hotConfig.database}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes`,
+    SQLALCHEMY_BINDS: {
+      hot: `mssql+pyodbc://${process.env.MSSQL_USER || 'sa'}:${process.env.MSSQL_SA_PASSWORD}@${hotConfig.host}:${hotConfig.port}/${hotConfig.database}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes`,
+      cold: `postgresql://${process.env.POSTGRES_USER || 'postgres'}:${process.env.POSTGRES_PASSWORD}@${coldConfig.host}:${coldConfig.port}/${coldConfig.database}`,
+    },
+    SQLALCHEMY_ENGINE_OPTIONS: {
+      pool_size: hotConfig.connection_pool.size,
+      max_overflow: hotConfig.connection_pool.max_overflow,
+      pool_timeout: hotConfig.connection_pool.timeout,
+      pool_recycle: hotConfig.connection_pool.recycle,
+      pool_pre_ping: true,
+    },
+    SQLALCHEMY_BINDS_ENGINE_OPTIONS: {
+      cold: {
+        pool_size: coldConfig.connection_pool.size,
+        max_overflow: coldConfig.connection_pool.max_overflow,
+        pool_timeout: coldConfig.connection_pool.timeout,
+        pool_recycle: coldConfig.connection_pool.recycle,
+        pool_pre_ping: true,
+      },
+    },
+  };
+}
+
+// =============================================================================
 // 導出配置常量
 // =============================================================================
-export { BASE_PATHS, PAGE_ENTRIES, ENV_CONFIG, THEME_CONFIG, TEST_CONFIG };
+export { BASE_PATHS, PAGE_ENTRIES, ENV_CONFIG, THEME_CONFIG, TEST_CONFIG, DUAL_DATABASE_CONFIG };

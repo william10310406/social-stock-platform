@@ -10,9 +10,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .extensions import db
 
 # This should be set as an environment variable in a real application
-SECRET_ENCRYPTION_KEY = os.environ.get("FERNET_KEY", Fernet.generate_key().decode("utf-8")).encode(
-    "utf-8"
-)
+_fernet_key = os.environ.get("FERNET_KEY")
+if _fernet_key:
+    SECRET_ENCRYPTION_KEY = _fernet_key.encode("utf-8")
+else:
+    # Generate a new key for development
+    SECRET_ENCRYPTION_KEY = Fernet.generate_key()
+
 f = Fernet(SECRET_ENCRYPTION_KEY)
 
 

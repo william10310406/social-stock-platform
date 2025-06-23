@@ -1,9 +1,10 @@
 # 🧠 Stock Insight Platform - 項目記憶中心
 
-## 🎉 **最新重大更新 (2025-06-22)**
-✨ **116支完整台股數據導入完成！** Platform 正式進入生產就緒階段  
-📊 **1,730筆價格記錄** 成功載入，中文編碼100%支持  
-🎯 **詳細報告**: `frontend/docs/reports/COMPLETE_TAIWAN_STOCK_DATA_IMPORT_REPORT.md`
+## 🎉 **最新重大更新 (2025-06-23)**
+🚀 **雙資料庫大規模股票數據導入完成！** 系統升級到企業級架構  
+📊 **1,312支股票，19,650筆價格記錄** 成功載入雙資料庫  
+🗄️ **雙資料庫架構**: 熱庫(MSSQL) + 冷庫(PostgreSQL) 完全運行  
+🎯 **詳細報告**: `frontend/docs/reports/STOCK_DATA_IMPORT_CONFIRMATION_REPORT.md`
 
 ## 📖 給新加入開發者和 AI 工具的快速指南
 
@@ -51,7 +52,8 @@ memory/
 ├── TECH_STACK_DECISIONS.md      # 🛠️ 技術棧選擇原因
 ├── COMMON_COMMANDS.md           # 💻 常用命令速查
 ├── TESTING_CHECKLIST.md        # 🧪 測試檢查清單
-└── TROUBLESHOOTING.md           # 🔧 常見問題解決
+├── TROUBLESHOOTING.md           # 🔧 常見問題解決
+└── DATABASE_IMPORT_GUIDE.md     # 📊 數據庫導入操作指南 (⭐ 新增)
 ```
 
 ---
@@ -69,6 +71,7 @@ memory/
 2. **架構**: `ARCHITECTURE_SUMMARY.md` - 了解技術決策
 3. **規範**: `DEVELOPMENT_RULES.md` - 遵循開發標準
 4. **測試**: `TESTING_CHECKLIST.md` - 確保代碼品質
+5. **數據導入**: `DATABASE_IMPORT_GUIDE.md` - 學習數據庫操作流程
 
 ### 🔧 **DevOps 工程師**
 1. 查看 `TECH_STACK_DECISIONS.md` 了解部署架構
