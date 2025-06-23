@@ -1,0 +1,15 @@
+version: "2"
+authtoken: # 如果有 ngrok 帳號可以填入 authtoken
+
+tunnels:
+  frontend:
+    proto: http
+    addr: 5173
+    bind_tls: true
+    inspect: true
+    
+  backend:
+    proto: http
+    addr: 5001
+    bind_tls: true
+    inspect: true 

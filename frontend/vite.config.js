@@ -25,20 +25,24 @@ export default defineConfig({
     },
     cors: {
       origin: (origin, callback) => {
-        // 允許 Docker、本地開發環境和網路訪問
+        // 允許 Docker、本地開發環境、網路訪問和 ngrok
         const allowedOrigins = [
           'http://localhost:5173',
           'http://127.0.0.1:5173',
           'http://0.0.0.0:5173',
           'http://192.168.1.106:5173',  // 手機訪問
+          'https://2db9-1-161-62-121.ngrok-free.app',  // ngrok 遠程訪問
         ];
 
         // 如果沒有 origin（同源請求）或在允許列表中，則允許
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
-          // 開發模式下允許所有本地網路請求
-          if (origin && origin.match(/^http:\/\/(192\.168\.|172\.16\.|10\.|localhost|127\.0\.0\.1)/)) {
+          // 開發模式下允許本地網路和 ngrok 請求
+          if (origin && (
+            origin.match(/^http:\/\/(192\.168\.|172\.16\.|10\.|localhost|127\.0\.0\.1)/) ||
+            origin.match(/^https:\/\/.*\.ngrok.*\.app$/)  // 支援所有 ngrok 網址
+          )) {
             callback(null, true);
           } else {
             console.log('❌ CORS blocked origin:', origin);
