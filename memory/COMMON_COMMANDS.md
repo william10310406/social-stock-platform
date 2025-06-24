@@ -275,6 +275,52 @@ npm run deploy
 
 ---
 
+## 🗄️ **Docker 資料庫指令 (已驗證)**
+
+### 📊 **MSSQL 熱資料庫**
+```bash
+# 正確指令模板 (關鍵: mssql-tools18 + -C 參數)
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -d StockInsight_Hot -Q "SQL查詢"
+
+# 查詢股票總數
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -d StockInsight_Hot -Q "SELECT COUNT(*) as total_stocks FROM stocks"
+
+# 查詢價格記錄總數
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -d StockInsight_Hot -Q "SELECT COUNT(*) as total_prices FROM stock_prices"
+```
+
+### 🐘 **PostgreSQL 冷資料庫**
+```bash
+# 正確指令模板 (關鍵: 用戶是 postgres)
+docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SQL查詢"
+
+# 查詢分析記錄總數
+docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELECT COUNT(*) as total_analysis FROM stock_analysis"
+
+# 查看表格列表
+docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "\dt"
+```
+
+### 🔧 **容器狀態檢查**
+```bash
+# 查看所有容器狀態
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# 檢查環境變數
+docker exec stock-insight-hot-db printenv | grep MSSQL_SA_PASSWORD
+docker exec stock-insight-cold-db printenv | grep POSTGRES
+```
+
+⚠️ **常見錯誤避免**:
+- 使用 `mssql-tools18` 不是 `mssql-tools`
+- 必須加 `-C` 參數信任證書
+- PostgreSQL 用戶是 `postgres` 不是 `stockinsight`
+- 密碼用單引號包圍: `'StrongP@ssw0rd!'`
+
+📖 **詳細指南**: `frontend/docs/guides/DOCKER_DATABASE_COMMANDS_GUIDE.md`
+
+---
+
 ## 🔧 **故障排除**
 
 ### 🐛 **常見問題解決**

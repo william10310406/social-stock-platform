@@ -36,7 +36,8 @@ docs/
 ├── 📖 guides/                    # 開發指南
 │   ├── DEVELOPMENT_SAFETY.md     # 開發安全實踐
 │   ├── TESTING_STRATEGY.md       # 測試策略
-│   └── LIB_TESTING_GUIDE.md      # 組件庫測試指南
+│   ├── LIB_TESTING_GUIDE.md      # 組件庫測試指南
+│   └── DOCKER_DATABASE_COMMANDS_GUIDE.md  # **NEW** Docker 資料庫指令指南
 └── 🛡️ best-practices/           # 最佳實踐
     └── DEFENSIVE_PROGRAMMING_SOLUTION.md  # 防禦性編程解決方案
 ```
@@ -165,6 +166,12 @@ docs/
 - **完整測試工具鏈**: 從開發到生產的測試覆蓋
 - **故障排除指南**: 常見問題解決方案
 
+#### [`DOCKER_DATABASE_COMMANDS_GUIDE.md`](./guides/DOCKER_DATABASE_COMMANDS_GUIDE.md) 🗄️ **Docker 資料庫指令指南** ⭐ **最新**
+- **雙資料庫指令**: MSSQL 熱資料庫 + PostgreSQL 冷資料庫正確指令
+- **常見錯誤避免**: SSL證書、工具路徑、認證問題完整解決方案
+- **驗證過的指令**: 所有指令經過實際測試，避免配置錯誤
+- **快速檢查腳本**: 一鍵檢查整個雙資料庫系統狀態
+
 ---
 
 ## 🛡️ 最佳實踐 (`best-practices/`)
@@ -198,6 +205,7 @@ docs/
 | JavaScript 模組關係 | 依賴關係圖 | `architecture/javascript-dependencies.yaml` |
 | 路徑管理系統 | 路徑架構 | `architecture/path-config-architecture.yaml` |
 | 開發規範 | 安全指南 | `guides/DEVELOPMENT_SAFETY.md` |
+| **🗄️ Docker 資料庫指令** | **Docker 指令指南** | `guides/DOCKER_DATABASE_COMMANDS_GUIDE.md` |
 | 測試策略 | 測試指南 | `guides/TESTING_STRATEGY.md` |
 | 防禦性編程 | 最佳實踐 | `best-practices/DEFENSIVE_PROGRAMMING_SOLUTION.md` |
 | 項目歷程 | 遷移報告 | `reports/MIGRATION_REPORT.md` |
