@@ -15,6 +15,15 @@
 | `CM_SUBCONSCIOUS` | Compressed pool | TBD (zstd) |
 | `CM_COLLECTIVE` | Shared pages across nodes | TBD (NUMA/RDMA) |
 
+### 1.1 Backend Mapping (v0.2)
+| Level | Allocator |
+|-------|-----------|
+| SHORT_TERM | Slab (page-size cache) |
+| WORKING    | Buddy (power-of-two pages) |
+| LONG_TERM  | malloc (TBD: file-backed) |
+| SUBCONSCIOUS | malloc (TBD: compressed pool) |
+| COLLECTIVE | malloc (TBD: RDMA shared) |
+
 ---
 
 ## 2. API Semantics

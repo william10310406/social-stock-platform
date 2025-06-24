@@ -336,3 +336,10 @@ docs/
   - `docs/reports/CRAZY_MEMORY_IMPLEMENTATION_REPORT.md`
   - `docs/technical/CRAZY_MEMORY_TECHNICAL_SPECS.md`
 - **後續**: Buddy/Slab、Header size tracking、壓縮池、RDMA 共享 
+
+### 2025-06-24: Buddy / Slab allocator MVP 整合 ✅
+
+- **功能**: SHORT_TERM 使用 Slab、WORKING 使用 Buddy (stub) 
+- **檔案**: buddy_allocator.*、slab_allocator.*、crazy_memory.c 更新
+- **測試**: `test_cm2` 通過
+- **後續**: 真正 Buddy split/merge、size header、Slab free list 

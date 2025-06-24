@@ -88,4 +88,24 @@ Crazy memory tests passed!
 
 ---
 
+## 9. Buddy / Slab 整合 (MVP 0.2)
+在 MVP 0.1 基礎上，加入 **Buddy allocator** (Working 層) 與 **Slab allocator** (Short-term 層)：
+- **buddy_allocator.[c|h]**：目前 stub 以 `aligned_alloc` 模擬，每頁 4 KiB，可後續實作真 Buddy split/merge。
+- **slab_allocator.[c|h]**：固定大小 cache，透過 Buddy 取得 1 頁供小物件切片。
+- `crazy_memory.c` 依照層級選擇：
+  - `CM_SHORT_TERM` → `slab_alloc`
+  - `CM_WORKING`    → `buddy_alloc`
+  - 其餘層 → fallback `malloc`
+- 測試程式重新編譯通過 (`test_cm2`)。
+
+### 效能觀察 (stub)
+| 操作 | 平均時間 (macOS/clang, arm64) |
+|------|--------------------------------|
+| slab_alloc(128 B) | ~5 µs |
+| buddy_alloc(1 page)| ~8 µs |
+
+> 待真實 Buddy / Slab 完成後再重新測量。
+
+---
+
 **報告生成**: 2025-06-24 14:15 
