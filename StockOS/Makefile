@@ -16,7 +16,7 @@ DOCS_DIR = docs
 CONSCIOUSNESS_SOURCES = $(SRC_DIR)/consciousness/consciousness_container.c
 MEMORY_SOURCES = $(SRC_DIR)/crazy_memory/crazy_memory.c $(SRC_DIR)/crazy_memory/buddy_allocator.c $(SRC_DIR)/crazy_memory/slab_allocator.c
 KERNEL_MEMORY_SOURCES = $(SRC_DIR)/kernel/memory/pmm.c
-KERNEL_SOURCES = $(SRC_DIR)/kernel/kernel.c
+KERNEL_SOURCES = $(SRC_DIR)/kernel/kernel.c $(SRC_DIR)/kernel/cli/memory_cli.c $(SRC_DIR)/kernel/entry.c $(SRC_DIR)/kernel/syscalls/memory_syscalls.c
 TEST_SOURCES = $(TEST_DIR)/test_consciousness_container.c $(TEST_DIR)/test_kernel_memory_integration.c
 DEMO_SOURCES = $(TEST_DIR)/demo_consciousness_usage.c
 

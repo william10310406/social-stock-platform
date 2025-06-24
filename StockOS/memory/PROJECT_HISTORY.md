@@ -375,6 +375,19 @@ Total Tests Run: 8, Passed: 8, Failed: 0 (100%)
 2. Memory CLI MVP (`meminfo`, `buddy stat`, `slab stat`)。  
 3. Bootloader + QEMU 啟動核心。
 
+### 2025-06-24: Memory CLI MVP 完成 ✅
+
+#### 主要成就
+* **CLI 指令**：help / meminfo / buddy stat / slab stat / exit。
+* **使用者空間入口**：`entry.c` 無需 VGA，便於容器或 CI 執行。
+* **Makefile 更新**：將 CLI 與 entry 納入 `kernel` 目標，可 `make kernel` 直接互動。
+* **報告/規格**：`docs/reports/MEMORY_CLI_MVP_IMPLEMENTATION_REPORT.md`、`docs/technical/MEMORY_CLI_SPECS.md`。
+
+#### 下一步
+1. 實作 alloc/free 指令與 stress 測試。  
+2. 互動功能：歷史、補全、顏色。  
+3. Bootloader + QEMU 整合後沿用同一 CLI。
+
 ---
 
 **最後更新**：2025-06-24
