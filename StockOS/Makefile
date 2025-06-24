@@ -220,7 +220,9 @@ help:
 	@echo "  docs             - Generate documentation with Doxygen"
 	@echo "  benchmark        - Run performance benchmarks"
 	@echo "  memcheck         - Run memory leak detection"
-	@echo "  help             - Show this help message"
+	@echo "  docker-build     - Build cross-compile Docker image"
+	@echo "  iso              - Build bootable StockOS.iso (Limine)"
+	@echo "  qemu             - Run ISO in QEMU (serial console)"
 	@echo ""
 	@echo "🚀 Quick Start for Kernel Memory Testing:"
 	@echo "  make test_memory  - Test the integrated memory system"
@@ -242,4 +244,34 @@ $(TEST_DIR)/test_consciousness_container.o: $(SRC_DIR)/consciousness/consciousne
 $(TEST_DIR)/demo_consciousness_usage.o: $(SRC_DIR)/consciousness/consciousness_container.h
 
 # 偽目標
-.PHONY: all build_dir memory_lib consciousness_lib kernel test_consciousness test_kernel_memory demo_consciousness test test_memory test_all test_verbose test_memory_verbose demo demo_verbose clean install uninstall lint analyze docs benchmark memcheck help 
+.PHONY: all build_dir memory_lib consciousness_lib kernel test_consciousness test_kernel_memory demo_consciousness test test_memory test_all test_verbose test_memory_verbose demo demo_verbose clean install uninstall lint analyze docs benchmark memcheck help
+
+# ---------------- Bootloader / ISO / QEMU ----------------
+ISO_NAME = StockOS.iso
+ASM = nasm
+CLANG = clang
+
+# Recompile kernel C sources for x86_64-elf using Clang
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CLANG) --target=x86_64-elf -I./src -ffreestanding -O2 -c $< -o $@
+
+KERNEL_CLANG_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(KERNEL_SOURCES))
+
+kernel.elf: boot/stage1.asm $(KERNEL_CLANG_OBJECTS)
+	$(ASM) -f elf64 boot/stage1.asm -o $(BUILD_DIR)/stage1.o
+	$(CLANG) --target=x86_64-elf -T boot/linker.ld -nostdlib -ffreestanding -Wl,-z,max-page-size=0x200000 -o $(BUILD_DIR)/kernel.elf $(BUILD_DIR)/stage1.o $(KERNEL_CLANG_OBJECTS)
+
+iso: kernel.elf
+	cp $(BUILD_DIR)/kernel.elf boot/kernel.elf
+	cp boot/limine.cfg build/
+	/opt/limine/limine-install build
+	mv build/image.iso $(ISO_NAME)
+	@echo "✅ ISO created: $(ISO_NAME)"
+
+qemu: iso
+	qemu-system-x86_64 -cdrom $(ISO_NAME) -m 256M -serial stdio -no-reboot -no-shutdown | cat
+
+# Build Docker image for cross environment
+docker-build:
+	docker build -t stockos/dev-x86_64 docker/dev 

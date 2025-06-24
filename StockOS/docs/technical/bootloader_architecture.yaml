@@ -1,0 +1,63 @@
+#%YAML 1.2
+---
+name: StockOS Bootloader & QEMU Environment
+version: 0.1.0
+maintainer: ai-o3
+last_updated: 2025-06-24
+
+bootloader:
+  type: limine
+  limine_repo: "https://github.com/limine-bootloader/limine"
+  pinned_commit: "<to-fill-after-submodule>"
+  spec: stivale2
+  entry_asm: boot/stage1.asm
+  linker_script: boot/linker.ld
+  config_file: boot/limine.cfg
+  output_iso: StockOS.iso
+  console: serial # uart → stdio (qemu -serial stdio)
+
+kernel_entry:
+  file: src/kernel/boot.c
+  function: kmain
+  parameters:
+    - name: stivale2_struct
+      type: "struct stivale2_struct*"
+      description: Root header provided by bootloader, contains memory map, cmdline, framebuffer etc.
+
+filesystem_layout:
+  boot/
+    limine/: "Bootloader binaries & install script"
+    stage1.asm: "real→protected→long mode switch, embeds stivale2 header"
+    linker.ld: "2 MiB aligned sections for higher-half kernel"
+    limine.cfg: "Boot menu & serial settings"
+  docker/
+    dev/Dockerfile: "Cross-compile environment (x86_64-elf toolchain, qemu, limine)"
+
+container_image:
+  name: ghcr.io/stockos/dev-x86_64
+  tag: "2025-06-24"
+  packages:
+    x86_64-elf-gcc: ">=13.2.0"
+    nasm: ">=2.16.01"
+    limine: ">=v4.202401"
+    grub-mkrescue: latest
+    qemu-system-x86_64: ">=9.0.0"
+  purpose: "Reproducible build & run of StockOS ISO inside CI and developer machines"
+
+make_targets:
+  kernel.elf: "Cross-linked kernel binary using linker.ld"
+  iso: "$(MAKE) kernel.elf → limine-install → StockOS.iso"
+  qemu: "qemu-system-x86_64 -cdrom StockOS.iso -m 256M -serial stdio"
+  docker-build: "docker build -t $(IMAGE) docker/dev"
+
+roadmap:
+  short_term:
+    - "Boot to CLI over serial"
+    - "Parse stivale2 memory map and init PMM"
+  mid_term:
+    - "Enable framebuffer tag; draw text UI"
+    - "UEFI boot validation"
+  long_term:
+    - "GUI stack (mode-setting, double-buffer, window manager)"
+    - "Secure Boot & TPM measurements"
+--- 

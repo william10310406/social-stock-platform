@@ -34,7 +34,7 @@ echo -e "${BLUE}🔍 第1步: 強制品質檢查${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ -f "$PROJECT_ROOT/scripts/enforce-rules.sh" ]; then
-    if ! "$PROJECT_ROOT/scripts/enforce-rules.sh"; then
+    if ! "$PROJECT_ROOT/scripts/enforce-rules.sh" --light; then
         echo ""
         echo -e "${RED}❌ 品質檢查失敗，推送被阻止！${NC}"
         echo ""

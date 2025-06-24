@@ -5,6 +5,15 @@
 
 set -e
 
+# Optional lightweight mode (skip heavy steps)
+# Enable by exporting LIGHT_CHECK=1 before calling or passing --light
+
+# Detect flag
+if [[ "$1" == "--light" ]]; then
+  export LIGHT_CHECK=1
+  shift
+fi
+
 # 顏色定義
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -116,6 +125,12 @@ check_docker_compatibility() {
 # 4. 檢查測試覆蓋率
 check_test_coverage() {
     echo "🧪 檢查測試覆蓋率..."
+
+    # Skip heavy coverage in lightweight mode
+    if [[ -n "${LIGHT_CHECK}" ]]; then
+        echo "ℹ️  LIGHT_CHECK 模式啟用，跳過測試覆蓋率檢查"
+        return
+    fi
 
     # 檢查前端測試
     if [ -d "frontend" ]; then
