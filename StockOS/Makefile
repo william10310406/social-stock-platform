@@ -17,7 +17,14 @@ CONSCIOUSNESS_SOURCES = $(SRC_DIR)/consciousness/consciousness_container.c
 MEMORY_SOURCES = $(SRC_DIR)/crazy_memory/crazy_memory.c $(SRC_DIR)/crazy_memory/buddy_allocator.c $(SRC_DIR)/crazy_memory/slab_allocator.c
 KERNEL_MEMORY_SOURCES = $(SRC_DIR)/kernel/memory/pmm.c
 KERNEL_SOURCES = $(SRC_DIR)/kernel/kernel.c $(SRC_DIR)/kernel/cli/memory_cli.c $(SRC_DIR)/kernel/entry.c $(SRC_DIR)/kernel/syscalls/memory_syscalls.c
-TEST_SOURCES = $(TEST_DIR)/test_consciousness_container.c $(TEST_DIR)/test_kernel_memory_integration.c
+
+# 測試源文件
+TEST_CONSCIOUSNESS_SOURCES = $(TEST_DIR)/test_consciousness_container.c
+TEST_CONSCIOUSNESS_OBJECTS = $(TEST_CONSCIOUSNESS_SOURCES:.c=.o)
+
+TEST_MEMORY_SOURCES = $(TEST_DIR)/test_kernel_memory_integration.c
+TEST_MEMORY_OBJECTS = $(TEST_MEMORY_SOURCES:.c=.o)
+
 DEMO_SOURCES = $(TEST_DIR)/demo_consciousness_usage.c
 
 # 目標文件
@@ -25,7 +32,7 @@ CONSCIOUSNESS_OBJECTS = $(CONSCIOUSNESS_SOURCES:.c=.o)
 MEMORY_OBJECTS = $(MEMORY_SOURCES:.c=.o)
 KERNEL_MEMORY_OBJECTS = $(KERNEL_MEMORY_SOURCES:.c=.o)
 KERNEL_OBJECTS = $(KERNEL_SOURCES:.c=.o)
-TEST_OBJECTS = $(TEST_SOURCES:.c=.o)
+TEST_OBJECTS = $(TEST_CONSCIOUSNESS_OBJECTS) $(TEST_MEMORY_OBJECTS)
 DEMO_OBJECTS = $(DEMO_SOURCES:.c=.o)
 
 # 可執行文件
@@ -57,9 +64,9 @@ consciousness_lib: build_dir $(CONSCIOUSNESS_OBJECTS)
 	@echo "✅ Consciousness library built: $(CONSCIOUSNESS_LIB)"
 
 # 編譯測試
-test_consciousness: consciousness_lib $(TEST_OBJECTS)
+test_consciousness: consciousness_lib memory_lib $(TEST_CONSCIOUSNESS_OBJECTS)
 	@echo "🧪 Building consciousness tests..."
-	$(CC) $(CFLAGS) $(INCLUDES) $(TEST_OBJECTS) $(CONSCIOUSNESS_LIB) $(LIBS) -o $(TEST_EXECUTABLE)
+	$(CC) $(CFLAGS) $(INCLUDES) $(TEST_CONSCIOUSNESS_OBJECTS) $(CONSCIOUSNESS_LIB) $(MEMORY_LIB) $(LIBS) -o $(TEST_EXECUTABLE)
 	@echo "✅ Consciousness tests built: $(TEST_EXECUTABLE)"
 
 # 編譯演示程序
@@ -69,9 +76,9 @@ demo_consciousness: consciousness_lib $(DEMO_OBJECTS)
 	@echo "✅ Consciousness demo built: $(DEMO_EXECUTABLE)"
 
 # 編譯內核記憶體測試
-test_kernel_memory: memory_lib consciousness_lib
+test_kernel_memory: memory_lib consciousness_lib $(TEST_MEMORY_OBJECTS)
 	@echo "🧪 Building kernel memory integration test..."
-	$(CC) $(CFLAGS) $(INCLUDES) $(TEST_DIR)/test_kernel_memory_integration.c $(MEMORY_LIB) $(CONSCIOUSNESS_LIB) $(LIBS) -o $(TEST_KERNEL_MEMORY)
+	$(CC) $(CFLAGS) $(INCLUDES) $(TEST_MEMORY_OBJECTS) $(MEMORY_LIB) $(CONSCIOUSNESS_LIB) $(LIBS) -o $(TEST_KERNEL_MEMORY)
 	@echo "✅ Kernel memory test built: $(TEST_KERNEL_MEMORY)"
 
 # 編譯完整內核 (簡化版，僅用於測試)
@@ -118,7 +125,7 @@ test_all: test test_memory
 clean:
 	@echo "🧹 Cleaning build files..."
 	rm -rf $(BUILD_DIR)
-	rm -f $(CONSCIOUSNESS_OBJECTS) $(MEMORY_OBJECTS) $(KERNEL_MEMORY_OBJECTS) $(KERNEL_OBJECTS) $(TEST_OBJECTS) $(DEMO_OBJECTS)
+	rm -f $(CONSCIOUSNESS_OBJECTS) $(MEMORY_OBJECTS) $(KERNEL_MEMORY_OBJECTS) $(KERNEL_OBJECTS) $(TEST_CONSCIOUSNESS_OBJECTS) $(TEST_MEMORY_OBJECTS) $(DEMO_OBJECTS)
 	rm -f test_output.log demo_output.log memory_test_output.log
 	@echo "✅ Clean complete"
 

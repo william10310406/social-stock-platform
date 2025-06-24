@@ -46,8 +46,8 @@ typedef struct {
     char input_buffer[CLI_BUFFER_SIZE];
     char output_buffer[CLI_OUTPUT_BUFFER_SIZE];
     
-    // 命令歷史
-    char history[16][CLI_BUFFER_SIZE];
+    // 命令歷史 (最多 64 條)
+    char history[64][CLI_BUFFER_SIZE];
     int history_count;
     int history_index;
     
