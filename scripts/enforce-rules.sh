@@ -37,6 +37,12 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # 切換到項目根目錄
 cd "$PROJECT_ROOT"
 
+# Allow StockOS kernel-only work to bypass heavy web checks
+if [[ -n "${OS_ONLY}" ]]; then
+    echo -e "${YELLOW}🛠️  OS_ONLY 模式啟用，跳過前端/後端規則檢查${NC}"
+    exit 0
+fi
+
 # 錯誤報告函數
 report_error() {
     echo -e "${RED}❌ 嚴重違規: $1${NC}"

@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 
 # 🔒 安全的 Git Push Wrapper
 # 強制執行所有檢查，無法跳過
@@ -21,6 +21,12 @@ echo ""
 # 獲取項目根目錄
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Detect if staged changes are only in StockOS directory (kernel project)
+if git diff --cached --name-only | grep -q "^StockOS/"; then
+    export OS_ONLY=1
+    echo -e "${YELLOW}🔧 檢測到 StockOS 相關變更，啟用 OS_ONLY 特例模式${NC}"
+fi
 
 # 檢查是否嘗試使用不安全的推送
 echo -e "${YELLOW}⚠️  重要提醒:${NC}"
