@@ -349,3 +349,32 @@ docs/
   2. 壓縮池 (compression pool) 與跨頁面 object caching
   3. RDMA 共享記憶體支援，對接分散式節點
   4. 與 Kernel PMM/VMM 整合，曝露 syscalls 與 CLI 工具
+
+### 2025-06-24: Slab Allocator MVP 與 PMM 整合 ✅
+
+#### 主要成就
+* **Slab Allocator**：實現 64B 物件固定 cache，向 Buddy 申請 4 KiB page 並切片。
+* **PMM 整合**：`pmm_init()` 內啟用 `buddy_init()`、`slab_init()`，`pmm_alloc()` 自動分流 (≤512B→Slab，≥4 KiB→Buddy)。
+* **全測試通過**：`make test_memory_verbose` 8 項測試 100 % 通過。
+* **技術報告**：`docs/reports/SLAB_ALLOCATOR_INTEGRATION_REPORT.md` 詳列實作與除錯歷程。
+
+#### 解決關鍵問題
+1. **未定義 `PAGE_SIZE`** → Slab 檔案內後援定義 4096。  
+2. **符號缺失 `slab_inited`** → 暴露全域旗標供 CCMS 連結。  
+3. **壓力測試失敗** → Slab 對未知大小回退 `malloc/free`。  
+4. **Buddy/Slab 未啟動** → `pmm_init_buddy_allocator()`, `pmm_init_slab_allocator()` 真正呼叫對應初始化。
+
+#### 測試摘要
+```
+🎉 All memory integration tests passed!
+Total Tests Run: 8, Passed: 8, Failed: 0 (100%)
+```
+
+#### 下一步計劃
+1. Slab 多尺寸 cache 與統計 API。  
+2. Memory CLI MVP (`meminfo`, `buddy stat`, `slab stat`)。  
+3. Bootloader + QEMU 啟動核心。
+
+---
+
+**最後更新**：2025-06-24

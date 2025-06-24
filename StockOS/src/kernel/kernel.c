@@ -2,6 +2,7 @@
 // 基於 Stock Insight Platform 的服務架構設計
 
 #include "kernel.h"
+#include <string.h>
 
 // 類似你的 RouteUtils，但用於 kernel 服務
 typedef struct {
@@ -13,6 +14,9 @@ typedef struct {
 // 類似你的組件庫概念，但用於 kernel 服務
 kernel_service_t services[] = {
     {"Memory Manager", memory_init, memory_cleanup},
+    {"PMM Service", (void*)pmm_service_init, (void*)pmm_service_cleanup},
+    {"Memory Syscalls", (void*)memory_syscalls_service_init, (void*)memory_syscalls_service_cleanup},
+    {"Memory CLI", (void*)memory_cli_service_init, (void*)memory_cli_service_cleanup},
     {"Process Manager", process_init, process_cleanup},
     {"File System", fs_init, fs_cleanup},
     {"Network Stack", network_init, network_cleanup},
@@ -189,4 +193,123 @@ void drivers_init(void) {
 
 void drivers_cleanup(void) {
     // 設備驅動清理
+}
+
+// ========================= 新增記憶體管理服務實現 =========================
+
+// 全域 PMM 管理器實例
+static pmm_manager_t g_kernel_pmm;
+static bool g_cli_mode = false;
+
+int pmm_service_init(void) {
+    // 創建模擬記憶體映射 (在實際實現中這來自 bootloader)
+    memory_map_t memory_map = {0};
+    memory_map.usable_memory = 64 * 1024 * 1024; // 64 MB 模擬記憶體
+    memory_map.total_memory = memory_map.usable_memory;
+    
+    int result = pmm_init(&g_kernel_pmm, &memory_map);
+    if (result != PMM_SUCCESS) {
+        print("PMM Service: Failed to initialize PMM\n");
+        return result;
+    }
+    
+    print("PMM Service: Physical Memory Manager initialized\n");
+    return 0;
+}
+
+void pmm_service_cleanup(void) {
+    pmm_cleanup(&g_kernel_pmm);
+    print("PMM Service: Physical Memory Manager cleaned up\n");
+}
+
+int memory_syscalls_service_init(void) {
+    int result = memory_syscalls_init();
+    if (result != 0) {
+        print("Memory Syscalls: Failed to initialize\n");
+        return result;
+    }
+    
+    print("Memory Syscalls: System call handlers initialized\n");
+    return 0;
+}
+
+void memory_syscalls_service_cleanup(void) {
+    print("Memory Syscalls: System call handlers cleaned up\n");
+}
+
+int memory_cli_service_init(void) {
+    int result = memory_cli_init();
+    if (result != 0) {
+        print("Memory CLI: Failed to initialize\n");
+        return result;
+    }
+    
+    print("Memory CLI: Command line interface initialized\n");
+    print("Memory CLI: Type 'help' for available commands\n");
+    print("Memory CLI: Type 'cli' to enter interactive mode\n");
+    return 0;
+}
+
+void memory_cli_service_cleanup(void) {
+    memory_cli_cleanup();
+    print("Memory CLI: Command line interface cleaned up\n");
+}
+
+// CLI 模式處理
+void kernel_enter_cli_mode(void) {
+    if (!g_cli_mode) {
+        g_cli_mode = true;
+        print("\n=== StockOS Memory Management CLI ===\n");
+        print("Type 'help' for commands, 'exit' to return to kernel\n");
+        print("StockOS> ");
+        
+        // 進入 CLI 主循環
+        memory_cli_main_loop();
+        
+        g_cli_mode = false;
+        print("\nReturning to kernel mode...\n");
+    }
+}
+
+void kernel_handle_cli_command(const char* command) {
+    if (command && strlen(command) > 0) {
+        if (strcmp(command, "cli") == 0) {
+            kernel_enter_cli_mode();
+        } else {
+            // 執行單個命令
+            int result = memory_cli_execute_command(command);
+            if (result != 0) {
+                print("Command failed with error code: ");
+                // 簡單的數字轉字符串 (避免 sprintf 依賴)
+                char error_str[16];
+                int i = 0;
+                int temp = result < 0 ? -result : result;
+                if (temp == 0) {
+                    error_str[i++] = '0';
+                } else {
+                    while (temp > 0) {
+                        error_str[i++] = '0' + (temp % 10);
+                        temp /= 10;
+                    }
+                }
+                if (result < 0) error_str[i++] = '-';
+                error_str[i] = '\0';
+                
+                // 反轉字符串
+                for (int j = 0; j < i/2; j++) {
+                    char tmp = error_str[j];
+                    error_str[j] = error_str[i-1-j];
+                    error_str[i-1-j] = tmp;
+                }
+                
+                print(error_str);
+                print("\n");
+            }
+        }
+    }
+}
+
+// 獲取全域 PMM 實例 (供其他模組使用)
+pmm_manager_t* kernel_get_pmm(void) {
+    return &g_kernel_pmm;
 } 

@@ -1,0 +1,64 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     'build/test_kernel_memory_integration'
+relocations:
+  - { offset: 0x26, size: 0x8, addend: 0x0, symName: _print_test_header, symObjAddr: 0x0, symBinAddr: 0x10000153C, symSize: 0x28 }
+  - { offset: 0x4D, size: 0x8, addend: 0x0, symName: _pmm, symObjAddr: 0x2860, symBinAddr: 0x100008080, symSize: 0x0 }
+  - { offset: 0x32E, size: 0x8, addend: 0x0, symName: _tests_run, symObjAddr: 0x2910, symBinAddr: 0x100008130, symSize: 0x0 }
+  - { offset: 0x34A, size: 0x8, addend: 0x0, symName: _tests_failed, symObjAddr: 0x2914, symBinAddr: 0x100008134, symSize: 0x0 }
+  - { offset: 0x35F, size: 0x8, addend: 0x0, symName: _pmm_is_initialized, symObjAddr: 0x2918, symBinAddr: 0x100008138, symSize: 0x0 }
+  - { offset: 0x376, size: 0x8, addend: 0x0, symName: _print_test_header, symObjAddr: 0x0, symBinAddr: 0x10000153C, symSize: 0x28 }
+  - { offset: 0x3D5, size: 0x8, addend: 0x0, symName: _test_pmm_initialization, symObjAddr: 0x28, symBinAddr: 0x100001564, symSize: 0xAC }
+  - { offset: 0x478, size: 0x8, addend: 0x0, symName: _test_pmm_allocations, symObjAddr: 0xD4, symBinAddr: 0x100001610, symSize: 0x210 }
+  - { offset: 0x5E7, size: 0x8, addend: 0x0, symName: _test_pmm_stress, symObjAddr: 0x2E4, symBinAddr: 0x100001820, symSize: 0x208 }
+  - { offset: 0x750, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x4EC, symBinAddr: 0x100001A28, symSize: 0x1E4 }
+  - { offset: 0x889, size: 0x8, addend: 0x0, symName: _cm_init_system, symObjAddr: 0x0, symBinAddr: 0x100001C0C, symSize: 0x60 }
+  - { offset: 0x8A2, size: 0x8, addend: 0x0, symName: _cm_mutex, symObjAddr: 0x2F0, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0x90F, size: 0x8, addend: 0x0, symName: _cm_inited, symObjAddr: 0x1698, symBinAddr: 0x100008140, symSize: 0x0 }
+  - { offset: 0x932, size: 0x8, addend: 0x0, symName: _cm_stats, symObjAddr: 0x16A0, symBinAddr: 0x100008148, symSize: 0x0 }
+  - { offset: 0x9C2, size: 0x8, addend: 0x0, symName: _cm_init_system, symObjAddr: 0x0, symBinAddr: 0x100001C0C, symSize: 0x60 }
+  - { offset: 0xA26, size: 0x8, addend: 0x0, symName: _cm_destroy_system, symObjAddr: 0x60, symBinAddr: 0x100001C6C, symSize: 0x34 }
+  - { offset: 0xA5D, size: 0x8, addend: 0x0, symName: _cm_alloc, symObjAddr: 0x94, symBinAddr: 0x100001CA0, symSize: 0xF0 }
+  - { offset: 0xB72, size: 0x8, addend: 0x0, symName: _cm_free, symObjAddr: 0x184, symBinAddr: 0x100001D90, symSize: 0x8C }
+  - { offset: 0xC2B, size: 0x8, addend: 0x0, symName: _cm_get_level_stats, symObjAddr: 0x210, symBinAddr: 0x100001E1C, symSize: 0x7C }
+  - { offset: 0xC84, size: 0x8, addend: 0x0, symName: _cm_get_total_in_use, symObjAddr: 0x28C, symBinAddr: 0x100001E98, symSize: 0x60 }
+  - { offset: 0xD23, size: 0x8, addend: 0x0, symName: _buddy_init, symObjAddr: 0x0, symBinAddr: 0x100001EF8, symSize: 0x128 }
+  - { offset: 0xD3C, size: 0x8, addend: 0x0, symName: _base_mem, symObjAddr: 0x1E28, symBinAddr: 0x10000C248, symSize: 0x0 }
+  - { offset: 0xD52, size: 0x8, addend: 0x0, symName: _total_pages, symObjAddr: 0x1E30, symBinAddr: 0x10000C250, symSize: 0x0 }
+  - { offset: 0xD79, size: 0x8, addend: 0x0, symName: _buddy_mutex, symObjAddr: 0x508, symBinAddr: 0x100008040, symSize: 0x0 }
+  - { offset: 0xDE6, size: 0x8, addend: 0x0, symName: _buddy_inited, symObjAddr: 0x1E38, symBinAddr: 0x10000C258, symSize: 0x0 }
+  - { offset: 0xE02, size: 0x8, addend: 0x0, symName: _block_order, symObjAddr: 0x1E3A, symBinAddr: 0x1000081C0, symSize: 0x0 }
+  - { offset: 0xE36, size: 0x8, addend: 0x0, symName: _block_free, symObjAddr: 0x2E3A, symBinAddr: 0x1000091C0, symSize: 0x0 }
+  - { offset: 0xE4B, size: 0x8, addend: 0x0, symName: _free_list_head, symObjAddr: 0x3E3A, symBinAddr: 0x10000A1C0, symSize: 0x0 }
+  - { offset: 0xE7E, size: 0x8, addend: 0x0, symName: _next_free, symObjAddr: 0x3E54, symBinAddr: 0x10000A1DA, symSize: 0x0 }
+  - { offset: 0xEBA, size: 0x8, addend: 0x0, symName: _buddy_init, symObjAddr: 0x0, symBinAddr: 0x100001EF8, symSize: 0x128 }
+  - { offset: 0xFC5, size: 0x8, addend: 0x0, symName: _buddy_destroy, symObjAddr: 0x128, symBinAddr: 0x100002020, symSize: 0x48 }
+  - { offset: 0x1032, size: 0x8, addend: 0x0, symName: _buddy_alloc, symObjAddr: 0x170, symBinAddr: 0x100002068, symSize: 0x26C }
+  - { offset: 0x1124, size: 0x8, addend: 0x0, symName: _buddy_free, symObjAddr: 0x3DC, symBinAddr: 0x1000022D4, symSize: 0x12C }
+  - { offset: 0x1234, size: 0x8, addend: 0x0, symName: _slab_init, symObjAddr: 0x0, symBinAddr: 0x100002400, symSize: 0x148 }
+  - { offset: 0x124D, size: 0x8, addend: 0x0, symName: _slab_inited, symObjAddr: 0x1AD1, symBinAddr: 0x10000C259, symSize: 0x0 }
+  - { offset: 0x1269, size: 0x8, addend: 0x0, symName: _cache_64, symObjAddr: 0x1AE0, symBinAddr: 0x10000C1E8, symSize: 0x0 }
+  - { offset: 0x13A8, size: 0x8, addend: 0x0, symName: _slab_system_inited, symObjAddr: 0x1AD8, symBinAddr: 0x10000C1E0, symSize: 0x0 }
+  - { offset: 0x1410, size: 0x8, addend: 0x0, symName: _slab_init, symObjAddr: 0x0, symBinAddr: 0x100002400, symSize: 0x148 }
+  - { offset: 0x1561, size: 0x8, addend: 0x0, symName: _slab_destroy, symObjAddr: 0x148, symBinAddr: 0x100002548, symSize: 0x14 }
+  - { offset: 0x1576, size: 0x8, addend: 0x0, symName: _slab_alloc, symObjAddr: 0x15C, symBinAddr: 0x10000255C, symSize: 0x19C }
+  - { offset: 0x16A1, size: 0x8, addend: 0x0, symName: _slab_free, symObjAddr: 0x2F8, symBinAddr: 0x1000026F8, symSize: 0xAC }
+  - { offset: 0x178D, size: 0x8, addend: 0x0, symName: _pmm_init, symObjAddr: 0x0, symBinAddr: 0x1000027A4, symSize: 0x190 }
+  - { offset: 0x17B4, size: 0x8, addend: 0x0, symName: _g_pmm, symObjAddr: 0x5070, symBinAddr: 0x10000C240, symSize: 0x0 }
+  - { offset: 0x1B17, size: 0x8, addend: 0x0, symName: _pmm_init, symObjAddr: 0x0, symBinAddr: 0x1000027A4, symSize: 0x190 }
+  - { offset: 0x1C48, size: 0x8, addend: 0x0, symName: _pmm_cleanup, symObjAddr: 0x190, symBinAddr: 0x100002934, symSize: 0x74 }
+  - { offset: 0x1D04, size: 0x8, addend: 0x0, symName: _pmm_alloc_page, symObjAddr: 0x204, symBinAddr: 0x1000029A8, symSize: 0x78 }
+  - { offset: 0x1D30, size: 0x8, addend: 0x0, symName: _pmm_alloc_page, symObjAddr: 0x204, symBinAddr: 0x1000029A8, symSize: 0x78 }
+  - { offset: 0x1DCB, size: 0x8, addend: 0x0, symName: _pmm_alloc_pages, symObjAddr: 0x27C, symBinAddr: 0x100002A20, symSize: 0x88 }
+  - { offset: 0x1E8E, size: 0x8, addend: 0x0, symName: _pmm_free_page, symObjAddr: 0x304, symBinAddr: 0x100002AA8, symSize: 0x74 }
+  - { offset: 0x1EC5, size: 0x8, addend: 0x0, symName: _pmm_free_page, symObjAddr: 0x304, symBinAddr: 0x100002AA8, symSize: 0x74 }
+  - { offset: 0x1F61, size: 0x8, addend: 0x0, symName: _pmm_free_pages, symObjAddr: 0x378, symBinAddr: 0x100002B1C, symSize: 0x88 }
+  - { offset: 0x1FEF, size: 0x8, addend: 0x0, symName: _pmm_alloc, symObjAddr: 0x400, symBinAddr: 0x100002BA4, symSize: 0x194 }
+  - { offset: 0x21A1, size: 0x8, addend: 0x0, symName: _pmm_free, symObjAddr: 0x594, symBinAddr: 0x100002D38, symSize: 0x160 }
+  - { offset: 0x2336, size: 0x8, addend: 0x0, symName: _pmm_get_stats, symObjAddr: 0x6F4, symBinAddr: 0x100002E98, symSize: 0xB4 }
+  - { offset: 0x2458, size: 0x8, addend: 0x0, symName: _pmm_reset_stats, symObjAddr: 0x7A8, symBinAddr: 0x100002F4C, symSize: 0x48 }
+  - { offset: 0x24A7, size: 0x8, addend: 0x0, symName: _pmm_check_consistency, symObjAddr: 0x7F0, symBinAddr: 0x100002F94, symSize: 0x64 }
+  - { offset: 0x2511, size: 0x8, addend: 0x0, symName: _pmm_get_memory_report, symObjAddr: 0x854, symBinAddr: 0x100002FF8, symSize: 0x36C }
+  - { offset: 0x26F7, size: 0x8, addend: 0x0, symName: _pmm_get_global_instance, symObjAddr: 0xBC0, symBinAddr: 0x100003364, symSize: 0xC }
+  - { offset: 0x2711, size: 0x8, addend: 0x0, symName: _pmm_print_summary, symObjAddr: 0xBCC, symBinAddr: 0x100003370, symSize: 0xFC }
+...

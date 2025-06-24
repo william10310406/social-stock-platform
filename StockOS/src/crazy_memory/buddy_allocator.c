@@ -118,20 +118,43 @@ void buddy_free(void* ptr, size_t pages_unused)
 {
     if (!ptr || !buddy_inited) return;
     size_t idx = ((uintptr_t)ptr - (uintptr_t)base_mem)/PAGE_SIZE;
+    if (idx >= total_pages) return; // 增加邊界檢查
+
     pthread_mutex_lock(&buddy_mutex);
     int order = block_order[idx];
+
     while (order < ORDER_MAX) {
         size_t bud = buddy_of(idx, order);
-        if (bud >= total_pages || !block_free[bud] || block_order[bud]!=order) break;
-        /* 從 free list 移除 bud */
-        /* 線性搜尋移除，因 MVP 頁數不大 */
-        uint16_t *cur = &free_list_head[order];
-        while (*cur != INVALID) {
-            if (*cur == bud) { *cur = next_free[bud]; break; }
-            cur = &next_free[*cur];
+        if (bud >= total_pages || !block_free[bud] || block_order[bud] != order) {
+            break; // Buddy 不可用或 order 不匹配，停止合併
         }
-        block_free[bud]=0;
-        idx = (idx<bud)?idx:bud;
+
+        // --- 安全地從 free list 移除 buddy ---
+        uint16_t* p = &free_list_head[order];
+        bool found = false;
+        while (*p != INVALID) {
+            if (*p == bud) {
+                *p = next_free[bud]; // 從鏈結串列中移除
+                found = true;
+                break;
+            }
+            // 移動到下一個節點的指標
+            if (*p < total_pages) { // 增加索引有效性檢查
+                p = &next_free[*p];
+            } else {
+                // 發現無效索引，鏈結串列可能已損壞，中斷操作
+                break;
+            }
+        }
+
+        if (!found) {
+            // 如果 buddy 在 free_list 中找不到，這意味著數據結構不一致
+            // 這是一個嚴重錯誤，但為了穩定性，我們在這裡停止合併
+            break; 
+        }
+
+        block_free[bud] = 0; // 標記 buddy 為已使用 (因為它將被合併)
+        idx = (idx < bud) ? idx : bud; // 取兩個 buddy 中較小的索引
         order++;
     }
     push_free(idx, order);

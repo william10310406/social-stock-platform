@@ -22,6 +22,11 @@ void handle_interrupts(void);
 void schedule(void);
 void handle_syscalls(void);
 
+// 引入新的記憶體管理系統
+#include "memory/pmm.h"
+#include "syscalls/memory_syscalls.h"
+#include "cli/memory_cli.h"
+
 // 服務初始化函數
 void memory_init(void);
 void memory_cleanup(void);
@@ -33,6 +38,18 @@ void network_init(void);
 void network_cleanup(void);
 void drivers_init(void);
 void drivers_cleanup(void);
+
+// 新增記憶體管理服務
+int pmm_service_init(void);
+void pmm_service_cleanup(void);
+int memory_syscalls_service_init(void);
+void memory_syscalls_service_cleanup(void);
+int memory_cli_service_init(void);
+void memory_cli_service_cleanup(void);
+
+// CLI 相關
+void kernel_enter_cli_mode(void);
+void kernel_handle_cli_command(const char* command);
 
 // 記憶體管理相關
 #define PAGE_SIZE 4096

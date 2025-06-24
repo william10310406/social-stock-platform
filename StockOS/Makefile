@@ -14,26 +14,41 @@ DOCS_DIR = docs
 
 # 源文件
 CONSCIOUSNESS_SOURCES = $(SRC_DIR)/consciousness/consciousness_container.c
-TEST_SOURCES = $(TEST_DIR)/test_consciousness_container.c
+MEMORY_SOURCES = $(SRC_DIR)/crazy_memory/crazy_memory.c $(SRC_DIR)/crazy_memory/buddy_allocator.c $(SRC_DIR)/crazy_memory/slab_allocator.c
+KERNEL_MEMORY_SOURCES = $(SRC_DIR)/kernel/memory/pmm.c
+KERNEL_SOURCES = $(SRC_DIR)/kernel/kernel.c
+TEST_SOURCES = $(TEST_DIR)/test_consciousness_container.c $(TEST_DIR)/test_kernel_memory_integration.c
 DEMO_SOURCES = $(TEST_DIR)/demo_consciousness_usage.c
 
 # 目標文件
 CONSCIOUSNESS_OBJECTS = $(CONSCIOUSNESS_SOURCES:.c=.o)
+MEMORY_OBJECTS = $(MEMORY_SOURCES:.c=.o)
+KERNEL_MEMORY_OBJECTS = $(KERNEL_MEMORY_SOURCES:.c=.o)
+KERNEL_OBJECTS = $(KERNEL_SOURCES:.c=.o)
 TEST_OBJECTS = $(TEST_SOURCES:.c=.o)
 DEMO_OBJECTS = $(DEMO_SOURCES:.c=.o)
 
 # 可執行文件
 TEST_EXECUTABLE = $(BUILD_DIR)/test_consciousness_container
+TEST_KERNEL_MEMORY = $(BUILD_DIR)/test_kernel_memory_integration
 DEMO_EXECUTABLE = $(BUILD_DIR)/demo_consciousness_usage
 CONSCIOUSNESS_LIB = $(BUILD_DIR)/libconsciousness.a
+MEMORY_LIB = $(BUILD_DIR)/libmemory.a
+KERNEL_EXECUTABLE = $(BUILD_DIR)/stockos_kernel
 
 # 默認目標
-all: build_dir consciousness_lib test_consciousness demo_consciousness
+all: build_dir memory_lib consciousness_lib test_consciousness demo_consciousness test_kernel_memory
 
 # 創建構建目錄
 build_dir:
 	@mkdir -p $(BUILD_DIR)
 	@echo "📁 Created build directory"
+
+# 編譯記憶體庫
+memory_lib: build_dir $(MEMORY_OBJECTS) $(KERNEL_MEMORY_OBJECTS)
+	@echo "💾 Building memory library..."
+	ar rcs $(MEMORY_LIB) $(MEMORY_OBJECTS) $(KERNEL_MEMORY_OBJECTS)
+	@echo "✅ Memory library built: $(MEMORY_LIB)"
 
 # 編譯意識容器庫
 consciousness_lib: build_dir $(CONSCIOUSNESS_OBJECTS)
@@ -52,6 +67,18 @@ demo_consciousness: consciousness_lib $(DEMO_OBJECTS)
 	@echo "🎭 Building consciousness demo..."
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEMO_OBJECTS) $(CONSCIOUSNESS_LIB) $(LIBS) -o $(DEMO_EXECUTABLE)
 	@echo "✅ Consciousness demo built: $(DEMO_EXECUTABLE)"
+
+# 編譯內核記憶體測試
+test_kernel_memory: memory_lib consciousness_lib
+	@echo "🧪 Building kernel memory integration test..."
+	$(CC) $(CFLAGS) $(INCLUDES) $(TEST_DIR)/test_kernel_memory_integration.c $(MEMORY_LIB) $(CONSCIOUSNESS_LIB) $(LIBS) -o $(TEST_KERNEL_MEMORY)
+	@echo "✅ Kernel memory test built: $(TEST_KERNEL_MEMORY)"
+
+# 編譯完整內核 (簡化版，僅用於測試)
+kernel: memory_lib consciousness_lib $(KERNEL_OBJECTS)
+	@echo "🖥️ Building StockOS kernel..."
+	$(CC) $(CFLAGS) $(INCLUDES) $(KERNEL_OBJECTS) $(MEMORY_LIB) $(CONSCIOUSNESS_LIB) $(LIBS) -o $(KERNEL_EXECUTABLE)
+	@echo "✅ StockOS kernel built: $(KERNEL_EXECUTABLE)"
 
 # 運行測試
 test: test_consciousness
@@ -73,12 +100,26 @@ demo_verbose: demo_consciousness
 	@echo "🎭 Running consciousness container demo (verbose)..."
 	@$(DEMO_EXECUTABLE) 2>&1 | tee demo_output.log
 
+# 運行內核記憶體測試
+test_memory: test_kernel_memory
+	@echo "🧪 Running kernel memory integration tests..."
+	@$(TEST_KERNEL_MEMORY)
+
+# 運行內核記憶體測試 (詳細模式)
+test_memory_verbose: test_kernel_memory
+	@echo "🧪 Running kernel memory integration tests (verbose)..."
+	@$(TEST_KERNEL_MEMORY) -v 2>&1 | tee memory_test_output.log
+
+# 運行所有測試
+test_all: test test_memory
+	@echo "✅ All tests completed"
+
 # 清理
 clean:
 	@echo "🧹 Cleaning build files..."
 	rm -rf $(BUILD_DIR)
-	rm -f $(CONSCIOUSNESS_OBJECTS) $(TEST_OBJECTS) $(DEMO_OBJECTS)
-	rm -f test_output.log demo_output.log
+	rm -f $(CONSCIOUSNESS_OBJECTS) $(MEMORY_OBJECTS) $(KERNEL_MEMORY_OBJECTS) $(KERNEL_OBJECTS) $(TEST_OBJECTS) $(DEMO_OBJECTS)
+	rm -f test_output.log demo_output.log memory_test_output.log
 	@echo "✅ Clean complete"
 
 # 安裝（如果需要）
@@ -146,16 +187,22 @@ memcheck: test_consciousness
 
 # 幫助
 help:
-	@echo "StockOS Consciousness Container Build System"
-	@echo "============================================="
+	@echo "StockOS Kernel Memory Management Build System"
+	@echo "=============================================="
 	@echo ""
 	@echo "Available targets:"
 	@echo "  all              - Build everything (default)"
-	@echo "  consciousness_lib - Build consciousness library only"
-	@echo "  test_consciousness - Build tests only"
-	@echo "  demo_consciousness - Build demo program only"
-	@echo "  test             - Build and run tests"
-	@echo "  test_verbose     - Build and run tests with detailed output"
+	@echo "  memory_lib       - Build memory management library"
+	@echo "  consciousness_lib - Build consciousness library"
+	@echo "  kernel           - Build StockOS kernel"
+	@echo "  test_consciousness - Build consciousness tests"
+	@echo "  test_kernel_memory - Build kernel memory tests"
+	@echo "  demo_consciousness - Build demo program"
+	@echo "  test             - Build and run consciousness tests"
+	@echo "  test_memory      - Build and run kernel memory tests"
+	@echo "  test_all         - Run all tests"
+	@echo "  test_verbose     - Run consciousness tests with detailed output"
+	@echo "  test_memory_verbose - Run memory tests with detailed output"
 	@echo "  demo             - Build and run demo program"
 	@echo "  demo_verbose     - Build and run demo with detailed output"
 	@echo "  clean            - Remove all build files"
@@ -167,6 +214,10 @@ help:
 	@echo "  benchmark        - Run performance benchmarks"
 	@echo "  memcheck         - Run memory leak detection"
 	@echo "  help             - Show this help message"
+	@echo ""
+	@echo "🚀 Quick Start for Kernel Memory Testing:"
+	@echo "  make test_memory  - Test the integrated memory system"
+	@echo "  make kernel       - Build the StockOS kernel"
 	@echo ""
 	@echo "Environment variables:"
 	@echo "  CC               - C compiler (default: gcc)"
@@ -184,4 +235,4 @@ $(TEST_DIR)/test_consciousness_container.o: $(SRC_DIR)/consciousness/consciousne
 $(TEST_DIR)/demo_consciousness_usage.o: $(SRC_DIR)/consciousness/consciousness_container.h
 
 # 偽目標
-.PHONY: all build_dir consciousness_lib test_consciousness demo_consciousness test test_verbose demo demo_verbose clean install uninstall lint analyze docs benchmark memcheck help 
+.PHONY: all build_dir memory_lib consciousness_lib kernel test_consciousness test_kernel_memory demo_consciousness test test_memory test_all test_verbose test_memory_verbose demo demo_verbose clean install uninstall lint analyze docs benchmark memcheck help 
