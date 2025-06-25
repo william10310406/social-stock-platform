@@ -251,12 +251,15 @@ ISO_NAME = StockOS.iso
 ASM = nasm
 CLANG = clang
 
-# Recompile kernel C sources for x86_64-elf using Clang
+# Minimal kernel sources for bare-metal ISO (exclude user-space helpers)
+BOOT_SOURCES = $(SRC_DIR)/kernel/kernel.c
+
+# Pattern rule: compile kernel sources with Clang cross-compiler
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CLANG) --target=x86_64-elf -I./src -ffreestanding -O2 -c $< -o $@
+	$(CLANG) --target=x86_64-elf -I./src -ffreestanding -DKERNEL_MODE -O2 -c $< -o $@
 
-KERNEL_CLANG_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(KERNEL_SOURCES))
+KERNEL_CLANG_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(BOOT_SOURCES))
 
 kernel.elf: boot/stage1.asm $(KERNEL_CLANG_OBJECTS)
 	$(ASM) -f elf64 boot/stage1.asm -o $(BUILD_DIR)/stage1.o

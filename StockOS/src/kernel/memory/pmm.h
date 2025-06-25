@@ -14,10 +14,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// 引入現有的分配器
+// 引入現有的分配器 (僅在非 Kernel 模式)
+#ifndef KERNEL_MODE
 #include "../../crazy_memory/buddy_allocator.h"
 #include "../../crazy_memory/slab_allocator.h"
 #include "../../crazy_memory/crazy_memory.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
