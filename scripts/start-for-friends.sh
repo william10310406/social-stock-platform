@@ -29,23 +29,92 @@ echo -e "${YELLOW}🔍 檢查系統環境...${NC}"
 # 檢查 Docker 是否安裝
 if ! command -v docker &> /dev/null; then
     echo -e "${RED}❌ Docker 未安裝！${NC}"
-    echo "請先安裝 Docker Desktop: https://www.docker.com/products/docker-desktop"
+    echo ""
+    echo -e "${BLUE}📥 安裝 Docker Desktop:${NC}"
+    echo "   1. 訪問: https://www.docker.com/products/docker-desktop"
+    echo "   2. 下載適合您系統的版本"
+    echo "   3. 安裝並重啟電腦"
+    echo "   4. 重新運行此腳本"
+    echo ""
+    echo -e "${YELLOW}💡 如果您使用的是 macOS 或 Windows，建議安裝 Docker Desktop${NC}"
+    echo -e "${YELLOW}   如果您使用的是 Linux，請運行: sudo apt-get install docker.io${NC}"
     exit 1
 fi
 
 # 檢查 Docker Compose 是否安裝
 if ! command -v docker-compose &> /dev/null; then
     echo -e "${RED}❌ Docker Compose 未安裝！${NC}"
-    echo "請先安裝 Docker Compose"
+    echo ""
+    echo -e "${BLUE}📥 安裝 Docker Compose:${NC}"
+    echo "   1. Docker Desktop 通常會自動安裝 Docker Compose"
+    echo "   2. 如果沒有，請訪問: https://docs.docker.com/compose/install/"
+    echo "   3. 安裝後重新運行此腳本"
     exit 1
 fi
 
 # 檢查 Docker 是否運行
+echo -e "${YELLOW}🔍 檢查 Docker 守護程序...${NC}"
 if ! docker info &> /dev/null; then
-    echo -e "${RED}❌ Docker 未運行！${NC}"
-    echo "請啟動 Docker Desktop"
+    echo -e "${RED}❌ Docker 守護程序未運行！${NC}"
+    echo ""
+    echo -e "${BLUE}🔧 解決方案:${NC}"
+    echo ""
+    
+    # 檢測操作系統
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -e "${YELLOW}🍎 macOS 用戶:${NC}"
+        echo "   1. 打開 Docker Desktop 應用程序"
+        echo "   2. 等待 Docker Desktop 完全啟動（狀態顯示 'Docker Desktop is running'）"
+        echo "   3. 重新運行此腳本"
+        echo ""
+        echo -e "${YELLOW}💡 如果 Docker Desktop 沒有自動啟動:${NC}"
+        echo "   - 打開 Applications 文件夾"
+        echo "   - 找到並雙擊 Docker Desktop"
+        echo "   - 等待啟動完成"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo -e "${YELLOW}🐧 Linux 用戶:${NC}"
+        echo "   1. 啟動 Docker 服務:"
+        echo "      sudo systemctl start docker"
+        echo "   2. 設置開機自啟:"
+        echo "      sudo systemctl enable docker"
+        echo "   3. 將用戶加入 docker 組:"
+        echo "      sudo usermod -aG docker $USER"
+        echo "   4. 重新登入或運行: newgrp docker"
+        echo "   5. 重新運行此腳本"
+    elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+        echo -e "${YELLOW}🪟 Windows 用戶:${NC}"
+        echo "   1. 打開 Docker Desktop"
+        echo "   2. 等待 Docker Desktop 完全啟動"
+        echo "   3. 重新運行此腳本"
+        echo ""
+        echo -e "${YELLOW}💡 如果 Docker Desktop 沒有自動啟動:${NC}"
+        echo "   - 在開始菜單中搜索 'Docker Desktop'"
+        echo "   - 雙擊啟動"
+        echo "   - 等待啟動完成"
+    else
+        echo "   1. 啟動 Docker Desktop 或 Docker 服務"
+        echo "   2. 等待完全啟動"
+        echo "   3. 重新運行此腳本"
+    fi
+    
+    echo ""
+    echo -e "${YELLOW}🔍 檢查 Docker 狀態:${NC}"
+    echo "   運行: docker info"
+    echo "   如果顯示錯誤，請確保 Docker 服務正在運行"
+    echo ""
+    echo -e "${YELLOW}🔄 重啟 Docker:${NC}"
+    echo "   如果問題持續，請嘗試重啟 Docker Desktop 或 Docker 服務"
+    echo ""
     exit 1
 fi
+
+# 檢查 Docker 版本
+echo -e "${YELLOW}📋 檢查 Docker 版本...${NC}"
+DOCKER_VERSION=$(docker --version)
+echo -e "${GREEN}✅ $DOCKER_VERSION${NC}"
+
+COMPOSE_VERSION=$(docker-compose --version)
+echo -e "${GREEN}✅ $COMPOSE_VERSION${NC}"
 
 echo -e "${GREEN}✅ Docker 環境檢查通過${NC}"
 

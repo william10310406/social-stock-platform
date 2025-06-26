@@ -12,6 +12,74 @@
 2. 啟動 Docker Desktop
 3. 重新運行啟動腳本
 
+#### 問題：Docker 守護程序未運行
+**症狀**: 錯誤信息包含 "Cannot connect to the Docker daemon" 或 "Is the docker daemon running?"
+
+**快速解決方案**:
+```bash
+# 使用我們的 Docker 修復腳本
+./scripts/fix-docker.sh
+```
+
+**手動解決方案**:
+
+##### 🍎 macOS 用戶
+```bash
+# 1. 打開 Docker Desktop 應用程序
+open -a Docker
+
+# 2. 等待 Docker Desktop 完全啟動
+# 狀態欄應該顯示 "Docker Desktop is running"
+
+# 3. 檢查 Docker 狀態
+docker info
+
+# 4. 如果 Docker Desktop 沒有自動啟動
+# - 打開 Applications 文件夾
+# - 找到並雙擊 Docker Desktop
+# - 等待啟動完成
+```
+
+##### 🪟 Windows 用戶
+```bash
+# 1. 在開始菜單中搜索 "Docker Desktop"
+# 2. 雙擊啟動 Docker Desktop
+# 3. 等待完全啟動
+# 4. 檢查狀態: docker info
+```
+
+##### 🐧 Linux 用戶
+```bash
+# 1. 啟動 Docker 服務
+sudo systemctl start docker
+
+# 2. 設置開機自啟
+sudo systemctl enable docker
+
+# 3. 將用戶加入 docker 組
+sudo usermod -aG docker $USER
+
+# 4. 重新登入或運行
+newgrp docker
+
+# 5. 檢查狀態
+docker info
+```
+
+##### 🔧 通用解決方案
+```bash
+# 檢查 Docker 狀態
+docker info
+
+# 重啟 Docker 服務
+# macOS/Windows: 重啟 Docker Desktop
+# Linux: sudo systemctl restart docker
+
+# 檢查 Docker 版本
+docker --version
+docker-compose --version
+```
+
 #### 問題：端口被佔用
 **症狀**: 啟動時提示端口被佔用
 

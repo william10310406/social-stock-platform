@@ -62,6 +62,15 @@ cd social-stock-platform
 - ✅ 服務健康檢查
 - ✅ 常見問題修復
 
+**🔧 如果遇到 Docker 問題**：
+```bash
+# 快速修復 Docker 問題
+./scripts/fix-docker.sh
+
+# 然後重新運行啟動腳本
+./scripts/start-for-friends.sh
+```
+
 ### 🔧 開發者啟動方式
 
 如果您是開發者想要更多控制：
