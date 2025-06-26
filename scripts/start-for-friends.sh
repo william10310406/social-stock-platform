@@ -221,6 +221,257 @@ fix_permission_issues() {
     fi
 }
 
+# 函數：檢查並修復 Docker 映像問題
+fix_docker_images() {
+    echo -e "${YELLOW}🔍 檢查 Docker 映像...${NC}"
+    
+    # 檢查必要的映像是否存在
+    local required_images=(
+        "mcr.microsoft.com/mssql/server:2022-latest"
+        "postgres:15"
+        "redis:7-alpine"
+        "python:3.11-slim"
+        "node:18-alpine"
+    )
+    
+    for image in "${required_images[@]}"; do
+        if ! docker images | grep -q "$(echo $image | cut -d: -f1)"; then
+            echo -e "${YELLOW}📥 下載映像: $image${NC}"
+            docker pull "$image" 2>/dev/null || true
+        fi
+    done
+    
+    echo -e "${GREEN}✅ Docker 映像檢查完成${NC}"
+}
+
+# 函數：檢查並修復 Docker Compose 問題
+fix_docker_compose() {
+    echo -e "${YELLOW}🔍 檢查 Docker Compose...${NC}"
+    
+    # 檢查 docker-compose 是否安裝
+    if ! command -v docker-compose &> /dev/null; then
+        echo -e "${YELLOW}📥 安裝 Docker Compose...${NC}"
+        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 通常已經包含在 Docker Desktop 中
+            echo -e "${BLUE}💡 請確保 Docker Desktop 已安裝${NC}"
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux 安裝 Docker Compose
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+        fi
+    fi
+    
+    echo -e "${GREEN}✅ Docker Compose 檢查完成${NC}"
+}
+
+# 函數：檢查並修復系統資源問題
+fix_system_resources() {
+    echo -e "${YELLOW}🔍 檢查系統資源...${NC}"
+    
+    # 檢查可用磁盤空間
+    local available_space=$(df . | awk 'NR==2 {print $4}')
+    if [[ "$available_space" -lt 5242880 ]]; then  # 5GB
+        echo -e "${RED}❌ 磁盤空間不足（需要至少 5GB）${NC}"
+        echo -e "${YELLOW}💡 請清理磁盤空間後重試${NC}"
+        exit 1
+    fi
+    
+    # 檢查可用內存
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        local available_memory=$(vm_stat | grep "Pages free" | awk '{print $3}' | sed 's/\.//')
+        if [[ "$available_memory" -lt 1048576 ]]; then  # 4GB
+            echo -e "${YELLOW}⚠️  可用內存較少，建議關閉其他應用${NC}"
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        local available_memory=$(free -m | awk 'NR==2{printf "%.0f", $7}')
+        if [[ "$available_memory" -lt 4096 ]]; then  # 4GB
+            echo -e "${YELLOW}⚠️  可用內存較少，建議關閉其他應用${NC}"
+        fi
+    fi
+    
+    echo -e "${GREEN}✅ 系統資源檢查完成${NC}"
+}
+
+# 函數：檢查並修復防火牆問題
+fix_firewall_issues() {
+    echo -e "${YELLOW}🔍 檢查防火牆設置...${NC}"
+    
+    # 檢查常用端口是否被防火牆阻擋
+    local ports=(5173 5001 1433 5433 6379)
+    
+    for port in "${ports[@]}"; do
+        if command -v nc &> /dev/null; then
+            if ! nc -z localhost $port 2>/dev/null; then
+                echo -e "${YELLOW}⚠️  端口 $port 可能被阻擋${NC}"
+            fi
+        fi
+    done
+    
+    echo -e "${GREEN}✅ 防火牆檢查完成${NC}"
+}
+
+# 函數：檢查並修復 DNS 問題
+fix_dns_issues() {
+    echo -e "${YELLOW}🔍 檢查 DNS 設置...${NC}"
+    
+    # 檢查 DNS 解析
+    if ! nslookup google.com &> /dev/null; then
+        echo -e "${YELLOW}⚠️  DNS 解析可能有問題${NC}"
+        echo -e "${BLUE}💡 嘗試使用 Google DNS: 8.8.8.8${NC}"
+        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo -e "${BLUE}💡 在系統偏好設定 > 網路 > 進階 > DNS 中添加 8.8.8.8${NC}"
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo -e "${BLUE}💡 編輯 /etc/resolv.conf 添加 nameserver 8.8.8.8${NC}"
+        fi
+    else
+        echo -e "${GREEN}✅ DNS 解析正常${NC}"
+    fi
+}
+
+# 函數：檢查並修復 Git 問題
+fix_git_issues() {
+    echo -e "${YELLOW}🔍 檢查 Git 設置...${NC}"
+    
+    # 檢查 Git 是否安裝
+    if ! command -v git &> /dev/null; then
+        echo -e "${YELLOW}📥 安裝 Git...${NC}"
+        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 安裝 Git
+            if command -v brew &> /dev/null; then
+                brew install git
+            else
+                echo -e "${BLUE}💡 請從 https://git-scm.com 下載安裝 Git${NC}"
+            fi
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux 安裝 Git
+            sudo apt-get update && sudo apt-get install -y git 2>/dev/null || \
+            sudo yum install -y git 2>/dev/null || \
+            sudo dnf install -y git 2>/dev/null || true
+        fi
+    fi
+    
+    # 檢查 Git 配置
+    if ! git config --global user.name &> /dev/null; then
+        echo -e "${YELLOW}📝 設置 Git 用戶名...${NC}"
+        git config --global user.name "Stock Insight User"
+        git config --global user.email "user@stockinsight.local"
+    fi
+    
+    echo -e "${GREEN}✅ Git 設置完成${NC}"
+}
+
+# 函數：檢查並修復 Python 問題
+fix_python_issues() {
+    echo -e "${YELLOW}🔍 檢查 Python 環境...${NC}"
+    
+    # 檢查 Python 是否安裝
+    if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
+        echo -e "${YELLOW}📥 安裝 Python...${NC}"
+        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 安裝 Python
+            if command -v brew &> /dev/null; then
+                brew install python
+            else
+                echo -e "${BLUE}💡 請從 https://python.org 下載安裝 Python${NC}"
+            fi
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux 安裝 Python
+            sudo apt-get update && sudo apt-get install -y python3 python3-pip 2>/dev/null || \
+            sudo yum install -y python3 python3-pip 2>/dev/null || \
+            sudo dnf install -y python3 python3-pip 2>/dev/null || true
+        fi
+    fi
+    
+    echo -e "${GREEN}✅ Python 環境檢查完成${NC}"
+}
+
+# 函數：檢查並修復 Node.js 問題
+fix_nodejs_issues() {
+    echo -e "${YELLOW}🔍 檢查 Node.js 環境...${NC}"
+    
+    # 檢查 Node.js 是否安裝
+    if ! command -v node &> /dev/null; then
+        echo -e "${YELLOW}📥 安裝 Node.js...${NC}"
+        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS 安裝 Node.js
+            if command -v brew &> /dev/null; then
+                brew install node
+            else
+                echo -e "${BLUE}💡 請從 https://nodejs.org 下載安裝 Node.js${NC}"
+            fi
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux 安裝 Node.js
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - 2>/dev/null || true
+            sudo apt-get install -y nodejs 2>/dev/null || true
+        fi
+    fi
+    
+    echo -e "${GREEN}✅ Node.js 環境檢查完成${NC}"
+}
+
+# 函數：檢查並修復項目文件問題
+fix_project_files() {
+    echo -e "${YELLOW}🔍 檢查項目文件...${NC}"
+    
+    # 檢查必要的文件是否存在
+    local required_files=(
+        "docker-compose.dual.yml"
+        "backend/app.py"
+        "frontend/package.json"
+        "scripts/import_stock_data_v2.py"
+    )
+    
+    for file in "${required_files[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo -e "${RED}❌ 缺少必要文件: $file${NC}"
+            echo -e "${YELLOW}💡 請確保項目完整克隆${NC}"
+            exit 1
+        fi
+    done
+    
+    # 檢查並修復文件權限
+    chmod +x scripts/*.sh 2>/dev/null || true
+    
+    echo -e "${GREEN}✅ 項目文件檢查完成${NC}"
+}
+
+# 函數：檢查並修復環境變數問題
+fix_environment_variables() {
+    echo -e "${YELLOW}🔍 檢查環境變數...${NC}"
+    
+    # 檢查 .env 文件是否存在
+    if [[ ! -f ".env" ]]; then
+        echo -e "${YELLOW}📝 創建 .env 文件...${NC}"
+        cat > .env << EOF
+# Stock Insight Platform 環境變數
+FLASK_ENV=development
+FLASK_DEBUG=1
+SECRET_KEY=your-secret-key-here
+FERNET_KEY=your-fernet-key-here
+
+# 資料庫配置
+DUAL_DATABASE_ENABLED=true
+HOT_DATABASE_URL=mssql+pyodbc://sa:StrongP@ssw0rd!@localhost:1433/StockInsight_Hot?driver=ODBC+Driver+18+for+SQL+Server
+COLD_DATABASE_URL=postgresql://postgres:StrongP@ssw0rd!@localhost:5433/StockInsight_Cold
+
+# Redis 配置
+REDIS_URL=redis://localhost:6379/0
+
+# 前端配置
+VITE_API_BASE_URL=http://localhost:5001
+VITE_WS_URL=ws://localhost:5001
+EOF
+        echo -e "${GREEN}✅ .env 文件已創建${NC}"
+    fi
+    
+    echo -e "${GREEN}✅ 環境變數檢查完成${NC}"
+}
+
 echo -e "${YELLOW}🔍 檢查系統環境...${NC}"
 
 # 檢查 Docker 是否安裝
@@ -255,6 +506,16 @@ fix_permission_issues
 fix_network_issues
 fix_docker_resources
 fix_port_conflicts
+fix_docker_images
+fix_docker_compose
+fix_system_resources
+fix_firewall_issues
+fix_dns_issues
+fix_git_issues
+fix_python_issues
+fix_nodejs_issues
+fix_project_files
+fix_environment_variables
 
 # 檢查 Docker 版本
 echo -e "${YELLOW}📋 檢查 Docker 版本...${NC}"
@@ -295,7 +556,7 @@ echo -e "${YELLOW}🔍 檢查服務狀態...${NC}"
 
 check_service() {
     local service=$1
-    local max_attempts=15
+    local max_attempts=8  # 減少到 8 次
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
@@ -306,12 +567,12 @@ check_service() {
             echo -e "${YELLOW}⏳ $service 啟動中... (嘗試 $attempt/$max_attempts)${NC}"
             
             # 如果服務啟動失敗，嘗試重啟
-            if [ $attempt -eq 5 ]; then
+            if [ $attempt -eq 3 ]; then
                 echo -e "${BLUE}🔄 嘗試重啟 $service...${NC}"
                 docker-compose -f docker-compose.dual.yml restart $service 2>/dev/null || true
             fi
             
-            sleep 10
+            sleep 5  # 減少等待時間到 5 秒
             attempt=$((attempt + 1))
         fi
     done
@@ -319,21 +580,28 @@ check_service() {
     echo -e "${RED}❌ $service 啟動失敗${NC}"
     echo -e "${YELLOW}💡 查看 $service 日誌:${NC}"
     echo -e "${CYAN}   docker-compose -f docker-compose.dual.yml logs $service${NC}"
+    echo -e "${YELLOW}💡 繼續執行其他步驟...${NC}"
     return 1
 }
 
-check_service hot-db
-check_service cold-db
-check_service redis
-check_service backend
-check_service frontend
+# 並行檢查服務狀態（更快速）
+echo -e "${BLUE}🔍 快速檢查核心服務...${NC}"
+check_service hot-db &
+check_service cold-db &
+check_service redis &
+wait
+
+echo -e "${BLUE}🔍 檢查應用服務...${NC}"
+check_service backend &
+check_service frontend &
+wait
 
 # 創建資料庫（如果需要）
 echo -e "${YELLOW}🗄️  檢查資料庫...${NC}"
 
 # 檢查 MSSQL 資料庫
 echo -e "${BLUE}📝 檢查 MSSQL 資料庫...${NC}"
-for i in {1..5}; do
+for i in {1..3}; do  # 減少到 3 次
     if docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "SELECT name FROM sys.databases WHERE name = 'StockInsight_Hot'" 2>/dev/null | grep -q "StockInsight_Hot"; then
         echo -e "${GREEN}✅ MSSQL 資料庫已存在${NC}"
         break
@@ -342,13 +610,13 @@ for i in {1..5}; do
             echo -e "${YELLOW}📝 創建 MSSQL 資料庫...${NC}"
         fi
         docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "CREATE DATABASE StockInsight_Hot" 2>/dev/null || true
-        sleep 5
+        sleep 3  # 減少等待時間
     fi
 done
 
 # 檢查 PostgreSQL 資料庫
 echo -e "${BLUE}📝 檢查 PostgreSQL 資料庫...${NC}"
-for i in {1..5}; do
+for i in {1..3}; do  # 減少到 3 次
     if docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELECT 1" 2>/dev/null >/dev/null; then
         echo -e "${GREEN}✅ PostgreSQL 資料庫已存在${NC}"
         break
@@ -357,7 +625,7 @@ for i in {1..5}; do
             echo -e "${YELLOW}📝 創建 PostgreSQL 資料庫...${NC}"
         fi
         docker exec stock-insight-cold-db psql -U postgres -c "CREATE DATABASE StockInsight_Cold" 2>/dev/null || true
-        sleep 5
+        sleep 3  # 減少等待時間
     fi
 done
 
@@ -397,11 +665,11 @@ fi
 
 # 最終檢查
 echo -e "${YELLOW}🔍 最終健康檢查...${NC}"
-sleep 10
+sleep 5  # 減少等待時間
 
 # 檢查應用是否響應
 echo -e "${BLUE}🔍 檢查後端 API...${NC}"
-for i in {1..5}; do
+for i in {1..3}; do  # 減少到 3 次
     if curl -s http://localhost:5001/api/health >/dev/null; then
         echo -e "${GREEN}✅ 後端 API 正常響應${NC}"
         break
@@ -409,12 +677,12 @@ for i in {1..5}; do
         if [ $i -eq 1 ]; then
             echo -e "${YELLOW}⏳ 等待後端 API 啟動...${NC}"
         fi
-        sleep 5
+        sleep 3  # 減少等待時間
     fi
 done
 
 echo -e "${BLUE}🔍 檢查前端服務...${NC}"
-for i in {1..5}; do
+for i in {1..3}; do  # 減少到 3 次
     if curl -s http://localhost:5173 >/dev/null; then
         echo -e "${GREEN}✅ 前端服務正常響應${NC}"
         break
@@ -422,7 +690,7 @@ for i in {1..5}; do
         if [ $i -eq 1 ]; then
             echo -e "${YELLOW}⏳ 等待前端服務啟動...${NC}"
         fi
-        sleep 5
+        sleep 3  # 減少等待時間
     fi
 done
 
@@ -448,4 +716,70 @@ echo -e "${BLUE}📚 更多資訊:${NC}"
 echo -e "   開發指南: ${YELLOW}frontend/docs/guides/DEVELOPER_SECURITY_GUIDE.md${NC}"
 echo -e "   故障排除: ${YELLOW}frontend/docs/guides/FRIENDLY_TROUBLESHOOTING.md${NC}"
 echo ""
-echo -e "${GREEN}🚀 開始開發吧！${NC}" 
+echo -e "${GREEN}🚀 開始開發吧！${NC}"
+
+# 緊急修復函數
+emergency_fix() {
+    echo ""
+    echo -e "${RED}🚨 緊急修復模式${NC}"
+    echo -e "${YELLOW}💡 如果遇到問題，請嘗試以下步驟：${NC}"
+    echo ""
+    
+    echo -e "${BLUE}1. 完全重置 Docker 環境：${NC}"
+    echo "   docker-compose -f docker-compose.dual.yml down -v"
+    echo "   docker system prune -f"
+    echo "   docker volume prune -f"
+    echo ""
+    
+    echo -e "${BLUE}2. 重新啟動 Docker Desktop：${NC}"
+    echo "   # macOS: 完全退出並重新啟動 Docker Desktop"
+    echo "   # Windows: 重新啟動 Docker Desktop"
+    echo "   # Linux: sudo systemctl restart docker"
+    echo ""
+    
+    echo -e "${BLUE}3. 檢查端口衝突：${NC}"
+    echo "   lsof -i :5173 -i :5001 -i :1433 -i :5433"
+    echo ""
+    
+    echo -e "${BLUE}4. 手動啟動服務：${NC}"
+    echo "   docker-compose -f docker-compose.dual.yml up -d"
+    echo ""
+    
+    echo -e "${BLUE}5. 查看詳細日誌：${NC}"
+    echo "   docker-compose -f docker-compose.dual.yml logs -f"
+    echo ""
+    
+    echo -e "${BLUE}6. 重新運行此腳本：${NC}"
+    echo "   ./scripts/start-for-friends.sh"
+    echo ""
+    
+    echo -e "${YELLOW}💡 如果問題持續，請參考故障排除指南：${NC}"
+    echo "   frontend/docs/guides/FRIENDLY_TROUBLESHOOTING.md"
+}
+
+# 錯誤處理
+trap 'echo -e "\n${RED}❌ 腳本執行被中斷${NC}"; emergency_fix; exit 1' INT TERM
+
+# 檢查最終狀態
+echo -e "${YELLOW}🔍 檢查最終狀態...${NC}"
+sleep 3
+
+# 檢查所有服務是否正常運行
+services_status=0
+for service in hot-db cold-db redis backend frontend; do
+    if ! docker-compose -f docker-compose.dual.yml ps $service | grep -q "Up"; then
+        echo -e "${RED}❌ $service 未正常運行${NC}"
+        services_status=1
+    fi
+done
+
+if [ $services_status -eq 0 ]; then
+    echo -e "${GREEN}✅ 所有服務運行正常！${NC}"
+else
+    echo -e "${YELLOW}⚠️  部分服務可能未正常運行${NC}"
+    emergency_fix
+fi
+
+echo ""
+echo -e "${GREEN}🎉 腳本執行完成！${NC}"
+echo -e "${BLUE}💡 如有問題，請查看上方日誌或運行緊急修復步驟${NC}" 
