@@ -1,6 +1,6 @@
 # 🚀 朋友專用故障排除指南
 
-## 快速解決常見問題
+## 🎯 快速解決方案（按問題類型）
 
 ### 🐳 Docker 相關問題
 
@@ -13,75 +13,28 @@
 3. 重新運行啟動腳本
 
 #### 問題：Docker 守護程序未運行
-**症狀**: 錯誤信息包含 "Cannot connect to the Docker daemon" 或 "Is the docker daemon running?"
+**錯誤信息**: `Cannot connect to the Docker daemon at unix:///Users/xxx/.docker/run/docker.sock. Is the docker daemon running?`
 
-**快速解決方案**:
+**解決方案**:
 ```bash
-# 使用我們的 Docker 修復腳本
-./scripts/fix-docker.sh
-```
-
-**手動解決方案**:
-
-##### 🍎 macOS 用戶
-```bash
-# 1. 打開 Docker Desktop 應用程序
+# 🍎 macOS 用戶
 open -a Docker
+# 等待狀態欄顯示 "Docker Desktop is running"
 
-# 2. 等待 Docker Desktop 完全啟動
-# 狀態欄應該顯示 "Docker Desktop is running"
+# 🪟 Windows 用戶
+# 在開始菜單搜索 "Docker Desktop" 並啟動
 
-# 3. 檢查 Docker 狀態
-docker info
-
-# 4. 如果 Docker Desktop 沒有自動啟動
-# - 打開 Applications 文件夾
-# - 找到並雙擊 Docker Desktop
-# - 等待啟動完成
-```
-
-##### 🪟 Windows 用戶
-```bash
-# 1. 在開始菜單中搜索 "Docker Desktop"
-# 2. 雙擊啟動 Docker Desktop
-# 3. 等待完全啟動
-# 4. 檢查狀態: docker info
-```
-
-##### 🐧 Linux 用戶
-```bash
-# 1. 啟動 Docker 服務
+# 🐧 Linux 用戶
 sudo systemctl start docker
-
-# 2. 設置開機自啟
-sudo systemctl enable docker
-
-# 3. 將用戶加入 docker 組
 sudo usermod -aG docker $USER
-
-# 4. 重新登入或運行
 newgrp docker
 
-# 5. 檢查狀態
+# 檢查是否成功
 docker info
-```
-
-##### 🔧 通用解決方案
-```bash
-# 檢查 Docker 狀態
-docker info
-
-# 重啟 Docker 服務
-# macOS/Windows: 重啟 Docker Desktop
-# Linux: sudo systemctl restart docker
-
-# 檢查 Docker 版本
-docker --version
-docker-compose --version
 ```
 
 #### 問題：端口被佔用
-**症狀**: 啟動時提示端口被佔用
+**錯誤信息**: `Bind for 0.0.0.0:5173 failed: port is already allocated`
 
 **解決方案**:
 ```bash
@@ -91,7 +44,7 @@ lsof -i :5001
 lsof -i :1433
 lsof -i :5433
 
-# 停止佔用進程
+# 強制停止佔用進程
 sudo lsof -ti:5173 | xargs kill -9
 sudo lsof -ti:5001 | xargs kill -9
 sudo lsof -ti:1433 | xargs kill -9
@@ -103,22 +56,19 @@ sudo lsof -ti:5433 | xargs kill -9
 
 **解決方案**:
 ```bash
-# 查看容器日誌
+# 查看具體錯誤
 docker-compose -f docker-compose.dual.yml logs backend
 docker-compose -f docker-compose.dual.yml logs frontend
 
-# 重新啟動所有服務
+# 重新啟動
 docker-compose -f docker-compose.dual.yml down
 docker-compose -f docker-compose.dual.yml up -d
-
-# 或者使用我們的啟動腳本
-./scripts/start-for-friends.sh
 ```
 
 ### 🗄️ 資料庫相關問題
 
 #### 問題：資料庫連接失敗
-**症狀**: 後端日誌顯示資料庫連接錯誤
+**錯誤信息**: `Login failed for user 'sa'` 或 `connection refused`
 
 **解決方案**:
 ```bash
@@ -129,7 +79,7 @@ docker-compose -f docker-compose.dual.yml ps
 docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "CREATE DATABASE StockInsight_Hot"
 docker exec stock-insight-cold-db psql -U postgres -c "CREATE DATABASE StockInsight_Cold"
 
-# 運行資料庫遷移
+# 運行遷移
 docker-compose -f docker-compose.dual.yml exec backend python -c "
 from app import create_app
 from flask_migrate import upgrade
@@ -139,137 +89,230 @@ with app.app_context():
 "
 ```
 
-#### 問題：資料庫密碼錯誤
-**症狀**: 資料庫連接時提示密碼錯誤
+#### 問題：Fernet 金鑰錯誤
+**錯誤信息**: `Invalid Fernet key` 或 `cryptography.fernet.InvalidToken`
 
 **解決方案**:
-預設密碼是 `StrongP@ssw0rd!`，如果還是不行：
 ```bash
-# 重置 MSSQL 密碼
-docker-compose -f docker-compose.dual.yml down
-docker volume rm test_hot_db_data
-docker-compose -f docker-compose.dual.yml up -d
+# 重新生成 Fernet 金鑰
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
-# 重置 PostgreSQL 密碼
-docker volume rm test_cold_db_data
+# 更新 docker-compose.dual.yml 中的 FERNET_KEY
+# 然後重啟服務
+docker-compose -f docker-compose.dual.yml down
 docker-compose -f docker-compose.dual.yml up -d
 ```
 
-### 🌐 網路相關問題
+### 🌐 網路和 API 問題
 
-#### 問題：無法訪問前端
-**症狀**: 瀏覽器無法打開 http://localhost:5173
-
-**解決方案**:
-1. 確認前端容器正在運行
-2. 檢查端口是否被佔用
-3. 嘗試使用 `http://0.0.0.0:5173`
-4. 清除瀏覽器緩存
-
-#### 問題：API 請求失敗
-**症狀**: 前端顯示 API 錯誤
+#### 問題：前端無法訪問後端 API
+**錯誤信息**: `Failed to fetch` 或 `Connection refused`
 
 **解決方案**:
 ```bash
-# 檢查後端 API 是否正常
+# 檢查後端是否正常
 curl http://localhost:5001/api/health
 
-# 查看後端日誌
-docker-compose -f docker-compose.dual.yml logs backend
+# 檢查前端代理配置
+# 確認 frontend/vite.config.js 中的代理設置正確
 
-# 重啟後端服務
+# 重啟後端
 docker-compose -f docker-compose.dual.yml restart backend
 ```
 
-### 🔐 認證相關問題
-
 #### 問題：註冊/登入失敗
-**症狀**: 無法註冊新用戶或登入
-
-**解決方案**:
-1. 確認資料庫正常運行
-2. 檢查後端日誌中的錯誤信息
-3. 嘗試清除瀏覽器緩存
-4. 確認 Fernet 金鑰配置正確
-
-#### 問題：JWT Token 錯誤
-**症狀**: 登入後立即被登出
+**錯誤信息**: `500 Internal Server Error` 或 `Registration failed`
 
 **解決方案**:
 ```bash
-# 檢查 SECRET_KEY 配置
+# 檢查後端日誌
+docker-compose -f docker-compose.dual.yml logs backend
+
+# 檢查資料庫連接
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "SELECT 1"
+
+# 重新創建資料庫
+docker-compose -f docker-compose.dual.yml down
+docker volume rm test_hot_db_data test_cold_db_data
+docker-compose -f docker-compose.dual.yml up -d
+```
+
+#### 問題：前端頁面無法載入
+**症狀**: 瀏覽器顯示空白頁面或錯誤
+
+**解決方案**:
+```bash
+# 檢查前端容器
+docker-compose -f docker-compose.dual.yml logs frontend
+
+# 清除瀏覽器緩存
+# 或使用無痕模式訪問 http://localhost:5173
+
+# 重啟前端
+docker-compose -f docker-compose.dual.yml restart frontend
+```
+
+### 🔐 認證和會話問題
+
+#### 問題：登入後立即被登出
+**症狀**: 登入成功但馬上跳回登入頁面
+
+**解決方案**:
+```bash
+# 檢查 JWT 配置
 docker-compose -f docker-compose.dual.yml exec backend python -c "
 from app import create_app
 app = create_app()
 print('SECRET_KEY:', app.config.get('SECRET_KEY'))
 "
+
+# 清除瀏覽器 localStorage
+# 在瀏覽器控制台執行: localStorage.clear()
+
+# 重啟所有服務
+docker-compose -f docker-compose.dual.yml restart
 ```
 
-### 🧹 清理和重置
+#### 問題：Socket.IO 連接失敗
+**錯誤信息**: `WebSocket connection failed` 或 `Socket.IO connection error`
 
-#### 完全重置環境
-如果遇到無法解決的問題，可以完全重置：
+**解決方案**:
+```bash
+# 檢查 Socket.IO 配置
+docker-compose -f docker-compose.dual.yml logs backend | grep socket
+
+# 重啟後端（Socket.IO 需要單 worker 模式）
+docker-compose -f docker-compose.dual.yml restart backend
+
+# 檢查前端 Socket.IO 配置
+# 確認 src/js/socket.js 中的連接地址正確
+```
+
+### 🧹 環境重置和清理
+
+#### 完全重置（終極解決方案）
+如果所有方法都無效，使用完全重置：
 
 ```bash
-# 停止所有服務
+# 1. 停止所有服務
 docker-compose -f docker-compose.dual.yml down
 
-# 清理所有數據
+# 2. 清理所有數據
 docker volume rm test_hot_db_data test_cold_db_data test_redis_data
 
-# 清理 Docker 緩存
+# 3. 清理 Docker 緩存
 docker system prune -f
 
-# 重新啟動
-./scripts/start-for-friends.sh
+# 4. 重新啟動
+docker-compose -f docker-compose.dual.yml up -d
+
+# 5. 等待服務啟動後創建資料庫
+sleep 30
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "CREATE DATABASE StockInsight_Hot"
+docker exec stock-insight-cold-db psql -U postgres -c "CREATE DATABASE StockInsight_Cold"
+
+# 6. 運行遷移
+docker-compose -f docker-compose.dual.yml exec backend python -c "
+from app import create_app
+from flask_migrate import upgrade
+app = create_app()
+with app.app_context():
+    upgrade()
+"
 ```
 
-#### 清理瀏覽器數據
-1. 清除瀏覽器緩存
-2. 清除 localStorage 和 sessionStorage
-3. 重新訪問 http://localhost:5173
+#### 瀏覽器清理
+```bash
+# 清除所有瀏覽器數據
+# 1. 打開瀏覽器開發者工具 (F12)
+# 2. 在控制台執行:
+localStorage.clear()
+sessionStorage.clear()
+# 3. 清除瀏覽器緩存
+# 4. 重新訪問 http://localhost:5173
+```
 
-### 📞 獲取幫助
+### 🔧 常用診斷命令
 
-如果以上方法都無法解決問題：
+#### 檢查服務狀態
+```bash
+# 查看所有容器狀態
+docker-compose -f docker-compose.dual.yml ps
 
-1. **查看詳細日誌**:
-   ```bash
-   docker-compose -f docker-compose.dual.yml logs -f
-   ```
+# 查看詳細日誌
+docker-compose -f docker-compose.dual.yml logs -f
 
-2. **檢查系統資源**:
-   ```bash
-   docker stats
-   ```
+# 檢查系統資源
+docker stats
+```
 
-3. **重啟 Docker Desktop**:
-   - 完全退出 Docker Desktop
-   - 重新啟動
-   - 等待完全啟動後再運行腳本
+#### 檢查資料庫
+```bash
+# MSSQL 檢查
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -d StockInsight_Hot -Q "SELECT COUNT(*) as stocks FROM stocks"
 
-4. **聯繫開發者**:
-   - 提供錯誤日誌
-   - 說明操作步驟
-   - 描述系統環境
+# PostgreSQL 檢查
+docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELECT COUNT(*) as users FROM users"
+```
+
+#### 檢查網路連接
+```bash
+# 檢查端口是否開放
+netstat -an | grep 5173
+netstat -an | grep 5001
+netstat -an | grep 1433
+netstat -an | grep 5433
+
+# 測試 API 連接
+curl -v http://localhost:5001/api/health
+curl -v http://localhost:5173
+```
 
 ### 🎯 預防措施
 
-為了避免問題：
+#### 定期維護
+```bash
+# 每週清理一次
+docker system prune -f
+docker volume prune -f
 
-1. **定期清理**:
+# 備份重要數據
+docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -d StockInsight_Hot -Q "BACKUP DATABASE StockInsight_Hot TO DISK = '/mssql_backup/backup.bak'"
+```
+
+#### 啟動前檢查
+```bash
+# 1. 確保 Docker Desktop 正在運行
+docker info
+
+# 2. 檢查端口是否被佔用
+lsof -i :5173
+lsof -i :5001
+
+# 3. 使用智能啟動腳本
+./scripts/start-for-friends.sh
+```
+
+### 📞 緊急聯繫
+
+如果以上方法都無法解決問題：
+
+1. **收集錯誤信息**:
    ```bash
-   docker system prune -f
+   docker-compose -f docker-compose.dual.yml logs > error_logs.txt
+   docker info > docker_info.txt
    ```
 
-2. **備份重要數據**:
-   ```bash
-   docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -d StockInsight_Hot -Q "BACKUP DATABASE StockInsight_Hot TO DISK = '/mssql_backup/backup.bak'"
-   ```
+2. **提供系統信息**:
+   - 操作系統版本
+   - Docker 版本
+   - 錯誤發生的具體步驟
 
-3. **使用啟動腳本**:
-   總是使用 `./scripts/start-for-friends.sh` 而不是手動啟動
+3. **聯繫開發者**:
+   - 發送錯誤日誌
+   - 描述問題現象
+   - 說明已嘗試的解決方案
 
 ---
 
-**💡 提示**: 大多數問題都可以通過重新啟動服務解決。如果問題持續存在，請聯繫項目維護者。 
+**💡 黃金法則**: 90% 的問題都可以通過 `docker-compose -f docker-compose.dual.yml restart` 解決！ 
