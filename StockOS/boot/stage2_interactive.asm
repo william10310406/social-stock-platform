@@ -203,8 +203,55 @@ cmd_boot_handler:
     mov esi, booting_kernel_msg
     call print_response
     
-    ; 跳轉到 C Kernel 的 kernel_main
+    ; 載入 C Kernel (我們需要從磁盤載入 kernel.elf)
+    call load_c_kernel
+    
+    ; 如果載入成功，跳轉到 C Kernel
+    cmp eax, 0
+    jne .kernel_loaded
+    
+    mov esi, kernel_load_failed_msg
+    call print_response
+    ret
+    
+.kernel_loaded:
+    mov esi, kernel_loaded_msg
+    call print_response
+    
+    ; 跳轉到交互式內核主函數
     call 0x100000
+    ret
+
+load_c_kernel:
+    ; 真正載入我們的 C Kernel 
+    ; 從磁盤扇區載入 kernel.elf 到 0x100000
+    
+    mov esi, loading_kernel_msg
+    call print_response
+    
+    ; 設置載入參數
+    mov bx, 0x1000          ; 載入到 0x10000 臨時位置
+    mov ah, 0x02            ; BIOS 讀取扇區功能
+    mov al, 50              ; 載入50個扇區 (25KB) - 足夠容納我們的 kernel
+    mov ch, 0               ; 柱面 0
+    mov cl, 21              ; 從扇區 21 開始 (Stage2佔用扇區2-20)
+    mov dh, 0               ; 磁頭 0
+    mov dl, 0               ; 軟盤驅動器 A
+    int 0x13
+    
+    jc .load_failed
+    
+    ; 載入成功，複製到正確位置 0x100000
+    mov esi, 0x10000
+    mov edi, 0x100000
+    mov ecx, 25600          ; 25KB
+    rep movsb
+    
+    mov eax, 1              ; 返回成功
+    ret
+    
+.load_failed:
+    mov eax, 0              ; 返回失敗
     ret
 
 cmd_reboot_handler:
@@ -378,7 +425,11 @@ scancode_to_ascii:
     cmp al, 0x1E
     je .a
     
-    jmp .wait
+    ; 未知按鍵，返回0
+    xor al, al
+    ret
+
+.wait:
 
 .enter:
     mov al, 13
@@ -575,6 +626,9 @@ memory_response db 'Memory: 64MB total, Buddy+Slab ready, CLI available', 0
 buddy_response db 'Buddy Allocator: Order-based, 4KB pages, merge/split ready', 0
 kernel_response db 'C Kernel: Full Memory CLI, PMM/VMM, Consciousness System', 0
 booting_kernel_msg db 'Booting StockOS C Kernel with Memory CLI...', 0
+loading_kernel_msg db 'Loading C Kernel from disk (50 sectors)...', 0
+kernel_load_failed_msg db 'Error: Failed to load C Kernel from disk', 0
+kernel_loaded_msg db 'C Kernel loaded successfully. Starting interactive_kernel_main...', 0
 rebooting_msg db 'Rebooting system...', 0
 unknown_command_msg db 'Unknown command. Type "help" for available commands.', 0
 

@@ -80,19 +80,33 @@ static void detect_hhdm(void) {
 void kernel_main(void) {
     serial_init();
     serial_print("[StockOS] kernel_main entered\n");
-    detect_hhdm();
-    LOG("HHDM base:\n");
-    LOG_HEX(hhdm_base);
+    
+    // 跳過 HHDM 檢測，直接使用 0xB8000
+    // detect_hhdm();
+    // LOG("HHDM base:\n");
+    // LOG_HEX(hhdm_base);
 
+    serial_print("Initializing IDT...\n");
     idt_init();
     serial_print("IDT initialized\n");
 
-    // 在 VGA 文字模式 0xB8000[0] 寫入 'X' 做黑屏排除測試
-    volatile char *vga = (volatile char *)(hhdm_base + 0xB8000);
-    vga[0] = 'X';
-    vga[1] = 0x0F;  // 白字黑底
+    // 直接訪問 VGA 記憶體測試 - 填滿整個螢幕
+    volatile char *vga = (volatile char *)0xB8000;
+    
+    // 清空螢幕為紅色背景
+    for (int i = 0; i < 80 * 25 * 2; i += 2) {
+        vga[i] = ' ';
+        vga[i + 1] = 0x4F; // 白字紅底
+    }
+    
+    // 在第一行寫入 StockOS 標題
+    const char* title = "StockOS Kernel v0.1 - Memory Management System";
+    for (int i = 0; title[i] && i < 80; i++) {
+        vga[i * 2] = title[i];
+        vga[i * 2 + 1] = 0x1F; // 白字藍底
+    }
 
-    serial_print("VGA test char written\n");
+    serial_print("VGA test written: StockOS\n");
 
     serial_print("clear_screen...\n");
     clear_screen();
@@ -214,7 +228,7 @@ void handle_syscalls(void) {
 
 // 清屏函數 - 類似你的 Loading 組件
 void clear_screen(void) {
-    volatile char* video_memory = (volatile char*)(hhdm_base + 0xB8000);
+    volatile char* video_memory = (volatile char*)0xB8000;
     for (int i = 0; i < 80 * 25 * 2; i += 2) {
         video_memory[i] = ' ';
         video_memory[i + 1] = 0x07; // 白色文字，黑色背景
@@ -228,7 +242,7 @@ void print(const char* str) {
     static int cursor_x = 0;
     static int cursor_y = 0;
     
-    volatile char* video_memory = (volatile char*)(hhdm_base + 0xB8000);
+    volatile char* video_memory = (volatile char*)0xB8000;
     
     for (int i = 0; str[i] != '\0'; i++) {
         if (str[i] == '\n') {
@@ -259,7 +273,7 @@ void print(const char* str) {
 
 // 滾動螢幕
 void scroll_screen(void) {
-    volatile char* video_memory = (volatile char*)(hhdm_base + 0xB8000);
+    volatile char* video_memory = (volatile char*)0xB8000;
     
     // 將所有行向上移動一行
     for (int i = 0; i < 24; i++) {

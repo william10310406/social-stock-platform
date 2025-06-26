@@ -151,46 +151,24 @@ main() {
     # Step 5: Start the application
     echo "🚀 Starting application (skipping DB checks for now)..."
 
-    # Try Gunicorn with eventlet worker first
-    echo "   - Attempting Gunicorn + eventlet worker..."
+    # Start with Gunicorn + eventlet worker
+    echo "   - Starting Gunicorn + eventlet worker..."
+    echo "   - Worker: 1 (required for SocketIO + Eventlet)"
+    echo "   - Worker class: eventlet"
+    echo "   - Binding: 0.0.0.0:5000"
+    echo "=================================================="
 
-    # Test if gunicorn eventlet worker works
-    timeout 10s gunicorn \
+    exec gunicorn \
         --bind 0.0.0.0:5000 \
         --worker-class eventlet \
         --workers 1 \
         --worker-connections 1000 \
-        --timeout 30 \
-        --preload \
-        --check-config \
-        "run:create_app()" > /tmp/gunicorn_test.log 2>&1
-
-    if [ $? -eq 0 ]; then
-        echo "✅ Gunicorn eventlet worker supported"
-        echo "   - Worker: 1 (required for SocketIO + Eventlet)"
-        echo "   - Worker class: eventlet"
-        echo "   - Binding: 0.0.0.0:5000"
-        echo "=================================================="
-
-        exec gunicorn \
-            --bind 0.0.0.0:5000 \
-            --worker-class eventlet \
-            --workers 1 \
-            --worker-connections 1000 \
-            --timeout 120 \
-            --keep-alive 5 \
-            --access-logfile - \
-            --error-logfile - \
-            --log-level info \
-            "run:create_app()"
-    else
-        echo "⚠️ Gunicorn eventlet worker failed, using Flask-SocketIO built-in server"
-        echo "   - Server: Flask-SocketIO + eventlet"
-        echo "   - Binding: 0.0.0.0:5000"
-        echo "=================================================="
-
-        exec python scripts/run_socketio.py
-    fi
+        --timeout 120 \
+        --keep-alive 5 \
+        --access-logfile - \
+        --error-logfile - \
+        --log-level info \
+        "run:create_app()"
 }
 
 # Run main function

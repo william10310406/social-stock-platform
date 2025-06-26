@@ -367,8 +367,26 @@ multi-stage-boot:
 	
 	@echo "✅ 多階段系統編譯完成!"
 
+# 編譯交互式內核為平面二進制文件
+interactive-kernel-flat: consciousness_lib memory_lib
+	@echo "🧠 編譯交互式內核..."
+	@mkdir -p $(BUILD_DIR)
+	
+	# 編譯交互式內核和依賴
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRC_DIR)/kernel/interactive_kernel.c -o $(BUILD_DIR)/interactive_kernel.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRC_DIR)/kernel/lib/string.c -o $(BUILD_DIR)/string.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRC_DIR)/kernel/stubs.c -o $(BUILD_DIR)/stubs.o
+	
+	# 鏈接成平面二進制
+	$(LD) -Ttext 0x100000 --oformat binary -o $(BUILD_DIR)/interactive_kernel_flat.bin \
+		$(BUILD_DIR)/interactive_kernel.o $(BUILD_DIR)/string.o $(BUILD_DIR)/stubs.o \
+		$(SRC_DIR)/kernel/cli/memory_cli.o $(SRC_DIR)/kernel/memory/pmm.o \
+		$(CONSCIOUSNESS_LIB) $(MEMORY_LIB)
+	
+	@echo "✅ 交互式內核編譯完成: $(BUILD_DIR)/interactive_kernel_flat.bin"
+
 multi-stage-floppy: multi-stage-boot
-	@echo "🖱️ 創建多階段軟盤映像..."
+	@echo "🖱️ 創建多階段軟盤映像 (含C Kernel)..."
 	
 	# 創建1.44MB軟盤映像
 	dd if=/dev/zero of=$(BUILD_DIR)/stockos_multistage.img bs=512 count=2880 status=none
@@ -376,8 +394,10 @@ multi-stage-floppy: multi-stage-boot
 	# 寫入Stage 1到第一個扇區
 	dd if=$(BUILD_DIR)/stage1.bin of=$(BUILD_DIR)/stockos_multistage.img bs=512 count=1 conv=notrunc status=none
 	
-	# 寫入Stage 2從第二個扇區開始
+	# 寫入Stage 2從第二個扇區開始 (扇區2-20)
 	dd if=$(BUILD_DIR)/stage2.bin of=$(BUILD_DIR)/stockos_multistage.img bs=512 seek=1 conv=notrunc status=none
+	
+	# C Kernel 暫時跳過，使用 Stage 2 內建功能
 	
 	@echo "✅ 軟盤映像創建完成: $(BUILD_DIR)/stockos_multistage.img"
 

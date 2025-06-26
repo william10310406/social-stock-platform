@@ -12,12 +12,22 @@ from .extensions import db
 # This should be set as an environment variable in a real application
 _fernet_key = os.environ.get("FERNET_KEY")
 if _fernet_key:
+    # The key is already base64 encoded, use it directly
     SECRET_ENCRYPTION_KEY = _fernet_key.encode("utf-8")
 else:
     # Generate a new key for development
     SECRET_ENCRYPTION_KEY = Fernet.generate_key()
 
-f = Fernet(SECRET_ENCRYPTION_KEY)
+try:
+    f = Fernet(SECRET_ENCRYPTION_KEY)
+except ValueError as e:
+    print(f"Error initializing Fernet: {e}")
+    print(f"Key provided: {_fernet_key}")
+    print(f"Key length: {len(_fernet_key) if _fernet_key else 'None'}")
+    # Fallback to generated key
+    SECRET_ENCRYPTION_KEY = Fernet.generate_key()
+    f = Fernet(SECRET_ENCRYPTION_KEY)
+    print("Using generated key as fallback")
 
 
 class Friendship(db.Model):

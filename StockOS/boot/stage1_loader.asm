@@ -12,12 +12,15 @@ start:
     mov ss, ax
     mov sp, 0x7C00
     
+    ; 保存啟動驅動器號
+    mov [boot_drive], dl
+    
     ; 顯示載入訊息
     mov si, loading_msg
     call print_16
     
     ; 載入 Stage 2 (從扇區2開始，載入20個扇區 = 10KB)
-    mov dl, [boot_drive]    ; 保存啟動驅動器
+    mov dl, [boot_drive]    ; 使用保存的啟動驅動器
     mov bx, STAGE2_LOAD_ADDR
     mov ah, 0x02           ; BIOS 讀取扇區功能
     mov al, 20             ; 載入20個扇區
@@ -36,7 +39,7 @@ start:
     call enable_a20
     
     ; 跳轉到 Stage 2
-    jmp STAGE2_LOAD_ADDR
+    jmp 0x0000:STAGE2_LOAD_ADDR
 
 load_error:
     mov si, error_msg
@@ -64,7 +67,7 @@ enable_a20:
 STAGE2_LOAD_ADDR equ 0x8000
 
 ; 數據
-boot_drive db 0x80
+boot_drive db 0
 loading_msg db 'StockOS Stage 1: Loading kernel...', 13, 10, 0
 success_msg db 'Stage 2 loaded. Booting...', 13, 10, 0
 error_msg db 'Load failed!', 13, 10, 0

@@ -30,6 +30,7 @@ services:
       - FLASK_CONFIG=dual_database
       - FLASK_DEBUG=1
       - SECRET_KEY=dev-secret-key-change-in-production
+      - FERNET_KEY=V8M_miy2DA3EGRwFdOn50Fhw63aqQSvHeatCUjy9uHE=
       - DUAL_DATABASE_ENABLED=true
       - MSSQL_USER=sa
       - MSSQL_SA_PASSWORD=StrongP@ssw0rd!

@@ -4,8 +4,8 @@
 
 // 使用函數來獲取 API_BASE_URL，避免全局變量衝突
 function getApiBaseUrl() {
-  const baseUrl = (window.ROUTES && window.ROUTES.api.base) || '';
-  return `${baseUrl}/api`;
+  // 在 Docker 環境中，使用相對路徑讓 Vite 代理處理
+  return '/api';
 }
 
 // Function to handle user logout
