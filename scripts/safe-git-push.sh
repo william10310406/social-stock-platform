@@ -106,7 +106,21 @@ echo "推送目標: $REMOTE/$BRANCH"
 echo ""
 
 # 執行推送 (設置環境變數告知 pre-push hook 這是安全推送)
-if SAFE_PUSH=1 git push "$REMOTE" "$BRANCH"; then
+if [[ -n "${OS_ONLY}" ]]; then
+    if SAFE_PUSH=1 OS_ONLY=1 git push "$REMOTE" "$BRANCH"; then
+        push_success=true
+    else
+        push_success=false
+    fi
+else
+    if SAFE_PUSH=1 git push "$REMOTE" "$BRANCH"; then
+        push_success=true
+    else
+        push_success=false
+    fi
+fi
+
+if [[ "$push_success" == "true" ]]; then
     echo ""
     echo -e "${GREEN}🎉 ========================================${NC}"
     echo -e "${GREEN}🎉   安全推送成功完成！                 ${NC}"
