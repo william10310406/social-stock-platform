@@ -33,7 +33,133 @@ newgrp docker
 docker info
 ```
 
-#### 問題：端口被佔用
+#### 問題：Docker Desktop 啟動失敗
+**錯誤信息**: `Docker Desktop failed to start` 或 `Docker Desktop is starting...`
+
+**解決方案**:
+```bash
+# 🍎 macOS 用戶
+# 1. 完全退出 Docker Desktop
+killall Docker && open /Applications/Docker.app
+
+# 2. 重置 Docker Desktop
+rm -rf ~/Library/Containers/com.docker.docker
+rm -rf ~/Library/Application\ Support/Docker\ Desktop
+rm -rf ~/.docker
+
+# 3. 重新安裝 Docker Desktop
+# 下載最新版本: https://www.docker.com/products/docker-desktop
+
+# 🪟 Windows 用戶
+# 1. 以管理員身份運行 PowerShell
+# 2. 重置 Docker Desktop
+wsl --shutdown
+# 3. 重新啟動 Docker Desktop
+```
+
+#### 問題：Docker 權限錯誤
+**錯誤信息**: `Got permission denied while trying to connect to the Docker daemon socket`
+
+**解決方案**:
+```bash
+# 🐧 Linux 用戶
+sudo usermod -aG docker $USER
+newgrp docker
+
+# 或者臨時使用 sudo
+sudo docker info
+
+# 🍎 macOS 用戶
+# 重新啟動 Docker Desktop
+killall Docker && open /Applications/Docker.app
+```
+
+#### 問題：Docker 磁盤空間不足
+**錯誤信息**: `no space left on device` 或 `Docker Desktop is running out of disk space`
+
+**解決方案**:
+```bash
+# 清理 Docker 緩存
+docker system prune -f
+docker volume prune -f
+docker image prune -f
+
+# 查看 Docker 磁盤使用情況
+docker system df
+
+# 清理所有未使用的資源
+docker system prune -a -f --volumes
+```
+
+#### 問題：Docker 容器啟動失敗
+**錯誤信息**: `container exited with code 1` 或 `failed to start container`
+
+**解決方案**:
+```bash
+# 查看容器日誌
+docker-compose -f docker-compose.dual.yml logs backend
+docker-compose -f docker-compose.dual.yml logs frontend
+
+# 重新構建容器
+docker-compose -f docker-compose.dual.yml down
+docker-compose -f docker-compose.dual.yml build --no-cache
+docker-compose -f docker-compose.dual.yml up -d
+
+# 檢查容器狀態
+docker-compose -f docker-compose.dual.yml ps
+```
+
+#### 問題：Docker 網路連接失敗
+**錯誤信息**: `network not found` 或 `failed to connect to the Docker daemon`
+
+**解決方案**:
+```bash
+# 檢查 Docker 網路
+docker network ls
+
+# 重新創建預設網路
+docker network create bridge
+
+# 重啟 Docker 服務
+# macOS/Windows: 重啟 Docker Desktop
+# Linux: sudo systemctl restart docker
+```
+
+#### 問題：Docker 映像下載失敗
+**錯誤信息**: `failed to pull image` 或 `network timeout`
+
+**解決方案**:
+```bash
+# 檢查網路連接
+ping google.com
+
+# 使用國內鏡像源（中國用戶）
+# 在 Docker Desktop 設置中添加鏡像源
+# https://registry.docker-cn.com
+# https://docker.mirrors.ustc.edu.cn
+
+# 手動拉取映像
+docker pull mcr.microsoft.com/mssql/server:2019-latest
+docker pull postgres:13
+docker pull redis:6-alpine
+```
+
+#### 問題：Docker 容器內存不足
+**錯誤信息**: `container killed due to memory limit` 或 `out of memory`
+
+**解決方案**:
+```bash
+# 增加 Docker Desktop 內存限制
+# Docker Desktop -> Settings -> Resources -> Memory
+
+# 檢查容器資源使用
+docker stats
+
+# 重啟容器
+docker-compose -f docker-compose.dual.yml restart
+```
+
+#### 問題：Docker 端口被佔用
 **錯誤信息**: `Bind for 0.0.0.0:5173 failed: port is already allocated`
 
 **解決方案**:
@@ -51,18 +177,21 @@ sudo lsof -ti:1433 | xargs kill -9
 sudo lsof -ti:5433 | xargs kill -9
 ```
 
-#### 問題：容器啟動失敗
-**症狀**: 容器狀態顯示 "Exit" 或 "unhealthy"
+#### 問題：Docker 容器健康檢查失敗
+**錯誤信息**: `container is unhealthy` 或 `health check failed`
 
 **解決方案**:
 ```bash
-# 查看具體錯誤
-docker-compose -f docker-compose.dual.yml logs backend
-docker-compose -f docker-compose.dual.yml logs frontend
+# 查看健康檢查日誌
+docker-compose -f docker-compose.dual.yml logs backend | grep health
+docker-compose -f docker-compose.dual.yml logs frontend | grep health
 
-# 重新啟動
-docker-compose -f docker-compose.dual.yml down
-docker-compose -f docker-compose.dual.yml up -d
+# 重新啟動服務
+docker-compose -f docker-compose.dual.yml restart backend
+docker-compose -f docker-compose.dual.yml restart frontend
+
+# 檢查服務狀態
+docker-compose -f docker-compose.dual.yml ps
 ```
 
 ### 🗄️ 資料庫相關問題
@@ -101,6 +230,19 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 # 然後重啟服務
 docker-compose -f docker-compose.dual.yml down
 docker-compose -f docker-compose.dual.yml up -d
+```
+
+#### 問題：資料庫密碼錯誤
+**錯誤信息**: `Login failed for user 'sa'` 或 `authentication failed`
+
+**解決方案**:
+```bash
+# 重置資料庫密碼
+docker-compose -f docker-compose.dual.yml down
+docker volume rm test_hot_db_data test_cold_db_data
+docker-compose -f docker-compose.dual.yml up -d
+
+# 預設密碼是 StrongP@ssw0rd!
 ```
 
 ### 🌐 網路和 API 問題
@@ -266,6 +408,28 @@ netstat -an | grep 5433
 # 測試 API 連接
 curl -v http://localhost:5001/api/health
 curl -v http://localhost:5173
+```
+
+#### Docker 診斷命令
+```bash
+# 檢查 Docker 版本
+docker --version
+docker-compose --version
+
+# 檢查 Docker 信息
+docker info
+
+# 檢查 Docker 磁盤使用
+docker system df
+
+# 檢查 Docker 網路
+docker network ls
+
+# 檢查 Docker 映像
+docker images
+
+# 檢查 Docker 容器
+docker ps -a
 ```
 
 ### 🎯 預防措施

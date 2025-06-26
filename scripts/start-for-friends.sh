@@ -10,6 +10,8 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}===========================================${NC}"
@@ -23,6 +25,210 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # 切換到項目根目錄
 cd "$PROJECT_ROOT"
+
+# 函數：顯示進度條
+show_progress() {
+    local current=$1
+    local total=$2
+    local width=50
+    local percentage=$((current * 100 / total))
+    local completed=$((width * current / total))
+    local remaining=$((width - completed))
+    
+    printf "\r["
+    printf "%${completed}s" | tr ' ' '█'
+    printf "%${remaining}s" | tr ' ' '░'
+    printf "] %d%%" $percentage
+}
+
+# 函數：檢查並修復 Docker 問題
+fix_docker_issues() {
+    echo -e "${YELLOW}🔧 檢查並修復 Docker 問題...${NC}"
+    
+    # 檢查 Docker 守護程序
+    if ! docker info &> /dev/null; then
+        echo -e "${RED}❌ Docker 守護程序未運行${NC}"
+        
+        # 檢測操作系統並提供解決方案
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo -e "${YELLOW}🍎 檢測到 macOS，嘗試啟動 Docker Desktop...${NC}"
+            
+            # 嘗試啟動 Docker Desktop
+            if command -v open &> /dev/null; then
+                open -a Docker
+                echo -e "${BLUE}⏳ 等待 Docker Desktop 啟動...${NC}"
+                
+                # 等待最多 60 秒
+                for i in {1..12}; do
+                    show_progress $i 12
+                    if docker info &> /dev/null; then
+                        echo -e "\n${GREEN}✅ Docker Desktop 啟動成功！${NC}"
+                        return 0
+                    fi
+                    sleep 5
+                done
+                echo -e "\n${RED}❌ Docker Desktop 啟動超時${NC}"
+            fi
+            
+            echo -e "${YELLOW}💡 請手動啟動 Docker Desktop:${NC}"
+            echo "   1. 打開 Applications 文件夾"
+            echo "   2. 找到並雙擊 Docker Desktop"
+            echo "   3. 等待狀態欄顯示 'Docker Desktop is running'"
+            echo "   4. 重新運行此腳本"
+            
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo -e "${YELLOW}🐧 檢測到 Linux，嘗試啟動 Docker 服務...${NC}"
+            
+            # 嘗試啟動 Docker 服務
+            if command -v sudo &> /dev/null; then
+                sudo systemctl start docker 2>/dev/null || true
+                sudo systemctl enable docker 2>/dev/null || true
+                
+                # 檢查用戶是否在 docker 組
+                if ! groups $USER | grep -q docker; then
+                    echo -e "${YELLOW}📝 將用戶加入 docker 組...${NC}"
+                    sudo usermod -aG docker $USER 2>/dev/null || true
+                    echo -e "${BLUE}💡 請重新登入或運行: newgrp docker${NC}"
+                fi
+                
+                # 等待服務啟動
+                for i in {1..6}; do
+                    show_progress $i 6
+                    if docker info &> /dev/null; then
+                        echo -e "\n${GREEN}✅ Docker 服務啟動成功！${NC}"
+                        return 0
+                    fi
+                    sleep 5
+                done
+                echo -e "\n${RED}❌ Docker 服務啟動失敗${NC}"
+            fi
+            
+        elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+            echo -e "${YELLOW}🪟 檢測到 Windows，請手動啟動 Docker Desktop:${NC}"
+            echo "   1. 在開始菜單中搜索 'Docker Desktop'"
+            echo "   2. 雙擊啟動 Docker Desktop"
+            echo "   3. 等待完全啟動"
+            echo "   4. 重新運行此腳本"
+        fi
+        
+        echo ""
+        echo -e "${RED}❌ 無法自動修復 Docker 問題${NC}"
+        echo -e "${YELLOW}💡 請參考故障排除指南: frontend/docs/guides/FRIENDLY_TROUBLESHOOTING.md${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✅ Docker 守護程序運行正常${NC}"
+}
+
+# 函數：檢查並修復端口衝突
+fix_port_conflicts() {
+    echo -e "${YELLOW}🔍 檢查並修復端口衝突...${NC}"
+    
+    local ports=(5173 5001 1433 5433 6379)
+    local services=("前端" "後端" "MSSQL" "PostgreSQL" "Redis")
+    
+    for i in "${!ports[@]}"; do
+        local port=${ports[$i]}
+        local service=${services[$i]}
+        
+        if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+            echo -e "${YELLOW}⚠️  端口 $port 被佔用 ($service)${NC}"
+            
+            # 嘗試停止佔用進程
+            if command -v lsof &> /dev/null && command -v sudo &> /dev/null; then
+                echo -e "${BLUE}🛑 嘗試停止佔用進程...${NC}"
+                sudo lsof -ti:$port | xargs kill -9 2>/dev/null || true
+                sleep 2
+                
+                # 再次檢查
+                if ! lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+                    echo -e "${GREEN}✅ 端口 $port 已釋放${NC}"
+                else
+                    echo -e "${RED}❌ 無法釋放端口 $port${NC}"
+                    echo -e "${YELLOW}💡 請手動停止佔用端口 $port 的進程${NC}"
+                fi
+            else
+                echo -e "${RED}❌ 無法自動釋放端口 $port${NC}"
+                echo -e "${YELLOW}💡 請手動停止佔用端口 $port 的進程${NC}"
+            fi
+        else
+            echo -e "${GREEN}✅ 端口 $port 可用${NC}"
+        fi
+    done
+}
+
+# 函數：檢查並修復 Docker 資源問題
+fix_docker_resources() {
+    echo -e "${YELLOW}🔍 檢查 Docker 資源...${NC}"
+    
+    # 檢查 Docker 磁盤空間
+    local disk_usage=$(docker system df --format "table {{.Type}}\t{{.TotalCount}}\t{{.Size}}\t{{.Reclaimable}}" 2>/dev/null | tail -n +2 | head -1)
+    if [[ -n "$disk_usage" ]]; then
+        local reclaimable=$(echo "$disk_usage" | awk '{print $4}' | sed 's/[^0-9.]//g')
+        if [[ "$reclaimable" -gt 1000 ]]; then
+            echo -e "${YELLOW}⚠️  Docker 磁盤使用量較高，建議清理${NC}"
+            read -p "是否要清理 Docker 緩存？(y/N): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo -e "${BLUE}🧹 清理 Docker 緩存...${NC}"
+                docker system prune -f
+                echo -e "${GREEN}✅ Docker 緩存清理完成${NC}"
+            fi
+        fi
+    fi
+    
+    # 檢查 Docker 容器數量
+    local container_count=$(docker ps -aq | wc -l)
+    if [[ "$container_count" -gt 10 ]]; then
+        echo -e "${YELLOW}⚠️  發現 $container_count 個容器，建議清理${NC}"
+        read -p "是否要停止並刪除所有停止的容器？(y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}🧹 清理停止的容器...${NC}"
+            docker container prune -f
+            echo -e "${GREEN}✅ 容器清理完成${NC}"
+        fi
+    fi
+}
+
+# 函數：檢查並修復網路問題
+fix_network_issues() {
+    echo -e "${YELLOW}🔍 檢查網路連接...${NC}"
+    
+    # 檢查 Docker 網路
+    if ! docker network ls | grep -q "bridge"; then
+        echo -e "${YELLOW}⚠️  Docker 預設網路不存在，嘗試修復...${NC}"
+        docker network create bridge 2>/dev/null || true
+    fi
+    
+    # 檢查 DNS 解析
+    if ! nslookup google.com &> /dev/null; then
+        echo -e "${YELLOW}⚠️  網路連接可能有問題${NC}"
+        echo -e "${BLUE}💡 請檢查網路連接${NC}"
+    else
+        echo -e "${GREEN}✅ 網路連接正常${NC}"
+    fi
+}
+
+# 函數：檢查並修復權限問題
+fix_permission_issues() {
+    echo -e "${YELLOW}🔍 檢查權限問題...${NC}"
+    
+    # 檢查 Docker 權限
+    if ! docker ps &> /dev/null; then
+        echo -e "${YELLOW}⚠️  Docker 權限問題，嘗試修復...${NC}"
+        
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if ! groups $USER | grep -q docker; then
+                echo -e "${BLUE}📝 將用戶加入 docker 組...${NC}"
+                sudo usermod -aG docker $USER 2>/dev/null || true
+                echo -e "${YELLOW}💡 請重新登入或運行: newgrp docker${NC}"
+            fi
+        fi
+    else
+        echo -e "${GREEN}✅ Docker 權限正常${NC}"
+    fi
+}
 
 echo -e "${YELLOW}🔍 檢查系統環境...${NC}"
 
@@ -52,61 +258,12 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-# 檢查 Docker 是否運行
-echo -e "${YELLOW}🔍 檢查 Docker 守護程序...${NC}"
-if ! docker info &> /dev/null; then
-    echo -e "${RED}❌ Docker 守護程序未運行！${NC}"
-    echo ""
-    echo -e "${BLUE}🔧 解決方案:${NC}"
-    echo ""
-    
-    # 檢測操作系統
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        echo -e "${YELLOW}🍎 macOS 用戶:${NC}"
-        echo "   1. 打開 Docker Desktop 應用程序"
-        echo "   2. 等待 Docker Desktop 完全啟動（狀態顯示 'Docker Desktop is running'）"
-        echo "   3. 重新運行此腳本"
-        echo ""
-        echo -e "${YELLOW}💡 如果 Docker Desktop 沒有自動啟動:${NC}"
-        echo "   - 打開 Applications 文件夾"
-        echo "   - 找到並雙擊 Docker Desktop"
-        echo "   - 等待啟動完成"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        echo -e "${YELLOW}🐧 Linux 用戶:${NC}"
-        echo "   1. 啟動 Docker 服務:"
-        echo "      sudo systemctl start docker"
-        echo "   2. 設置開機自啟:"
-        echo "      sudo systemctl enable docker"
-        echo "   3. 將用戶加入 docker 組:"
-        echo "      sudo usermod -aG docker $USER"
-        echo "   4. 重新登入或運行: newgrp docker"
-        echo "   5. 重新運行此腳本"
-    elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
-        echo -e "${YELLOW}🪟 Windows 用戶:${NC}"
-        echo "   1. 打開 Docker Desktop"
-        echo "   2. 等待 Docker Desktop 完全啟動"
-        echo "   3. 重新運行此腳本"
-        echo ""
-        echo -e "${YELLOW}💡 如果 Docker Desktop 沒有自動啟動:${NC}"
-        echo "   - 在開始菜單中搜索 'Docker Desktop'"
-        echo "   - 雙擊啟動"
-        echo "   - 等待啟動完成"
-    else
-        echo "   1. 啟動 Docker Desktop 或 Docker 服務"
-        echo "   2. 等待完全啟動"
-        echo "   3. 重新運行此腳本"
-    fi
-    
-    echo ""
-    echo -e "${YELLOW}🔍 檢查 Docker 狀態:${NC}"
-    echo "   運行: docker info"
-    echo "   如果顯示錯誤，請確保 Docker 服務正在運行"
-    echo ""
-    echo -e "${YELLOW}🔄 重啟 Docker:${NC}"
-    echo "   如果問題持續，請嘗試重啟 Docker Desktop 或 Docker 服務"
-    echo ""
-    exit 1
-fi
+# 執行所有修復函數
+fix_docker_issues
+fix_permission_issues
+fix_network_issues
+fix_docker_resources
+fix_port_conflicts
 
 # 檢查 Docker 版本
 echo -e "${YELLOW}📋 檢查 Docker 版本...${NC}"
@@ -117,32 +274,6 @@ COMPOSE_VERSION=$(docker-compose --version)
 echo -e "${GREEN}✅ $COMPOSE_VERSION${NC}"
 
 echo -e "${GREEN}✅ Docker 環境檢查通過${NC}"
-
-# 檢查端口是否被佔用
-echo -e "${YELLOW}🔍 檢查端口佔用...${NC}"
-
-check_port() {
-    local port=$1
-    local service=$2
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠️  端口 $port 被佔用 ($service)${NC}"
-        echo -e "${YELLOW}   正在嘗試停止佔用進程...${NC}"
-        if command -v lsof &> /dev/null; then
-            sudo lsof -ti:$port | xargs kill -9 2>/dev/null || true
-            echo -e "${GREEN}✅ 已釋放端口 $port${NC}"
-        fi
-    else
-        echo -e "${GREEN}✅ 端口 $port 可用${NC}"
-    fi
-}
-
-check_port 5173 "前端"
-check_port 5001 "後端"
-check_port 1433 "MSSQL"
-check_port 5433 "PostgreSQL"
-check_port 6379 "Redis"
-
-echo -e "${GREEN}✅ 端口檢查完成${NC}"
 
 # 停止現有容器
 echo -e "${YELLOW}🛑 停止現有容器...${NC}"
@@ -167,14 +298,18 @@ docker-compose -f docker-compose.dual.yml up -d
 
 # 等待服務啟動
 echo -e "${YELLOW}⏳ 等待服務啟動...${NC}"
-sleep 30
+for i in {1..6}; do
+    show_progress $i 6
+    sleep 10
+done
+echo ""
 
 # 檢查服務狀態
 echo -e "${YELLOW}🔍 檢查服務狀態...${NC}"
 
 check_service() {
     local service=$1
-    local max_attempts=10
+    local max_attempts=15
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
@@ -183,12 +318,21 @@ check_service() {
             return 0
         else
             echo -e "${YELLOW}⏳ $service 啟動中... (嘗試 $attempt/$max_attempts)${NC}"
+            
+            # 如果服務啟動失敗，嘗試重啟
+            if [ $attempt -eq 5 ]; then
+                echo -e "${BLUE}🔄 嘗試重啟 $service...${NC}"
+                docker-compose -f docker-compose.dual.yml restart $service 2>/dev/null || true
+            fi
+            
             sleep 10
             attempt=$((attempt + 1))
         fi
     done
     
     echo -e "${RED}❌ $service 啟動失敗${NC}"
+    echo -e "${YELLOW}💡 查看 $service 日誌:${NC}"
+    echo -e "${CYAN}   docker-compose -f docker-compose.dual.yml logs $service${NC}"
     return 1
 }
 
@@ -202,51 +346,85 @@ check_service frontend
 echo -e "${YELLOW}🗄️  檢查資料庫...${NC}"
 
 # 檢查 MSSQL 資料庫
-if docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "SELECT name FROM sys.databases WHERE name = 'StockInsight_Hot'" 2>/dev/null | grep -q "StockInsight_Hot"; then
-    echo -e "${GREEN}✅ MSSQL 資料庫已存在${NC}"
-else
-    echo -e "${YELLOW}📝 創建 MSSQL 資料庫...${NC}"
-    docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "CREATE DATABASE StockInsight_Hot"
-    echo -e "${GREEN}✅ MSSQL 資料庫創建完成${NC}"
-fi
+echo -e "${BLUE}📝 檢查 MSSQL 資料庫...${NC}"
+for i in {1..5}; do
+    if docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "SELECT name FROM sys.databases WHERE name = 'StockInsight_Hot'" 2>/dev/null | grep -q "StockInsight_Hot"; then
+        echo -e "${GREEN}✅ MSSQL 資料庫已存在${NC}"
+        break
+    else
+        if [ $i -eq 1 ]; then
+            echo -e "${YELLOW}📝 創建 MSSQL 資料庫...${NC}"
+        fi
+        docker exec stock-insight-hot-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongP@ssw0rd!' -C -Q "CREATE DATABASE StockInsight_Hot" 2>/dev/null || true
+        sleep 5
+    fi
+done
 
 # 檢查 PostgreSQL 資料庫
-if docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELECT 1" 2>/dev/null >/dev/null; then
-    echo -e "${GREEN}✅ PostgreSQL 資料庫已存在${NC}"
-else
-    echo -e "${YELLOW}📝 創建 PostgreSQL 資料庫...${NC}"
-    docker exec stock-insight-cold-db psql -U postgres -c "CREATE DATABASE StockInsight_Cold"
-    echo -e "${GREEN}✅ PostgreSQL 資料庫創建完成${NC}"
-fi
+echo -e "${BLUE}📝 檢查 PostgreSQL 資料庫...${NC}"
+for i in {1..5}; do
+    if docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELECT 1" 2>/dev/null >/dev/null; then
+        echo -e "${GREEN}✅ PostgreSQL 資料庫已存在${NC}"
+        break
+    else
+        if [ $i -eq 1 ]; then
+            echo -e "${YELLOW}📝 創建 PostgreSQL 資料庫...${NC}"
+        fi
+        docker exec stock-insight-cold-db psql -U postgres -c "CREATE DATABASE StockInsight_Cold" 2>/dev/null || true
+        sleep 5
+    fi
+done
 
 # 運行資料庫遷移
 echo -e "${YELLOW}🔄 運行資料庫遷移...${NC}"
-docker-compose -f docker-compose.dual.yml exec -T backend python -c "
+for i in {1..3}; do
+    if docker-compose -f docker-compose.dual.yml exec -T backend python -c "
 from app import create_app
 from flask_migrate import upgrade
 app = create_app()
 with app.app_context():
     upgrade()
-" 2>/dev/null || echo -e "${YELLOW}⚠️  遷移可能已經是最新版本${NC}"
-
-echo -e "${GREEN}✅ 資料庫遷移完成${NC}"
+" 2>/dev/null; then
+        echo -e "${GREEN}✅ 資料庫遷移完成${NC}"
+        break
+    else
+        if [ $i -eq 1 ]; then
+            echo -e "${YELLOW}⚠️  遷移失敗，重試中...${NC}"
+        fi
+        sleep 10
+    fi
+done
 
 # 最終檢查
 echo -e "${YELLOW}🔍 最終健康檢查...${NC}"
 sleep 10
 
 # 檢查應用是否響應
-if curl -s http://localhost:5001/api/health >/dev/null; then
-    echo -e "${GREEN}✅ 後端 API 正常響應${NC}"
-else
-    echo -e "${YELLOW}⚠️  後端 API 可能需要更多時間啟動${NC}"
-fi
+echo -e "${BLUE}🔍 檢查後端 API...${NC}"
+for i in {1..5}; do
+    if curl -s http://localhost:5001/api/health >/dev/null; then
+        echo -e "${GREEN}✅ 後端 API 正常響應${NC}"
+        break
+    else
+        if [ $i -eq 1 ]; then
+            echo -e "${YELLOW}⏳ 等待後端 API 啟動...${NC}"
+        fi
+        sleep 5
+    fi
+done
 
-if curl -s http://localhost:5173 >/dev/null; then
-    echo -e "${GREEN}✅ 前端服務正常響應${NC}"
-else
-    echo -e "${YELLOW}⚠️  前端服務可能需要更多時間啟動${NC}"
-fi
+echo -e "${BLUE}🔍 檢查前端服務...${NC}"
+for i in {1..5}; do
+    if curl -s http://localhost:5173 >/dev/null; then
+        echo -e "${GREEN}✅ 前端服務正常響應${NC}"
+        break
+    else
+        if [ $i -eq 1 ]; then
+            echo -e "${YELLOW}⏳ 等待前端服務啟動...${NC}"
+        fi
+        sleep 5
+    fi
+done
 
 echo ""
 echo -e "${GREEN}🎉 ==========================================${NC}"
@@ -268,6 +446,6 @@ echo -e "   重啟服務: ${YELLOW}docker-compose -f docker-compose.dual.yml res
 echo ""
 echo -e "${BLUE}📚 更多資訊:${NC}"
 echo -e "   開發指南: ${YELLOW}frontend/docs/guides/DEVELOPER_SECURITY_GUIDE.md${NC}"
-echo -e "   故障排除: ${YELLOW}memory/TROUBLESHOOTING.md${NC}"
+echo -e "   故障排除: ${YELLOW}frontend/docs/guides/FRIENDLY_TROUBLESHOOTING.md${NC}"
 echo ""
 echo -e "${GREEN}🚀 開始開發吧！${NC}" 
