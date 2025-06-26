@@ -527,4 +527,58 @@ lsof -i :5001
 ### 腳本自動偵測
 - 本專案啟動腳本已自動偵測 WSL2，並給出專屬提示與修復建議。
 
+---
+
+## 🍎 macOS 常見 Docker 問題與解決方案
+
+### 1. Docker Desktop 啟動與資源問題
+- **症狀**：Docker Desktop 無法啟動、卡在 starting、daemon 連不上
+- **解法**：
+  - 完全退出再重啟 Docker Desktop（`killall Docker`）
+  - 清理資源：`docker system prune -f`
+  - 檢查 Docker Desktop 設定的 CPU/記憶體分配（建議至少 2C/4G）
+  - 建議升級到最新 Docker Desktop
+
+### 2. 權限與網路問題
+- **症狀**：`permission denied while trying to connect to the Docker daemon socket`、端口被佔用、容器無法互通
+- **解法**：
+  - macOS 通常不會有 Linux 的 docker group 問題
+  - 端口衝突：`lsof -i :PORT` 找出佔用進程並 kill
+  - Docker Desktop → Preferences → Resources → Network，檢查網路設定
+
+### 3. 檔案系統同步問題（Volume Mount）
+- **症狀**：容器內檔案與本機不同步、hot reload 失效、權限錯誤
+- **解法**：
+  - 重新啟動 Docker Desktop
+  - 確認 volume mount 路徑正確（macOS 路徑區分大小寫！）
+  - 清理 node_modules，重新安裝依賴
+  - Docker Desktop → Preferences → Resources → File Sharing，確認專案目錄已加入
+
+### 4. M1/M2 (Apple Silicon) 架構相容性
+- **症狀**：`exec format error`、`no matching manifest for linux/arm64`、mssql 無法啟動
+- **解法**：
+  - 優先選用支援 arm64 的映像
+  - mssql 只能用 amd64，需在 Docker Desktop → Settings → Features in development → Use Rosetta for x86/amd64 emulation
+  - `docker buildx` 可指定 `--platform linux/amd64`
+
+### 5. 前端/後端 Proxy 與網路隔離
+- **症狀**：前端無法呼叫後端 API、CORS 問題
+- **解法**：
+  - Docker Compose 內部服務用 container name
+  - 本機測試用 `localhost:5001`
+  - Vite/React Proxy 設定 `/api` 代理到正確後端
+  - CORS 設定允許 `http://localhost:5173`、`http://127.0.0.1:5173`
+
+### 6. 檔案系統大小寫敏感問題
+- **說明**：macOS 預設磁碟為大小寫不敏感，Linux 容器為大小寫敏感，路徑拼錯會出現「找不到檔案」。
+- **解法**：所有 import 路徑、volume 路徑都要完全一致。
+
+### 7. SSL 憑證與本地 HTTPS 問題
+- **症狀**：開發環境需要 HTTPS，macOS 會遇到自簽憑證信任問題。
+- **解法**：用 `mkcert` 產生本地信任憑證，或開發時用 HTTP。
+
+### 8. 其他常見小坑
+- 防火牆/安全軟體阻擋 Docker 網路：關閉 Little Snitch、CleanMyMac 等安全軟體測試。
+- 系統資源不足：長時間開機後 Docker 會變慢，重啟電腦可解決。
+
 --- 
