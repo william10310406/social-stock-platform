@@ -145,4 +145,23 @@ docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELE
 
 ---
 
-**注意**: 這些密碼僅供開發使用，請勿在生產環境中使用！ 
+**注意**: 這些密碼僅供開發使用，請勿在生產環境中使用！
+
+---
+
+## 📄 報告命名規範（必讀）
+
+- 所有報告檔案必須以 `YYYYMMDD_主題.md` 格式命名，例如：
+  - `20240629_FRIENDLY_TROUBLESHOOTING.md`
+  - `20240629_DEVELOPER_SECURITY_GUIDE.md`
+- 報告必須放在 `frontend/docs/guides/`、`frontend/docs/reports/`、`frontend/docs/implementation/` 等指定目錄下。
+- 這是團隊強制規範，方便追蹤、管理與審查。
+
+### 一鍵檢查命名規則
+
+專案已提供自動檢查腳本：
+```bash
+./scripts/check-report-naming.sh
+```
+- 執行後會列出所有不符合命名規則的報告檔案，並給出修正建議。
+- 請務必在提交新報告前執行此腳本，確保命名合規。 
