@@ -27,14 +27,23 @@
 
 ### 🚀 快速開始
 
-#### 1. 克隆項目
+#### 方法一：使用智能啟動腳本（推薦）
 ```bash
+# 克隆項目
 git clone <repository-url>
 cd stock-insight-platform
+
+# 使用智能啟動腳本（自動處理所有問題）
+./scripts/start-for-friends.sh
 ```
 
-#### 2. 直接啟動 (無需配置)
+#### 方法二：手動啟動
 ```bash
+# 克隆項目
+git clone <repository-url>
+cd stock-insight-platform
+
+# 直接啟動
 docker-compose -f docker-compose.dual.yml up -d
 ```
 
@@ -122,6 +131,11 @@ docker exec stock-insight-cold-db psql -U postgres -d StockInsight_Cold -c "SELE
 2. 查看應用日誌
 3. 確認端口未被佔用
 4. 參考故障排除文檔
+
+#### 📚 相關文檔
+- 🔧 [故障排除指南](./FRIENDLY_TROUBLESHOOTING.md) - 常見問題解決方案
+- 🗄️ [資料庫操作指南](./DOCKER_DATABASE_COMMANDS_GUIDE.md) - 資料庫管理命令
+- 🚀 [智能啟動腳本](../../../scripts/start-for-friends.sh) - 一鍵啟動所有服務
 
 ---
 

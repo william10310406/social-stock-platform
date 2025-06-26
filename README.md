@@ -36,7 +36,49 @@
 
 **🎯 適用對象**: 新加入的開發者、AI 工具（Cursor、ChatGPT 等）、項目交接、代碼審查
 
-**⚡ 快速開始**: 如果您是 AI 工具，請直接閱讀 [`memory/README.md`](./memory/README.md) 獲得完整項目導航。
+## 🚀 快速開始
+
+### 🎯 朋友專用啟動方式（推薦）
+
+如果您是朋友想要快速開始開發：
+
+```bash
+# 1. 克隆項目
+git clone https://github.com/william10310406/social-stock-platform.git
+cd social-stock-platform
+
+# 2. 使用智能啟動腳本（自動處理所有問題）
+./scripts/start-for-friends.sh
+
+# 3. 訪問應用
+# 前端: http://localhost:5173
+# 後端: http://localhost:5001
+```
+
+**💡 智能啟動腳本會自動處理**：
+- ✅ Docker 環境檢查
+- ✅ 端口衝突解決
+- ✅ 資料庫創建和遷移
+- ✅ 服務健康檢查
+- ✅ 常見問題修復
+
+### 🔧 開發者啟動方式
+
+如果您是開發者想要更多控制：
+
+```bash
+# 使用雙資料庫配置
+docker-compose -f docker-compose.dual.yml up -d
+
+# 或使用單資料庫配置
+docker-compose up -d
+```
+
+### 📚 詳細文檔
+
+- 🔐 [開發者安全指南](./frontend/docs/guides/DEVELOPER_SECURITY_GUIDE.md) - 密碼說明和安全提醒
+- 🔧 [故障排除指南](./frontend/docs/guides/FRIENDLY_TROUBLESHOOTING.md) - 常見問題解決方案
+- 🗄️ [資料庫操作指南](./frontend/docs/guides/DOCKER_DATABASE_COMMANDS_GUIDE.md) - 資料庫管理命令
 
 ## 🚀 核心功能架構
 
@@ -620,7 +662,7 @@ checks:
 
 ## 🐳 Docker 容器化架構
 
-### �� **多服務編排**
+### 🎯 **多服務編排**
 ```yaml
 # docker-compose.yml 核心配置
 version: '3.8'
