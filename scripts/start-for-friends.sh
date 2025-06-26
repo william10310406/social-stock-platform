@@ -421,7 +421,7 @@ fix_project_files() {
     # 檢查必要的文件是否存在
     local required_files=(
         "docker-compose.dual.yml"
-        "backend/app.py"
+        "backend/app/__init__.py"
         "frontend/package.json"
         "scripts/import_stock_data_v2.py"
     )
