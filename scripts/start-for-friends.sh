@@ -395,6 +395,20 @@ with app.app_context():
     fi
 done
 
+# 自動導入股票數據
+STOCK_DATA_DIR="個股日成交資訊 2"
+if [ -d "$STOCK_DATA_DIR" ]; then
+    echo -e "${YELLOW}📦 準備導入股票數據...${NC}"
+    # 複製資料到 backend 容器
+    docker cp "$STOCK_DATA_DIR" stock-insight-backend:/app/ 2>/dev/null || true
+    # 執行導入腳本
+    docker exec stock-insight-backend python scripts/import_stock_data_v2.py
+    echo -e "${GREEN}✅ 股票數據導入完成！${NC}"
+else
+    echo -e "${YELLOW}⚠️  找不到股票數據目錄（個股日成交資訊 2），跳過自動導入${NC}"
+    echo -e "${BLUE}💡 如需導入，請將資料夾放在專案根目錄再重新執行本腳本${NC}"
+fi
+
 # 最終檢查
 echo -e "${YELLOW}🔍 最終健康檢查...${NC}"
 sleep 10
