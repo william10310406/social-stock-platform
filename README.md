@@ -30,6 +30,10 @@
 - 🛠️ [`COMMON_COMMANDS.md`](./memory/COMMON_COMMANDS.md) - 常用命令速查
 - 🔧 [`TROUBLESHOOTING.md`](./memory/TROUBLESHOOTING.md) - 故障排除指南
 
+📁 **[`frontend/docs/guides/`](./frontend/docs/guides/)** - 開發指南
+- 🔐 [`DEVELOPER_SECURITY_GUIDE.md`](./frontend/docs/guides/DEVELOPER_SECURITY_GUIDE.md) - 開發者安全指南 (密碼說明)
+- 🗄️ [`DOCKER_DATABASE_COMMANDS_GUIDE.md`](./frontend/docs/guides/DOCKER_DATABASE_COMMANDS_GUIDE.md) - 資料庫操作指南
+
 **🎯 適用對象**: 新加入的開發者、AI 工具（Cursor、ChatGPT 等）、項目交接、代碼審查
 
 **⚡ 快速開始**: 如果您是 AI 工具，請直接閱讀 [`memory/README.md`](./memory/README.md) 獲得完整項目導航。
@@ -616,7 +620,7 @@ checks:
 
 ## 🐳 Docker 容器化架構
 
-### 📦 **多服務編排**
+### �� **多服務編排**
 ```yaml
 # docker-compose.yml 核心配置
 version: '3.8'
