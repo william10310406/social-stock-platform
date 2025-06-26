@@ -13,11 +13,15 @@
 #include <ctype.h>
 #include <termios.h>
 #include <unistd.h>
+#include <locale.h>
 
 // 依賴 pmm.c 中的全域 getter（在 user-space 模式可用）
 extern pmm_manager_t* pmm_get_global_instance(void);
 
 static memory_cli_t g_cli;
+
+// 啟動時的工作目錄，作為 CLI 根目錄
+static char g_base_dir[512] = "";
 
 // Simple storage for allocated pointers (demo purposes)
 #define MAX_CLI_ALLOCS 64
@@ -54,9 +58,14 @@ static void enable_raw_mode(void) {
 
 /* 指令清單供補全 */
 static const char* k_commands[] = {
-    "meminfo", "buddy", "slab", "history", "help", "exit",
+    // 英文指令
+    "meminfo", "buddy", "slab", "cat", "ls", "mkdir", "cd", "pwd", "edit", "history", "help", "exit",
     "buddy stat", "buddy alloc", "buddy free",
-    "slab stat", "slab alloc", "slab free", NULL};
+    "slab stat", "slab alloc", "slab free",
+    // 中文別名
+    "記憶體資訊", "夥伴", "區塊",
+    "夥伴 狀態", "夥伴 配置", "夥伴 釋放",
+    "區塊 狀態", "區塊 配置", "區塊 釋放", NULL};
 
 static void redraw_line(const char* buf, int len, int cursor);
 
@@ -69,7 +78,21 @@ static void trim_newline(char* str) {
 }
 
 static void cli_print_prompt(void) {
-    printf(C_GREEN "StockOS> " C_RESET);
+    char cwd[512];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        strncpy(cwd, "?", sizeof(cwd));
+        cwd[sizeof(cwd)-1] = '\0';
+    }
+
+    const char* rel = cwd;
+    size_t base_len = strlen(g_base_dir);
+    if (base_len > 0 && strncmp(cwd, g_base_dir, base_len) == 0) {
+        rel = cwd + base_len;
+        if (*rel == '/') rel++;          // remove leading '/'
+        if (*rel == '\0') rel = "/";   // show root when at base
+    }
+
+    printf(C_GREEN "StockOS" C_RESET ":" C_CYAN "%s" C_RESET "> ", rel);
     fflush(stdout);
 }
 
@@ -128,10 +151,12 @@ int cli_cmd_buddy(int argc, char** argv) {
     pmm_manager_t* pmm = pmm_get_global_instance();
     if (!pmm) { printf("[ERROR] PMM not initialized\n"); return -1; }
 
-    if (strcmp(argv[1], "stat")==0) {
+    // 中文別名對應
+    const char* sub = argv[1];
+    if (strcmp(sub, "stat")==0 || strcmp(sub, "狀態")==0) {
         pmm_stats_t stats = pmm_get_stats(pmm);
         print_buddy_stats(&stats);
-    } else if (strcmp(argv[1], "alloc")==0) {
+    } else if (strcmp(sub, "alloc")==0 || strcmp(sub, "配置")==0) {
         if (argc < 3) { printf("Usage: buddy alloc <pages>\n"); return -1; }
         size_t pages = (size_t)strtoul(argv[2], NULL, 0);
         if (pages==0) { printf("Invalid pages\n"); return -1; }
@@ -142,7 +167,7 @@ int cli_cmd_buddy(int argc, char** argv) {
         buddy_sizes[buddy_count] = pages*PMM_PAGE_SIZE;
         printf("Buddy alloc idx=%d addr=%p size=%zu bytes\n", buddy_count, ptr, pages*PMM_PAGE_SIZE);
         buddy_count++;
-    } else if (strcmp(argv[1], "free")==0) {
+    } else if (strcmp(sub, "free")==0 || strcmp(sub, "釋放")==0) {
         if (argc < 3) { printf("Usage: buddy free <idx>\n"); return -1; }
         int idx = atoi(argv[2]);
         if (idx<0 || idx>=buddy_count || !buddy_ptrs[idx]) { printf("Invalid idx\n"); return -1; }
@@ -168,10 +193,12 @@ int cli_cmd_slab(int argc, char** argv) {
     pmm_manager_t* pmm = pmm_get_global_instance();
     if (!pmm) { printf("[ERROR] PMM not initialized\n"); return -1; }
 
-    if (strcmp(argv[1], "stat")==0) {
+    // 中文別名對應
+    const char* sub2 = argv[1];
+    if (strcmp(sub2, "stat")==0 || strcmp(sub2, "狀態")==0) {
         pmm_stats_t stats = pmm_get_stats(pmm);
         print_slab_stats(&stats);
-    } else if (strcmp(argv[1], "alloc")==0) {
+    } else if (strcmp(sub2, "alloc")==0 || strcmp(sub2, "配置")==0) {
         if (argc<3) { printf("Usage: slab alloc <bytes>\n"); return -1; }
         size_t bytes = (size_t)strtoul(argv[2],NULL,0);
         if (bytes==0) { printf("Invalid size\n"); return -1; }
@@ -182,7 +209,7 @@ int cli_cmd_slab(int argc, char** argv) {
         slab_sizes[slab_count]=bytes;
         printf("Slab alloc idx=%d addr=%p size=%zu\n", slab_count, ptr, bytes);
         slab_count++;
-    } else if (strcmp(argv[1], "free")==0) {
+    } else if (strcmp(sub2, "free")==0 || strcmp(sub2, "釋放")==0) {
         if (argc<3){printf("Usage: slab free <idx>\n");return -1;}
         int idx=atoi(argv[2]);
         if (idx<0||idx>=slab_count||!slab_ptrs[idx]){printf("Invalid idx\n");return -1;}
@@ -196,19 +223,148 @@ int cli_cmd_slab(int argc, char** argv) {
     return 0;
 }
 
+// ------------------ 指令：cat ------------------
+int cli_cmd_cat(int argc, char** argv) {
+    if (argc < 2) {
+        printf("Usage: cat <filename>\n");
+        return -1;
+    }
+    const char* filename = argv[1];
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "cat %s", filename);
+
+    disable_raw_mode();
+    int ret = system(cmd);
+    enable_raw_mode();
+    printf("\n");
+    (void)ret;
+    return 0;
+}
+
+// ------------------ 指令：ls ------------------
+int cli_cmd_ls(int argc, char** argv) {
+    char cmd[512];
+    if (argc < 2) {
+        snprintf(cmd, sizeof(cmd), "ls -al --color=auto");
+    } else {
+        snprintf(cmd, sizeof(cmd), "ls -al --color=auto %s", argv[1]);
+    }
+
+    disable_raw_mode();
+    int ret = system(cmd);
+    enable_raw_mode();
+    printf("\n");
+    (void)ret;
+    return 0;
+}
+
+// ------------------ 指令：mkdir ------------------
+int cli_cmd_mkdir(int argc, char** argv) {
+    if (argc < 2) {
+        printf("Usage: mkdir <path> [more_paths...]\n");
+        return -1;
+    }
+
+    disable_raw_mode();
+    for (int i = 1; i < argc; i++) {
+        char cmd[512];
+        snprintf(cmd, sizeof(cmd), "mkdir -p -- '%s'", argv[i]);
+        int ret = system(cmd);
+        if (ret != 0) {
+            printf("Failed to create %s\n", argv[i]);
+        }
+    }
+    enable_raw_mode();
+    printf("\n");
+    return 0;
+}
+
+// ------------------ 指令：cd ------------------
+int cli_cmd_cd(int argc, char** argv) {
+    if (argc < 2) {
+        char cwd[512];
+        if (getcwd(cwd, sizeof(cwd))) {
+            printf("Current directory: %s\n", cwd);
+        } else {
+            perror("getcwd");
+        }
+        return 0;
+    }
+
+    if (chdir(argv[1]) != 0) {
+        perror("chdir");
+        return -1;
+    }
+    return 0;
+}
+
+// ------------------ 指令：pwd ------------------
+int cli_cmd_pwd(int argc, char** argv) {
+    (void)argc; (void)argv;
+    char cwd[512];
+    if (getcwd(cwd, sizeof(cwd))) {
+        printf("%s\n", cwd);
+    } else {
+        perror("getcwd");
+        return -1;
+    }
+    return 0;
+}
+
+// --------------- 指令：help ---------------
+int cli_cmd_help(int argc, char** argv) {
+    (void)argc; (void)argv;
+    printf(C_CYAN "可用指令與說明：" C_RESET "\n\n");
+    printf("meminfo / 記憶體資訊    - 顯示整體記憶體統計\n");
+    printf("buddy / 夥伴 stat|狀態  - 顯示 Buddy 分配器統計\n");
+    printf("buddy / 夥伴 alloc|配置 <頁數> - 分配 <頁數>×4KiB 記憶體\n");
+    printf("buddy / 夥伴 free|釋放 <索引>  - 釋放先前 buddy alloc\n");
+    printf("slab / 區塊 stat|狀態   - 顯示 Slab 分配器統計\n");
+    printf("slab / 區塊 alloc|配置 <大小> - 分配 <大小> 位元組記憶體\n");
+    printf("slab / 區塊 free|釋放 <索引>   - 釋放先前 slab alloc\n");
+    printf("cat <檔名>             - 顯示檔案內容\n");
+    printf("ls [路徑]              - 列出檔案/目錄\n");
+    printf("mkdir <路徑>           - 建立新目錄 (可多個)\n");
+    printf("cd [路徑]              - 切換/顯示目前目錄\n");
+    printf("pwd                    - 顯示目前工作目錄\n");
+    printf("edit <檔名>            - 使用內建編輯器\n");
+    printf("history                - 列出歷史指令\n");
+    printf("history clear          - 清除歷史記錄\n");
+    printf("exit                   - 離開 CLI\n");
+    return 0;
+}
+
 /* ------------------ 簡單解析/執行 ------------------ */
 static int dispatch_command(int argc, char** argv) {
     if (argc==0) return 0;
-    if (strcmp(argv[0], "meminfo")==0) return cli_cmd_meminfo(argc, argv);
-    if (strcmp(argv[0], "buddy")==0)   return cli_cmd_buddy(argc, argv);
-    if (strcmp(argv[0], "slab")==0)    return cli_cmd_slab(argc, argv);
-    if (strcmp(argv[0], "help")==0) {
-        printf(C_CYAN "Available commands:" C_RESET "\n");
-        printf("  meminfo\n  buddy stat|alloc <pages>|free <idx>\n  slab stat|alloc <bytes>|free <idx>\n  history [clear]\n  exit\n");
+    if (strcmp(argv[0], "meminfo")==0 || strcmp(argv[0], "記憶體資訊")==0) return cli_cmd_meminfo(argc, argv);
+    if (strcmp(argv[0], "buddy")==0 || strcmp(argv[0], "夥伴")==0)   return cli_cmd_buddy(argc, argv);
+    if (strcmp(argv[0], "slab")==0 || strcmp(argv[0], "區塊")==0)    return cli_cmd_slab(argc, argv);
+    if (strcmp(argv[0], "cat")==0 || strcmp(argv[0], "查看")==0)     return cli_cmd_cat(argc, argv);
+    if (strcmp(argv[0], "ls")==0 || strcmp(argv[0], "列表")==0)      return cli_cmd_ls(argc, argv);
+    if (strcmp(argv[0], "mkdir")==0 || strcmp(argv[0], "建立目錄")==0 || strcmp(argv[0], "創建目錄")==0) return cli_cmd_mkdir(argc, argv);
+    if (strcmp(argv[0], "cd")==0 || strcmp(argv[0], "切換目錄")==0) return cli_cmd_cd(argc, argv);
+    if (strcmp(argv[0], "pwd")==0 || strcmp(argv[0], "當前目錄")==0) return cli_cmd_pwd(argc, argv);
+    if (strcmp(argv[0], "edit")==0 || strcmp(argv[0], "編輯")==0) {
+        const char* filename = (argc>=2) ? argv[1] : "untitled.txt";
+        char cmd[512];
+        snprintf(cmd, sizeof(cmd), "./build/kilo %s", filename);
+
+        /* Temporarily exit raw mode so the external editor can manage the terminal */
+        disable_raw_mode();
+        int ret = system(cmd);
+        /* Clear screen and return cursor to top-left */
+        printf("\x1b[2J\x1b[H");
+        enable_raw_mode();
+        printf("\n"); /* move to next line after editor exits */
+
+        (void)ret;
         return 0;
     }
+    if (strcmp(argv[0], "help")==0) return cli_cmd_help(argc, argv);
     if (strcmp(argv[0], "history")==0) return cli_cmd_history(argc, argv);
     if (strcmp(argv[0], "exit")==0) return 1; // signal to exit loop
+
     printf("Unknown command. Type 'help'.\n");
     return 0;
 }
@@ -216,6 +372,11 @@ static int dispatch_command(int argc, char** argv) {
 int memory_cli_init(void) {
     memset(&g_cli, 0, sizeof(g_cli));
     g_cli.initialized = true;
+
+    // 記錄啟動時的工作目錄作為根目錄
+    if (!getcwd(g_base_dir, sizeof(g_base_dir))) {
+        g_base_dir[0] = '\0';
+    }
     return 0;
 }
 
@@ -224,6 +385,9 @@ void memory_cli_cleanup(void) {
 }
 
 void memory_cli_main_loop(void) {
+    /* 啟用當前環境的 UTF-8 locale，讓 isprint 針對中文也可正確判定。*/
+    setlocale(LC_CTYPE, "");
+
     enable_raw_mode();
     char buffer[CLI_BUFFER_SIZE];
     int len = 0;
@@ -294,7 +458,7 @@ void memory_cli_main_loop(void) {
                     }
                 }
             }
-        } else if (isprint((unsigned char)c) && len<CLI_BUFFER_SIZE-1) {
+        } else if (((unsigned char)c >= 0x20 && c != 0x7F) && len<CLI_BUFFER_SIZE-1) {
             if (cursor==len) {
                 buffer[len++]=c; buffer[len]='\0'; cursor++; write(STDOUT_FILENO,&c,1);
             } else {

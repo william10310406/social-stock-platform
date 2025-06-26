@@ -10,9 +10,32 @@
 #ifndef STOCKOS_PMM_H
 #define STOCKOS_PMM_H
 
+#ifdef KERNEL_MODE
+// Kernel mode: 使用我們自己的類型定義
+#ifndef __STDINT_TYPES_DEFINED__
+#define __STDINT_TYPES_DEFINED__
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+#ifdef __LP64__
+typedef unsigned long uint64_t;
+typedef unsigned long uintptr_t;
+#else
+typedef unsigned long long uint64_t;
+typedef unsigned long uintptr_t;
+#endif
+typedef unsigned long size_t;
+typedef int bool;
+#define true 1
+#define false 0
+#define NULL ((void*)0)
+#endif
+#else
+// User mode: 使用標準頭文件
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#endif
 
 // 引入現有的分配器 (僅在非 Kernel 模式)
 #ifndef KERNEL_MODE
@@ -215,7 +238,7 @@ size_t pmm_get_memory_report(pmm_manager_t* pmm, char* buffer, size_t buffer_siz
  * @return 頁面框架號
  */
 static inline uint32_t pmm_virt_to_pfn(void* virt_addr) {
-    return (uint32_t)((uintptr_t)virt_addr / PMM_PAGE_SIZE);
+    return (uint32_t)((unsigned long)virt_addr / PMM_PAGE_SIZE);
 }
 
 /**
@@ -224,7 +247,7 @@ static inline uint32_t pmm_virt_to_pfn(void* virt_addr) {
  * @return 虛擬地址
  */
 static inline void* pmm_pfn_to_virt(uint32_t pfn) {
-    return (void*)(uintptr_t)(pfn * PMM_PAGE_SIZE);
+    return (void*)(unsigned long)(pfn * PMM_PAGE_SIZE);
 }
 
 /**
@@ -233,7 +256,7 @@ static inline void* pmm_pfn_to_virt(uint32_t pfn) {
  * @return 對齊返回 true
  */
 static inline bool pmm_is_page_aligned(void* addr) {
-    return ((uintptr_t)addr & (PMM_PAGE_SIZE - 1)) == 0;
+    return ((unsigned long)addr & (PMM_PAGE_SIZE - 1)) == 0;
 }
 
 /**

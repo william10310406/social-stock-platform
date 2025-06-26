@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM menci/archlinuxarm:base
+FROM archlinux:base
 
 # ---------------------------
 # StockOS cross-compile image
@@ -10,15 +10,17 @@ FROM menci/archlinuxarm:base
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
-RUN pacman -Sy --noconfirm \
-    base-devel \
-    git \
-    nasm \
-    clang llvm lld \
-    qemu-base \
-    grub \
-    python \
-    && pacman -Scc --noconfirm
+RUN pacman -Sy --noconfirm archlinux-keyring && \
+    pacman -S --noconfirm \
+        base-devel \
+        git \
+        nasm \
+        clang llvm lld \
+        libxml2 libarchive \
+        qemu-base \
+        grub \
+        python && \
+    pacman -Scc --noconfirm
 
 # Build & install limine (bootloader)
 RUN git clone --depth 1 --branch v9.3.4-binary https://github.com/limine-bootloader/limine.git /opt/limine && \

@@ -1,0 +1,3 @@
+[submodule "StockOS/ext/limine"]
+	path = StockOS/ext/limine
+	url = https://github.com/limine-bootloader/limine.git

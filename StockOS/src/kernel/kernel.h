@@ -4,8 +4,29 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-// 基本類型定義：直接使用 <stdint.h>
+// 基本類型定義 (kernel mode)
+#ifdef KERNEL_MODE
+#ifndef __STDINT_TYPES_DEFINED__
+#define __STDINT_TYPES_DEFINED__
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+#ifdef __LP64__
+typedef unsigned long uint64_t;
+#else
+typedef unsigned long long uint64_t;
+#endif
+typedef unsigned long size_t;
+typedef char* va_list;
+typedef int bool;
+#define true 1
+#define false 0
+#define NULL ((void*)0)
+#endif
+#else
 #include <stdint.h>
+#include <stdbool.h>
+#endif
 
 // 函數聲明
 void kernel_main(void);

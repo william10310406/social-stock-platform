@@ -1,6 +1,6 @@
 # StockOS Memory CLI Commands Database
 
-_Last updated: 2025-06-24_
+_Last updated: 2025-06-25_
 
 | Command | Sub-commands / Args | Description |
 |---------|--------------------|-------------|
@@ -13,6 +13,12 @@ _Last updated: 2025-06-24_
 | `slab` | `stat` | Show slab allocator stats |
 |  | `alloc <bytes>` | Allocate ≤ 512 B via slab allocator |
 |  | `free <idx>` | Free a slab allocation |
+| `cat <file>` | – | Print file contents |
+| `ls [path]` | – | List files / directories (alias of `ls -al --color=auto`) |
+| `mkdir <path ...>` | – | Create one or more directories (`-p`) |
+| `cd [path]` | – | Change directory; no arg prints current dir |
+| `pwd` | – | Print current working directory |
+| `edit <file>` | – | Open file in built-in kilo editor |
 | `exit` | – | Leave the CLI |
 
 ## Editing Keys / Shortcuts

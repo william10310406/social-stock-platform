@@ -2,48 +2,152 @@
 // 基於 Stock Insight Platform 的服務架構設計
 
 #include "kernel.h"
-#include <string.h>
+#include "lib/string.h"
+#include "serial.h"
+#include "idt.h"
+#include <stdint.h>
+#include "../../ext/limine/limine.h"
 
-// 類似你的 RouteUtils，但用於 kernel 服務
-typedef struct {
-    const char* name;
-    void (*init_func)(void);
-    void (*cleanup_func)(void);
-} kernel_service_t;
+// 簡化的服務初始化，避免字符串和函數指針數組
+// 改用直接函數調用避免重定位問題
 
-// 類似你的組件庫概念，但用於 kernel 服務
-kernel_service_t services[] = {
-    {"Memory Manager", memory_init, memory_cleanup},
-    {"PMM Service", (void*)pmm_service_init, (void*)pmm_service_cleanup},
-    {"Memory Syscalls", (void*)memory_syscalls_service_init, (void*)memory_syscalls_service_cleanup},
-    {"Memory CLI", (void*)memory_cli_service_init, (void*)memory_cli_service_cleanup},
-    {"Process Manager", process_init, process_cleanup},
-    {"File System", fs_init, fs_cleanup},
-    {"Network Stack", network_init, network_cleanup},
-    {"Device Drivers", drivers_init, drivers_cleanup}
+// 字符陣列避免重定位問題
+static char msg_kernel_title[] = {'S','t','o','c','k','O','S',' ','K','e','r','n','e','l',' ','v','0','.','1','\n',0};
+static char msg_separator[] = {'=','=','=','=','=','=','=','=','=','=','=','=','=','=','=','=','=','=','\n','\n',0};
+static char msg_init_services[] = {'I','n','i','t','i','a','l','i','z','i','n','g',' ','s','e','r','v','i','c','e','s','.','.','.', '\n',0};
+static char msg_memory_mgr[] = {' ',' ','M','e','m','o','r','y',' ','M','a','n','a','g','e','r','.','.','.', 0};
+static char msg_pmm[] = {' ',' ','P','M','M',' ','S','e','r','v','i','c','e','.','.','.', 0};
+static char msg_syscalls[] = {' ',' ','M','e','m','o','r','y',' ','S','y','s','c','a','l','l','s','.','.','.', 0};
+static char msg_cli[] = {' ',' ','M','e','m','o','r','y',' ','C','L','I','.','.','.', 0};
+static char msg_process[] = {' ',' ','P','r','o','c','e','s','s',' ','M','a','n','a','g','e','r','.','.','.', 0};
+static char msg_fs[] = {' ',' ','F','i','l','e',' ','S','y','s','t','e','m','.','.','.', 0};
+static char msg_network[] = {' ',' ','N','e','t','w','o','r','k',' ','S','t','a','c','k','.','.','.', 0};
+static char msg_drivers[] = {' ',' ','D','e','v','i','c','e',' ','D','r','i','v','e','r','s','.','.','.', 0};
+static char msg_ok[] = {'[','O','K',']','\n', 0};
+static char msg_success[] = {'\n','K','e','r','n','e','l',' ','i','n','i','t','i','a','l','i','z','e','d','!','\n', 0};
+static char msg_loop[] = {'E','n','t','e','r','i','n','g',' ','m','a','i','n',' ','l','o','o','p','.','.','.', '\n','\n',0};
+
+#define VGA_BASE ((volatile char*)0xFFFF8000000B8000ULL)
+
+#define STIVALE2_STRUCT_TAG_HHDM_ID 0xB0ED257E6AB0A0A0
+
+struct stivale2_struct_tag {
+    uint64_t identifier;
+    uint64_t next;
 };
+struct stivale2_struct {
+    uint64_t tags;
+};
+struct stivale2_struct_tag_hhdm {
+    uint64_t identifier;
+    uint64_t next;
+    uint64_t offset;
+};
+struct stivale2_struct *stivale2_info;
+static uint64_t hhdm_base = 0;
+
+#ifdef __APPLE__
+#define LIMINE_SEC __attribute__((section("__DATA,__limine_reqs")))
+#else
+#define LIMINE_SEC __attribute__((section(".limine_reqs")))
+#endif
+
+// Request Limine terminal before kernel_main so bootloader provides it
+static volatile struct limine_terminal_request terminal_request LIMINE_SEC = {
+    LIMINE_TERMINAL_REQUEST
+};
+
+// Helper to write to Limine terminal if available
+static void term_write(const char *str) {
+    if (terminal_request.response && terminal_request.response->terminal_count > 0) {
+        struct limine_terminal *term = terminal_request.response->terminals[0];
+        terminal_request.response->write(term, str, strlen(str));
+    }
+}
+
+static void detect_hhdm(void) {
+    struct stivale2_struct_tag *tag = (void*)stivale2_info->tags;
+    while (tag) {
+        if (tag->identifier == STIVALE2_STRUCT_TAG_HHDM_ID) {
+            hhdm_base = ((struct stivale2_struct_tag_hhdm*)tag)->offset;
+            break;
+        }
+        tag = (void*)tag->next;
+    }
+}
 
 // 類似你的應用初始化流程
 void kernel_main(void) {
-    // 清屏並顯示歡迎訊息
+    serial_init();
+    serial_print("[StockOS] kernel_main entered\n");
+    detect_hhdm();
+    LOG("HHDM base:\n");
+    LOG_HEX(hhdm_base);
+
+    idt_init();
+    serial_print("IDT initialized\n");
+
+    // 在 VGA 文字模式 0xB8000[0] 寫入 'X' 做黑屏排除測試
+    volatile char *vga = (volatile char *)(hhdm_base + 0xB8000);
+    vga[0] = 'X';
+    vga[1] = 0x0F;  // 白字黑底
+
+    serial_print("VGA test char written\n");
+
+    serial_print("clear_screen...\n");
     clear_screen();
-    print("StockOS Kernel v0.1\n");
-    print("==================\n\n");
-    
-    // 初始化核心服務 - 參考你的服務架構
-    print("Initializing kernel services...\n");
-    for (int i = 0; i < sizeof(services)/sizeof(services[0]); i++) {
-        print("  Loading service: ");
-        print(services[i].name);
-        print(" ");
-        
-        // 初始化服務
-        services[i].init_func();
-        print("[OK]\n");
-    }
-    
-    print("\nKernel initialized successfully!\n");
-    print("Entering main loop...\n\n");
+
+    serial_print("print title...\n");
+    print(msg_kernel_title);
+    serial_print("print separator...\n");
+    print(msg_separator);
+
+    serial_print("init services...\n");
+    print(msg_init_services);
+
+    serial_print("memory_init...\n");
+    print(msg_memory_mgr);
+    memory_init();
+    print(msg_ok);
+
+    serial_print("pmm_service_init...\n");
+    print(msg_pmm);
+    pmm_service_init();
+    print(msg_ok);
+
+    serial_print("syscalls_service_init...\n");
+    print(msg_syscalls);
+    memory_syscalls_service_init();
+    print(msg_ok);
+
+    serial_print("cli_service_init...\n");
+    print(msg_cli);
+    memory_cli_service_init();
+    print(msg_ok);
+
+    serial_print("process_init...\n");
+    print(msg_process);
+    process_init();
+    print(msg_ok);
+
+    serial_print("fs_init...\n");
+    print(msg_fs);
+    fs_init();
+    print(msg_ok);
+
+    serial_print("network_init...\n");
+    print(msg_network);
+    network_init();
+    print(msg_ok);
+
+    serial_print("drivers_init...\n");
+    print(msg_drivers);
+    drivers_init();
+    print(msg_ok);
+
+    serial_print("success...\n");
+    print(msg_success);
+    print(msg_loop);
     
     // 進入主循環 - 類似你的事件處理
     kernel_loop();
@@ -51,20 +155,42 @@ void kernel_main(void) {
 
 // Kernel 主循環 - 類似你的 Socket.IO 事件循環
 void kernel_loop(void) {
+    static char input_buf[128];
+    static int  input_len = 0;
+
     while (1) {
+        // Poll serial for input (non-blocking)
+        if (serial_received()) {
+            char c = serial_read_char();
+            // Echo back to both serial and terminal
+            char echo[2] = {c, '\0'};
+            term_write(echo);
+            serial_write(c);
+
+            if (c == '\r' || c == '\n') {
+                // End of line → process command
+                input_buf[input_len] = '\0';
+                if (input_len > 0) {
+                    kernel_handle_cli_command(input_buf);
+                }
+                input_len = 0;
+            } else if (c == 0x08 || c == 0x7f) { // backspace
+                if (input_len > 0) {
+                    input_len--;
+                }
+            } else if (input_len < (int)sizeof(input_buf) - 1) {
+                input_buf[input_len++] = c;
+            }
+        }
+
         // 處理中斷和事件
         handle_interrupts();
-        
+
         // 調度程序
         schedule();
-        
+
         // 處理系統調用
         handle_syscalls();
-        
-        // 短暫休眠
-        for (volatile int i = 0; i < 1000000; i++) {
-            // 簡單的延遲
-        }
     }
 }
 
@@ -88,7 +214,7 @@ void handle_syscalls(void) {
 
 // 清屏函數 - 類似你的 Loading 組件
 void clear_screen(void) {
-    volatile char* video_memory = (volatile char*)0xB8000;
+    volatile char* video_memory = (volatile char*)(hhdm_base + 0xB8000);
     for (int i = 0; i < 80 * 25 * 2; i += 2) {
         video_memory[i] = ' ';
         video_memory[i + 1] = 0x07; // 白色文字，黑色背景
@@ -97,10 +223,12 @@ void clear_screen(void) {
 
 // 字串輸出函數 - 類似你的 Formatter 組件
 void print(const char* str) {
+    // First, write to Limine terminal (framebuffer text) if present
+    term_write(str);
     static int cursor_x = 0;
     static int cursor_y = 0;
     
-    volatile char* video_memory = (volatile char*)0xB8000;
+    volatile char* video_memory = (volatile char*)(hhdm_base + 0xB8000);
     
     for (int i = 0; str[i] != '\0'; i++) {
         if (str[i] == '\n') {
@@ -131,7 +259,7 @@ void print(const char* str) {
 
 // 滾動螢幕
 void scroll_screen(void) {
-    volatile char* video_memory = (volatile char*)0xB8000;
+    volatile char* video_memory = (volatile char*)(hhdm_base + 0xB8000);
     
     // 將所有行向上移動一行
     for (int i = 0; i < 24; i++) {

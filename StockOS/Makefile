@@ -3,8 +3,9 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -g -O2
-INCLUDES = -I./src
+INCLUDES = -I./src -I./arch/x86_64/hal
 LIBS = -lm
+LD = ld.lld
 
 # 目錄
 SRC_DIR = src
@@ -16,7 +17,10 @@ DOCS_DIR = docs
 CONSCIOUSNESS_SOURCES = $(SRC_DIR)/consciousness/consciousness_container.c
 MEMORY_SOURCES = $(SRC_DIR)/crazy_memory/crazy_memory.c $(SRC_DIR)/crazy_memory/buddy_allocator.c $(SRC_DIR)/crazy_memory/slab_allocator.c
 KERNEL_MEMORY_SOURCES = $(SRC_DIR)/kernel/memory/pmm.c
-KERNEL_SOURCES = $(SRC_DIR)/kernel/kernel.c $(SRC_DIR)/kernel/cli/memory_cli.c $(SRC_DIR)/kernel/entry.c $(SRC_DIR)/kernel/syscalls/memory_syscalls.c
+KERNEL_SOURCES = $(SRC_DIR)/kernel/kernel.c $(SRC_DIR)/kernel/interactive_kernel.c $(SRC_DIR)/kernel/cli/memory_cli.c $(SRC_DIR)/kernel/entry.c $(SRC_DIR)/kernel/syscalls/memory_syscalls.c
+
+# New: HAL assembly source for port I/O (x86_64)
+HAL_SOURCES = arch/x86_64/hal/io.S
 
 # 測試源文件
 TEST_CONSCIOUSNESS_SOURCES = $(TEST_DIR)/test_consciousness_container.c
@@ -31,6 +35,7 @@ DEMO_SOURCES = $(TEST_DIR)/demo_consciousness_usage.c
 CONSCIOUSNESS_OBJECTS = $(CONSCIOUSNESS_SOURCES:.c=.o)
 MEMORY_OBJECTS = $(MEMORY_SOURCES:.c=.o)
 KERNEL_MEMORY_OBJECTS = $(KERNEL_MEMORY_SOURCES:.c=.o)
+BOOT_ASM_SOURCES = boot/stivale2_header.S
 KERNEL_OBJECTS = $(KERNEL_SOURCES:.c=.o)
 TEST_OBJECTS = $(TEST_CONSCIOUSNESS_OBJECTS) $(TEST_MEMORY_OBJECTS)
 DEMO_OBJECTS = $(DEMO_SOURCES:.c=.o)
@@ -42,6 +47,12 @@ DEMO_EXECUTABLE = $(BUILD_DIR)/demo_consciousness_usage
 CONSCIOUSNESS_LIB = $(BUILD_DIR)/libconsciousness.a
 MEMORY_LIB = $(BUILD_DIR)/libmemory.a
 KERNEL_EXECUTABLE = $(BUILD_DIR)/stockos_kernel
+
+# add variable near top
+LIMINE_DIR = ext/limine
+ISO_BIOS_SYS = limine-bios.sys
+ISO_BIOS_CD  = limine-bios-cd.bin
+ISO_EFI_FILE = BOOTX64.EFI
 
 # 默認目標
 all: build_dir memory_lib consciousness_lib test_consciousness demo_consciousness test_kernel_memory
@@ -194,44 +205,34 @@ memcheck: test_consciousness
 
 # 幫助
 help:
-	@echo "StockOS Kernel Memory Management Build System"
-	@echo "=============================================="
+	@echo "StockOS 編譯系統 - 可用目標:"
 	@echo ""
-	@echo "Available targets:"
-	@echo "  all              - Build everything (default)"
-	@echo "  memory_lib       - Build memory management library"
-	@echo "  consciousness_lib - Build consciousness library"
-	@echo "  kernel           - Build StockOS kernel"
-	@echo "  test_consciousness - Build consciousness tests"
-	@echo "  test_kernel_memory - Build kernel memory tests"
-	@echo "  demo_consciousness - Build demo program"
-	@echo "  test             - Build and run consciousness tests"
-	@echo "  test_memory      - Build and run kernel memory tests"
-	@echo "  test_all         - Run all tests"
-	@echo "  test_verbose     - Run consciousness tests with detailed output"
-	@echo "  test_memory_verbose - Run memory tests with detailed output"
-	@echo "  demo             - Build and run demo program"
-	@echo "  demo_verbose     - Build and run demo with detailed output"
-	@echo "  clean            - Remove all build files"
-	@echo "  install          - Install library to system"
-	@echo "  uninstall        - Remove library from system"
-	@echo "  lint             - Format code with clang-format"
-	@echo "  analyze          - Run static analysis with cppcheck"
-	@echo "  docs             - Generate documentation with Doxygen"
-	@echo "  benchmark        - Run performance benchmarks"
-	@echo "  memcheck         - Run memory leak detection"
-	@echo "  docker-build     - Build cross-compile Docker image"
-	@echo "  iso              - Build bootable StockOS.iso (Limine)"
-	@echo "  qemu             - Run ISO in QEMU (serial console)"
+	@echo "🎯 推薦使用 (多階段系統):"
+	@echo "  multi-stage-boot   - 編譯多階段bootloader (Stage1+Stage2)"
+	@echo "  multi-stage-floppy - 創建多階段軟盤映像"
+	@echo "  qemu-multistage    - QEMU測試多階段系統 ⭐️ 推薦"
 	@echo ""
-	@echo "🚀 Quick Start for Kernel Memory Testing:"
-	@echo "  make test_memory  - Test the integrated memory system"
-	@echo "  make kernel       - Build the StockOS kernel"
+	@echo "基本目標:"
+	@echo "  build              - 編譯 StockOS 內核"
+	@echo "  clean              - 清理建構文件"
+	@echo "  help               - 顯示此幫助"
 	@echo ""
-	@echo "Environment variables:"
-	@echo "  CC               - C compiler (default: gcc)"
-	@echo "  CFLAGS           - Compiler flags"
-	@echo "  BUILD_DIR        - Build directory (default: build)"
+	@echo "簡單 Bootloader (512字節限制):"
+	@echo "  simple-boot        - 編譯簡單 bootloader"
+	@echo "  simple-floppy      - 創建簡單軟盤映像"
+	@echo "  qemu-simple        - QEMU 測試簡單版本"
+	@echo "  test-simple        - 快速測試簡單版本"
+	@echo ""
+	@echo "交互式 Bootloader (已棄用):"
+	@echo "  interactive-boot   - 編譯交互式 bootloader"
+	@echo "  interactive-floppy - 創建交互式軟盤映像"
+	@echo "  qemu-interactive   - QEMU 測試交互式系統"
+	@echo ""
+	@echo "調試目標:"
+	@echo "  debug              - 顯示工具版本信息"
+	@echo "  test-env           - 測試編譯環境"
+	@echo ""
+	@echo "💡 快速開始: make qemu-multistage"
 
 # 通用編譯規則
 %.o: %.c
@@ -252,24 +253,28 @@ ASM = nasm
 CLANG = clang
 
 # Minimal kernel sources for bare-metal ISO (exclude user-space helpers)
-BOOT_SOURCES = $(SRC_DIR)/kernel/kernel.c
+BOOT_SOURCES = $(SRC_DIR)/kernel/kernel.c $(SRC_DIR)/kernel/lib/string.c $(SRC_DIR)/kernel/stubs.c $(SRC_DIR)/kernel/serial.c $(SRC_DIR)/kernel/idt.c boot/stivale2_header.S
 
 # Pattern rule: compile kernel sources with Clang cross-compiler
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CLANG) --target=x86_64-elf -I./src -ffreestanding -DKERNEL_MODE -O2 -c $< -o $@
+	$(CLANG) --target=x86_64-elf -I./src -ffreestanding -DKERNEL_MODE -O2 -mcmodel=kernel -fno-pic -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -c $< -o $@
 
-KERNEL_CLANG_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(BOOT_SOURCES))
+KERNEL_CLANG_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(patsubst %.S,$(BUILD_DIR)/%.o,$(BOOT_SOURCES)))
 
-kernel.elf: boot/stage1.asm $(KERNEL_CLANG_OBJECTS)
-	$(ASM) -f elf64 boot/stage1.asm -o $(BUILD_DIR)/stage1.o
-	$(CLANG) --target=x86_64-elf -T boot/linker.ld -nostdlib -ffreestanding -Wl,-z,max-page-size=0x200000 -o $(BUILD_DIR)/kernel.elf $(BUILD_DIR)/stage1.o $(KERNEL_CLANG_OBJECTS)
+kernel.elf: $(KERNEL_CLANG_OBJECTS)
+	$(LD) -nostdlib -z max-page-size=0x1000 -T boot/linker.ld -o $(BUILD_DIR)/kernel.elf $(KERNEL_CLANG_OBJECTS)
 
 iso: kernel.elf
-	cp $(BUILD_DIR)/kernel.elf boot/kernel.elf
-	cp boot/limine.cfg build/
-	/opt/limine/limine-install build
-	mv build/image.iso $(ISO_NAME)
+	@echo "📦 Creating ISO with Limine (no install)..."
+	@mkdir -p $(BUILD_DIR)/iso_root
+	cp $(BUILD_DIR)/kernel.elf $(BUILD_DIR)/iso_root/
+	cp boot/limine.cfg $(BUILD_DIR)/iso_root/
+	cp $(LIMINE_DIR)/$(ISO_BIOS_SYS) $(LIMINE_DIR)/$(ISO_BIOS_CD) $(LIMINE_DIR)/$(ISO_EFI_FILE) $(BUILD_DIR)/iso_root/
+	xorriso -as mkisofs \
+	    -b $(ISO_BIOS_CD) -no-emul-boot -boot-load-size 4 -boot-info-table \
+	    -eltorito-alt-boot -e $(ISO_EFI_FILE) -no-emul-boot \
+	    -o $(ISO_NAME) $(BUILD_DIR)/iso_root
 	@echo "✅ ISO created: $(ISO_NAME)"
 
 qemu: iso
@@ -277,4 +282,173 @@ qemu: iso
 
 # Build Docker image for cross environment
 docker-build:
-	docker build -t stockos/dev-x86_64 docker/dev 
+	docker buildx build --platform linux/amd64 -t stockos/dev-x86_64 docker/dev --load
+
+# Build ISO inside Docker cross environment
+docker-iso:
+	docker run --rm -v "$(CURDIR)":/workspace -w /workspace stockos/dev-x86_64 make iso
+
+# Simple bootloader - 避免複雜工具鏈問題
+simple-boot: 
+	@echo "🚀 Building simple StockOS bootloader..."
+	nasm -f bin boot/simple_boot.asm -o $(BUILD_DIR)/stockos_simple.bin
+	@echo "✅ Simple bootloader built: $(BUILD_DIR)/stockos_simple.bin"
+
+# 創建簡單的軟盤映像
+simple-floppy: simple-boot
+	@echo "💾 Creating bootable floppy image..."
+	@mkdir -p $(BUILD_DIR)
+	dd if=/dev/zero of=$(BUILD_DIR)/stockos_simple.img bs=1024 count=1440
+	dd if=$(BUILD_DIR)/stockos_simple.bin of=$(BUILD_DIR)/stockos_simple.img bs=512 count=1 conv=notrunc
+	@echo "✅ Bootable floppy created: $(BUILD_DIR)/stockos_simple.img"
+
+# 使用QEMU運行簡單版本
+qemu-simple: simple-floppy
+	@echo "🖥️ Running StockOS in QEMU..."
+	qemu-system-x86_64 -fda $(BUILD_DIR)/stockos_simple.img -boot a -serial stdio -m 256M
+
+# 創建 ISO 映像檔
+simple-iso: simple-boot
+	@echo "💿 Creating StockOS ISO image..."
+	@mkdir -p $(BUILD_DIR)/iso_root/boot
+	cp $(BUILD_DIR)/stockos_simple.bin $(BUILD_DIR)/iso_root/boot/
+	@# 創建 El Torito 可啟動 ISO
+	mkisofs -o $(BUILD_DIR)/stockos.iso -b boot/stockos_simple.bin -no-emul-boot -boot-load-size 1 -boot-info-table $(BUILD_DIR)/iso_root/
+	@echo "✅ ISO created: $(BUILD_DIR)/stockos.iso"
+
+# 使用 ISO 在 QEMU 中運行
+qemu-iso: simple-iso  
+	@echo "🖥️ Running StockOS from ISO in QEMU..."
+	qemu-system-x86_64 -cdrom $(BUILD_DIR)/stockos.iso -boot d -serial stdio -m 256M
+
+# 交互式 Bootloader 目標
+interactive-boot:
+	@echo "編譯交互式 StockOS Bootloader..."
+	@mkdir -p $(BUILD_DIR)
+	nasm -f bin boot/enhanced_simple.asm -o $(BUILD_DIR)/$(INTERACTIVE_NAME).bin
+	@echo "成功創建: $(BUILD_DIR)/$(INTERACTIVE_NAME).bin"
+
+interactive-floppy: interactive-boot
+	@echo "創建交互式軟盤映像..."
+	dd if=/dev/zero of=$(BUILD_DIR)/$(INTERACTIVE_NAME).img bs=1024 count=1440 status=none
+	dd if=$(BUILD_DIR)/$(INTERACTIVE_NAME).bin of=$(BUILD_DIR)/$(INTERACTIVE_NAME).img conv=notrunc status=none
+	@echo "成功創建: $(BUILD_DIR)/$(INTERACTIVE_NAME).img"
+
+interactive-iso: interactive-boot
+	@echo "創建交互式 ISO 映像..."
+	@mkdir -p $(ISO_DIR)/boot
+	cp $(BUILD_DIR)/$(INTERACTIVE_NAME).bin $(ISO_DIR)/boot/
+	mkisofs -b boot/$(INTERACTIVE_NAME).bin -no-emul-boot -boot-load-size 4 \
+	        -A "StockOS Interactive" -input-charset iso8859-1 -quiet \
+	        -boot-info-table -o $(BUILD_DIR)/stockos_interactive.iso $(ISO_DIR)
+	@echo "成功創建: $(BUILD_DIR)/stockos_interactive.iso"
+
+# QEMU 測試目標
+qemu-interactive: interactive-floppy
+	@echo "啟動 StockOS 交互式系統 (軟盤)..."
+	qemu-system-x86_64 -fda $(BUILD_DIR)/$(INTERACTIVE_NAME).img -boot a
+
+qemu-interactive-iso: interactive-iso
+	@echo "啟動 StockOS 交互式系統 (ISO)..."
+	qemu-system-x86_64 -cdrom $(BUILD_DIR)/stockos_interactive.iso -boot d 
+
+# 多階段 Bootloader 系統
+multi-stage-boot:
+	@echo "🚀 編譯多階段 StockOS Bootloader 系統..."
+	@mkdir -p $(BUILD_DIR)
+	
+	# Stage 1: 512字節載入器
+	@echo "  📁 Stage 1: 編譯512字節載入器..."
+	nasm -f bin boot/stage1_loader.asm -o $(BUILD_DIR)/stage1.bin
+	
+	# Stage 2: 10KB交互系統
+	@echo "  📁 Stage 2: 編譯10KB交互系統..."
+	nasm -f bin boot/stage2_interactive.asm -o $(BUILD_DIR)/stage2.bin
+	
+	@echo "✅ 多階段系統編譯完成!"
+
+multi-stage-floppy: multi-stage-boot
+	@echo "🖱️ 創建多階段軟盤映像..."
+	
+	# 創建1.44MB軟盤映像
+	dd if=/dev/zero of=$(BUILD_DIR)/stockos_multistage.img bs=512 count=2880 status=none
+	
+	# 寫入Stage 1到第一個扇區
+	dd if=$(BUILD_DIR)/stage1.bin of=$(BUILD_DIR)/stockos_multistage.img bs=512 count=1 conv=notrunc status=none
+	
+	# 寫入Stage 2從第二個扇區開始
+	dd if=$(BUILD_DIR)/stage2.bin of=$(BUILD_DIR)/stockos_multistage.img bs=512 seek=1 conv=notrunc status=none
+	
+	@echo "✅ 軟盤映像創建完成: $(BUILD_DIR)/stockos_multistage.img"
+
+# QEMU 測試多階段系統
+qemu-multistage: multi-stage-floppy
+	@echo "🖥️ 啟動多階段 StockOS 交互系統..."
+	qemu-system-x86_64 -fda $(BUILD_DIR)/stockos_multistage.img -boot a -m 64M
+
+# 測試原始簡單版本
+test-simple: simple-floppy
+	@echo "🖥️ 測試簡單版本..."
+	qemu-system-x86_64 -fda $(BUILD_DIR)/$(SIMPLE_NAME).img -boot a -m 64M
+
+# 更新幫助目標
+help:
+	@echo "StockOS 編譯系統 - 可用目標:"
+	@echo ""
+	@echo "🎯 推薦使用 (多階段系統):"
+	@echo "  multi-stage-boot   - 編譯多階段bootloader (Stage1+Stage2)"
+	@echo "  multi-stage-floppy - 創建多階段軟盤映像"
+	@echo "  qemu-multistage    - QEMU測試多階段系統 ⭐️ 推薦"
+	@echo ""
+	@echo "基本目標:"
+	@echo "  build              - 編譯 StockOS 內核"
+	@echo "  clean              - 清理建構文件"
+	@echo "  help               - 顯示此幫助"
+	@echo ""
+	@echo "簡單 Bootloader (512字節限制):"
+	@echo "  simple-boot        - 編譯簡單 bootloader"
+	@echo "  simple-floppy      - 創建簡單軟盤映像"
+	@echo "  qemu-simple        - QEMU 測試簡單版本"
+	@echo "  test-simple        - 快速測試簡單版本"
+	@echo ""
+	@echo "交互式 Bootloader (已棄用):"
+	@echo "  interactive-boot   - 編譯交互式 bootloader"
+	@echo "  interactive-floppy - 創建交互式軟盤映像"
+	@echo "  qemu-interactive   - QEMU 測試交互式系統"
+	@echo ""
+	@echo "調試目標:"
+	@echo "  debug              - 顯示工具版本信息"
+	@echo "  test-env           - 測試編譯環境"
+	@echo ""
+	@echo "💡 快速開始: make qemu-multistage"
+
+.PHONY: multi-stage-boot multi-stage-floppy qemu-multistage test-simple help
+
+# Pattern rule to build assembly sources (*.S) with the host compiler (supports preprocessing)
+$(BUILD_DIR)/%.o: %.S
+	@mkdir -p $(dir $@)
+	$(CLANG) --target=x86_64-elf -c $< -o $@ 
+
+# ------------------------------------------------------------
+# 🖥️  User-space Memory CLI (no QEMU required)
+# ------------------------------------------------------------
+CLI_EXECUTABLE = $(BUILD_DIR)/stockos_cli
+KILO_SRC = $(SRC_DIR)/apps/kilo/kilo.c
+KILO_OBJ = $(KILO_SRC:.c=.o)
+KILO_EXECUTABLE = $(BUILD_DIR)/kilo
+
+$(KILO_OBJ): %.o: %.c | build_dir
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+kilo: $(KILO_OBJ)
+	@echo "📝 Building kilo editor..."
+	$(CC) $(CFLAGS) $(INCLUDES) $(KILO_OBJ) -o $(KILO_EXECUTABLE)
+	@echo "✅ Kilo built: $(KILO_EXECUTABLE)"
+
+CLI_OBJS = $(BUILD_DIR)/entry_cli.o $(SRC_DIR)/kernel/cli/memory_cli.o
+
+cli: consciousness_lib memory_lib kilo $(CLI_OBJS)
+	@echo "🖥️  Building StockOS user-space Memory CLI..."
+	$(CC) $(CFLAGS) $(INCLUDES) $(CLI_OBJS) $(CONSCIOUSNESS_LIB) $(MEMORY_LIB) $(LIBS) -o $(CLI_EXECUTABLE)
+	@echo "✅ Memory CLI built: $(CLI_EXECUTABLE)"
+	@echo "👉  Run it with: $(CLI_EXECUTABLE)" 
