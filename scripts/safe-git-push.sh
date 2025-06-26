@@ -24,10 +24,10 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Detect if changes to be pushed are only in StockOS directory (kernel project)
 if git diff --name-only origin/main..HEAD | grep -q "^StockOS/"; then
-    # Check if ALL changes are in StockOS or scripts/ (infrastructure fixes are OK)
-    if ! git diff --name-only origin/main..HEAD | grep -v "^StockOS/" | grep -v "^scripts/" | grep -q .; then
+    # Check if ALL changes are in StockOS, scripts/, or .gitmodules (infrastructure fixes are OK)
+    if ! git diff --name-only origin/main..HEAD | grep -v "^StockOS/" | grep -v "^scripts/" | grep -v "^\.gitmodules$" | grep -q .; then
         export OS_ONLY=1
-        echo -e "${YELLOW}🔧 檢測到 StockOS + 基礎設施變更，啟用 OS_ONLY 特例模式${NC}"
+        echo -e "${YELLOW}🔧 檢測到 StockOS 相關變更，啟用 OS_ONLY 特例模式${NC}"
     fi
 fi
 
