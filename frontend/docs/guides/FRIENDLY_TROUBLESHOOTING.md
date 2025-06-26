@@ -479,4 +479,52 @@ lsof -i :5001
 
 ---
 
-**💡 黃金法則**: 90% 的問題都可以通過 `docker-compose -f docker-compose.dual.yml restart` 解決！ 
+**💡 黃金法則**: 90% 的問題都可以通過 `docker-compose -f docker-compose.dual.yml restart` 解決！
+
+## 🐧 Windows WSL2 + Docker Desktop 問題與解決方案
+
+### 常見錯誤
+
+- `Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?`
+- `permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: ... permission denied`
+
+### 成因說明
+- WSL2 內部的 Linux 不能自己啟動 dockerd，必須「共用」Windows 上的 Docker Desktop。
+- 權限問題：WSL2 用戶沒有存取 /var/run/docker.sock 的權限。
+- Docker Desktop 沒有啟用 WSL2 整合。
+
+### 標準修復步驟
+
+1. **Windows 啟動 Docker Desktop**
+2. **Docker Desktop 設定 > Resources > WSL Integration 勾選你的 Linux 發行版**
+3. **關閉所有 WSL2 終端機**
+4. **重新打開 WSL2 終端機，執行：**
+   ```bash
+   docker info
+   ```
+   應該能看到 Server 資訊
+5. **如遇權限問題，執行：**
+   ```bash
+   sudo usermod -aG docker $USER
+   newgrp docker
+   ```
+
+### 進階診斷
+
+- 檢查 WSL2 狀態：
+  ```bash
+  wsl -l -v
+  ```
+- 檢查 docker.sock 權限：
+  ```bash
+  ls -l /var/run/docker.sock
+  groups
+  ```
+
+### 官方參考
+- [Docker Desktop + WSL2 官方說明](https://docs.docker.com/desktop/wsl/)
+
+### 腳本自動偵測
+- 本專案啟動腳本已自動偵測 WSL2，並給出專屬提示與修復建議。
+
+--- 

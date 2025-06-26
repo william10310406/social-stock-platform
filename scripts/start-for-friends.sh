@@ -3,6 +3,16 @@
 # 🚀 Stock Insight Platform - 朋友專用啟動腳本
 # 這個腳本會自動處理所有常見問題，讓朋友可以輕鬆啟動項目
 
+# WSL2 偵測與提示
+if grep -qi microsoft /proc/version 2>/dev/null; then
+    echo -e "${YELLOW}⚠️ 偵測到 WSL2 環境${NC}"
+    echo -e "${BLUE}💡 請確保 Windows 上的 Docker Desktop 已啟動，且已啟用 WSL2 整合${NC}"
+    echo -e "${BLUE}   1. Windows 啟動 Docker Desktop"
+    echo -e "${BLUE}   2. Docker Desktop 設定 > Resources > WSL Integration 勾選你的 Linux 發行版"
+    echo -e "${BLUE}   3. WSL2 終端機執行 docker info 應該能看到資訊"
+    echo -e "${YELLOW}⚠️  如果 docker info 失敗，請先在 Windows 啟動 Docker Desktop，再重試本腳本${NC}"
+fi
+
 set -e
 
 # 顏色定義
