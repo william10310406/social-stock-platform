@@ -56,11 +56,11 @@ fix_docker_issues() {
             # 嘗試啟動 Docker Desktop
             if command -v open &> /dev/null; then
                 open -a Docker
-                echo -e "${BLUE}⏳ 等待 Docker Desktop 啟動...${NC}"
+                echo -e "${BLUE}⏳ 等待 Docker Desktop 啟動（最多 2 分鐘）...${NC}"
                 
-                # 等待最多 60 秒
-                for i in {1..12}; do
-                    show_progress $i 12
+                # 等待最多 120 秒（2分鐘）
+                for i in {1..24}; do
+                    show_progress $i 24
                     if docker info &> /dev/null; then
                         echo -e "\n${GREEN}✅ Docker Desktop 啟動成功！${NC}"
                         return 0
@@ -92,8 +92,8 @@ fix_docker_issues() {
                 fi
                 
                 # 等待服務啟動
-                for i in {1..6}; do
-                    show_progress $i 6
+                for i in {1..12}; do
+                    show_progress $i 12
                     if docker info &> /dev/null; then
                         echo -e "\n${GREEN}✅ Docker 服務啟動成功！${NC}"
                         return 0
@@ -114,6 +114,7 @@ fix_docker_issues() {
         echo ""
         echo -e "${RED}❌ 無法自動修復 Docker 問題${NC}"
         echo -e "${YELLOW}💡 請參考故障排除指南: frontend/docs/guides/FRIENDLY_TROUBLESHOOTING.md${NC}"
+        echo -e "${YELLOW}💡 或者手動啟動 Docker Desktop 後重新運行此腳本${NC}"
         exit 1
     fi
     
@@ -166,28 +167,18 @@ fix_docker_resources() {
     if [[ -n "$disk_usage" ]]; then
         local reclaimable=$(echo "$disk_usage" | awk '{print $4}' | sed 's/[^0-9.]//g')
         if [[ "$reclaimable" -gt 1000 ]]; then
-            echo -e "${YELLOW}⚠️  Docker 磁盤使用量較高，建議清理${NC}"
-            read -p "是否要清理 Docker 緩存？(y/N): " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                echo -e "${BLUE}🧹 清理 Docker 緩存...${NC}"
-                docker system prune -f
-                echo -e "${GREEN}✅ Docker 緩存清理完成${NC}"
-            fi
+            echo -e "${YELLOW}⚠️  Docker 磁盤使用量較高，自動清理中...${NC}"
+            docker system prune -f 2>/dev/null || true
+            echo -e "${GREEN}✅ Docker 緩存清理完成${NC}"
         fi
     fi
     
     # 檢查 Docker 容器數量
     local container_count=$(docker ps -aq | wc -l)
     if [[ "$container_count" -gt 10 ]]; then
-        echo -e "${YELLOW}⚠️  發現 $container_count 個容器，建議清理${NC}"
-        read -p "是否要停止並刪除所有停止的容器？(y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}🧹 清理停止的容器...${NC}"
-            docker container prune -f
-            echo -e "${GREEN}✅ 容器清理完成${NC}"
-        fi
+        echo -e "${YELLOW}⚠️  發現 $container_count 個容器，自動清理中...${NC}"
+        docker container prune -f 2>/dev/null || true
+        echo -e "${GREEN}✅ 容器清理完成${NC}"
     fi
 }
 
@@ -280,14 +271,9 @@ echo -e "${YELLOW}🛑 停止現有容器...${NC}"
 docker-compose -f docker-compose.dual.yml down 2>/dev/null || true
 echo -e "${GREEN}✅ 現有容器已停止${NC}"
 
-# 清理舊的數據卷（可選）
-read -p "是否要清理舊的數據庫數據？(y/N): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}🧹 清理數據卷...${NC}"
-    docker volume rm test_hot_db_data test_cold_db_data test_redis_data 2>/dev/null || true
-    echo -e "${GREEN}✅ 數據卷已清理${NC}"
-fi
+# 清理舊的數據卷（自動模式）
+echo -e "${YELLOW}🧹 預設不清理舊的數據庫數據（自動模式）...${NC}"
+echo -e "${BLUE}💡 如需清理，請手動執行: docker volume rm test_hot_db_data test_cold_db_data test_redis_data${NC}"
 
 # 啟動服務
 echo -e "${YELLOW}🚀 啟動 Stock Insight Platform...${NC}"
