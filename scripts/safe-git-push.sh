@@ -22,10 +22,13 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Detect if staged changes are only in StockOS directory (kernel project)
-if git diff --cached --name-only | grep -q "^StockOS/"; then
-    export OS_ONLY=1
-    echo -e "${YELLOW}🔧 檢測到 StockOS 相關變更，啟用 OS_ONLY 特例模式${NC}"
+# Detect if changes to be pushed are only in StockOS directory (kernel project)
+if git diff --name-only origin/main..HEAD | grep -q "^StockOS/"; then
+    # Check if ALL changes are in StockOS (not mixed with frontend/backend)
+    if ! git diff --name-only origin/main..HEAD | grep -v "^StockOS/" | grep -q .; then
+        export OS_ONLY=1
+        echo -e "${YELLOW}🔧 檢測到純 StockOS 變更，啟用 OS_ONLY 特例模式${NC}"
+    fi
 fi
 
 # 檢查是否嘗試使用不安全的推送
