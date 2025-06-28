@@ -1,0 +1,179 @@
+# 資安緊急程度分層級配置
+# 按照攻擊對網站的緊急程度分層
+
+security_levels:
+  critical:
+    name: "極高危險等級"
+    description: "立即系統崩潰風險 - 可能導致整個系統被攻破"
+    risk_level: "🚨 CRITICAL"
+    priority: 4  # 最高優先級
+    threats:
+      - "遠程代碼執行 (RCE)"
+      - "SQL 注入攻擊"
+      - "認證系統繞過"
+      - "權限提升攻擊"
+      - "系統後門植入"
+    modules:
+      - "sql_injection_protection"
+      - "rce_prevention"
+      - "auth_bypass_protection"
+      - "privilege_escalation_guard"
+
+  high:
+    name: "高危險等級"
+    description: "數據洩露風險 - 可能導致用戶數據被竊取"
+    risk_level: "⚠️ HIGH"
+    priority: 3
+    threats:
+      - "跨站腳本攻擊 (XSS)"
+      - "未授權數據存取"
+      - "敏感信息暴露"
+      - "用戶數據洩露"
+      - "會話劫持"
+    modules:
+      - "xss_protection"
+      - "data_access_control"
+      - "sensitive_data_masking"
+      - "session_hijack_prevention"
+
+  medium:
+    name: "中危險等級"
+    description: "功能影響風險 - 可能影響網站正常功能"
+    risk_level: "🔶 MEDIUM"
+    priority: 2
+    threats:
+      - "跨站請求偽造 (CSRF)"
+      - "輸入驗證繞過"
+      - "業務邏輯缺陷"
+      - "檔案上傳漏洞"
+      - "API 濫用"
+    modules:
+      - "csrf_protection"
+      - "input_validation"
+      - "business_logic_guard"
+      - "file_upload_security"
+      - "api_rate_limiting"
+
+  low:
+    name: "低危險等級"
+    description: "一般安全風險 - 輕微的安全問題"
+    risk_level: "🔵 LOW"
+    priority: 1
+    threats:
+      - "信息洩露"
+      - "弱密碼策略"
+      - "HTTP 安全標頭缺失"
+      - "目錄遍歷"
+      - "敏感路徑暴露"
+    modules:
+      - "info_disclosure_prevention"
+      - "password_policy"
+      - "security_headers"
+      - "path_traversal_guard"
+      - "endpoint_security"
+
+  info:
+    name: "基礎資訊等級"
+    description: "基礎工具和監控 - 不涉及直接安全威脅"
+    risk_level: "ℹ️ INFO"
+    priority: 0  # 最低優先級，基礎工具
+    components:
+      - "安全常數定義"
+      - "工具函數"
+      - "日誌系統"
+      - "監控指標"
+      - "配置管理"
+    modules:
+      - "security_constants"
+      - "security_utils"
+      - "security_logger"
+      - "security_monitoring"
+      - "config_manager"
+
+# XSS 防護配置 (屬於 HIGH 等級)
+xss_protection_config:
+  level: "high"
+  strict_mode: true
+  allowed_tags:
+    - "b"
+    - "i" 
+    - "em"
+    - "strong"
+    - "p"
+    - "br"
+    - "ul"
+    - "ol"
+    - "li"
+  blocked_attributes:
+    - "onclick"
+    - "onload"
+    - "onerror"
+    - "onmouseover"
+    - "onfocus"
+    - "onblur"
+    - "onchange"
+    - "onsubmit"
+  blocked_protocols:
+    - "javascript:"
+    - "data:"
+    - "vbscript:"
+  content_security_policy:
+    default_src: "'self'"
+    script_src: "'self'"
+    style_src: "'self' 'unsafe-inline'"
+    img_src: "'self' data: https:"
+    font_src: "'self' https://fonts.gstatic.com"
+    connect_src: "'self'"
+    object_src: "'none'"
+    base_uri: "'self'"
+    form_action: "'self'"
+
+# 依賴關係規則 (簡化)
+dependency_rules:
+  # 基本規則：高優先級可以引用低優先級
+  rule: "higher_priority_can_import_lower_priority"
+  
+  # 禁止向上引用：低優先級不能引用高優先級
+  forbidden_upward_imports: true
+  
+  # 禁止循環依賴
+  forbidden_circular_imports: true
+  
+  # 優先級順序 (數字越大優先級越高)
+  priority_order:
+    info: 0      # 最低優先級，基礎工具
+    low: 1       # 一般安全風險
+    medium: 2    # 功能影響風險
+    high: 3      # 數據洩露風險
+    critical: 4  # 最高優先級，系統崩潰風險
+
+# 安全事件響應等級
+incident_response:
+  critical:
+    response_time: "立即 (0-15分鐘)"
+    actions:
+      - "自動阻斷攻擊來源"
+      - "立即通知系統管理員"
+      - "啟動緊急修復程序"
+      - "記錄詳細攻擊信息"
+  
+  high:
+    response_time: "緊急 (15分鐘-1小時)"
+    actions:
+      - "增強監控"
+      - "通知安全團隊"
+      - "分析攻擊模式"
+      - "更新防護規則"
+  
+  medium:
+    response_time: "重要 (1-4小時)"
+    actions:
+      - "記錄安全事件"
+      - "定期檢查"
+      - "優化防護策略"
+  
+  low:
+    response_time: "一般 (4-24小時)"
+    actions:
+      - "日誌記錄"
+      - "定期報告"
