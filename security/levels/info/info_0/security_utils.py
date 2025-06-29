@@ -1,6 +1,6 @@
 """
-基礎安全工具函數 - Info 層級 (Priority: 0)
-不依賴任何其他層級，提供基礎工具
+基礎安全工具函數 - INFO-0 層級
+純工具函數，只依賴常數，無其他依賴
 """
 import re
 import hashlib

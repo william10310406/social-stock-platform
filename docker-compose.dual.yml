@@ -24,6 +24,8 @@ services:
     container_name: stock-insight-backend
     ports:
       - "5001:5000"
+    env_file:
+      - .env.security
     environment:
       - FLASK_APP=app
       - FLASK_ENV=development
@@ -64,8 +66,10 @@ services:
       - stock-insight-net
     volumes:
       - ./backend:/app
+      - ./security:/app/security
       - ./exports:/app/exports
       - ./scripts:/app/scripts
+      - ./test:/app/test
 
   # 熱資料庫 - MSSQL Server 2022 (即時數據)
   hot-db:

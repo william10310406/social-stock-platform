@@ -1,6 +1,7 @@
 """
-資安監控模組 (INFO 層級)
+資安監控模組 - INFO-2 層級
 提供基礎監控指標、健康檢查、性能監控等功能
+依賴 INFO-0 基礎工具和 INFO-1 日誌服務
 """
 
 import time
@@ -13,9 +14,12 @@ from collections import defaultdict, deque
 import json
 import os
 
-from .security_constants import *
-from .security_logger import SecurityLogger
-from .security_exceptions import SecurityException
+# 依賴 INFO-0 層級
+from ..info_0.security_constants import *
+from ..info_0.security_exceptions import SecurityException
+
+# 依賴 INFO-1 日誌服務
+from ..info_1.security_logger import SecurityLogger
 
 
 @dataclass
@@ -59,7 +63,7 @@ class SecurityMonitoring:
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
-        self.logger = SecurityLogger()
+        self.logger = SecurityLogger("security_monitoring")
         
         # 監控指標存儲
         self.metrics: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
@@ -89,25 +93,25 @@ class SecurityMonitoring:
         # 註冊基本健康檢查
         self._register_basic_health_checks()
         
-        self.logger.info("安全監控系統初始化完成")
+        self.logger.log_security_event("MONITOR_INIT", "安全監控系統初始化完成")
     
     def start_monitoring(self):
         """開始監控"""
         if self.monitoring_thread and self.monitoring_thread.is_alive():
-            self.logger.warning("監控已在運行中")
+            self.logger.log_security_event("MONITOR_ALREADY_RUNNING", "監控已在運行中", priority="WARNING")
             return
         
         self.monitoring_enabled = True
         self.monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self.monitoring_thread.start()
-        self.logger.info("監控系統已啟動")
+        self.logger.log_security_event("MONITOR_STARTED", "監控系統已啟動")
     
     def stop_monitoring(self):
         """停止監控"""
         self.monitoring_enabled = False
         if self.monitoring_thread:
             self.monitoring_thread.join(timeout=5)
-        self.logger.info("監控系統已停止")
+        self.logger.log_security_event("MONITOR_STOPPED", "監控系統已停止")
     
     def _monitoring_loop(self):
         """監控主循環"""
@@ -125,7 +129,7 @@ class SecurityMonitoring:
                 time.sleep(self.monitoring_interval)
                 
             except Exception as e:
-                self.logger.error(f"監控循環錯誤: {e}")
+                self.logger.log_security_event("MONITOR_LOOP_ERROR", f"監控循環錯誤: {e}", priority="ERROR")
                 time.sleep(self.monitoring_interval)
     
     def _collect_system_metrics(self):
@@ -157,7 +161,7 @@ class SecurityMonitoring:
             self.record_metric('system.processes.count', process_count, {'host': 'localhost'})
             
         except Exception as e:
-            self.logger.error(f"系統指標收集失敗: {e}")
+            self.logger.log_security_event("METRICS_COLLECTION_ERROR", f"系統指標收集失敗: {e}", priority="ERROR")
     
     def record_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None):
         """記錄監控指標"""
@@ -169,7 +173,7 @@ class SecurityMonitoring:
         self.metrics[name].append(metric)
         
         # 記錄到日誌
-        self.logger.debug(f"指標記錄: {name}={value}, tags={tags}")
+        self.logger.log_security_event("METRIC_RECORDED", f"指標記錄: {name}={value}, tags={tags}", priority="DEBUG")
     
     def increment_counter(self, name: str, value: int = 1, tags: Optional[Dict[str, str]] = None):
         """增加計數器"""
@@ -219,7 +223,7 @@ class SecurityMonitoring:
     def register_health_check(self, name: str, check_func: Callable[[], HealthCheckResult]):
         """註冊健康檢查"""
         self.health_checks[name] = check_func
-        self.logger.info(f"健康檢查已註冊: {name}")
+        self.logger.log_security_event("HEALTH_CHECK_REGISTERED", f"健康檢查已註冊: {name}")
     
     def _register_basic_health_checks(self):
         """註冊基本健康檢查"""
@@ -316,20 +320,20 @@ class SecurityMonitoring:
                 result = check_func()
                 
                 # 記錄健康檢查結果
-                self.logger.debug(f"健康檢查 {name}: {result.status} - {result.message}")
+                self.logger.log_security_event("HEALTH_CHECK_RESULT", f"健康檢查 {name}: {result.status} - {result.message}", priority="DEBUG")
                 
                 # 記錄響應時間指標
                 self.record_metric(f"health_check.{name}.response_time", result.response_time)
                 
                 # 如果狀態不健康，記錄警告或錯誤
                 if result.status == 'warning':
-                    self.logger.warning(f"健康檢查警告 {name}: {result.message}")
+                    self.logger.log_security_event("HEALTH_CHECK_WARNING", f"健康檢查警告 {name}: {result.message}", priority="WARNING")
                 elif result.status == 'critical':
-                    self.logger.error(f"健康檢查嚴重 {name}: {result.message}")
+                    self.logger.log_security_event("HEALTH_CHECK_CRITICAL", f"健康檢查嚴重 {name}: {result.message}", priority="CRITICAL")
                     self._create_alert('health_check_critical', result.to_dict())
                 
             except Exception as e:
-                self.logger.error(f"健康檢查 {name} 執行失敗: {e}")
+                self.logger.log_security_event("HEALTH_CHECK_EXECUTION_ERROR", f"健康檢查 {name} 執行失敗: {e}", priority="ERROR")
     
     def _check_thresholds(self):
         """檢查閾值"""
@@ -350,7 +354,7 @@ class SecurityMonitoring:
                         })
                         
         except Exception as e:
-            self.logger.error(f"閾值檢查失敗: {e}")
+            self.logger.log_security_event("THRESHOLD_CHECK_ERROR", f"閾值檢查失敗: {e}", priority="ERROR")
     
     def _create_alert(self, alert_type: str, data: Dict[str, Any]):
         """創建警報"""
@@ -368,7 +372,7 @@ class SecurityMonitoring:
             self.alerts = self.alerts[-100:]
         
         # 記錄警報
-        self.logger.warning(f"警報產生: {alert_type} - {data}")
+        self.logger.log_security_event("ALERT_GENERATED", f"警報產生: {alert_type} - {data}", priority="WARNING")
     
     def get_recent_security_events(self, minutes: int = 60) -> List[Dict[str, Any]]:
         """獲取最近的安全事件"""
@@ -412,7 +416,7 @@ class SecurityMonitoring:
             }
             
         except Exception as e:
-            self.logger.error(f"獲取儀表板數據失敗: {e}")
+            self.logger.log_security_event("DASHBOARD_DATA_ERROR", f"獲取儀表板數據失敗: {e}", priority="ERROR")
             return {'error': str(e)}
     
     def export_metrics(self, format_type: str = 'json') -> str:
@@ -432,7 +436,7 @@ class SecurityMonitoring:
                 return str(data)
                 
         except Exception as e:
-            self.logger.error(f"導出指標失敗: {e}")
+            self.logger.log_security_event("METRICS_EXPORT_ERROR", f"導出指標失敗: {e}", priority="ERROR")
             raise SecurityException(f"指標導出失敗: {e}")
 
 
@@ -492,7 +496,7 @@ def monitor_security_event(event_type: str):
                 return result
             except Exception as e:
                 monitor.increment_counter(f"security.{event_type}.failure")
-                monitor.logger.warning(f"安全事件失敗: {event_type} - {e}")
+                monitor.logger.log_security_event("SECURITY_EVENT_ERROR", f"安全事件失敗: {event_type} - {e}", priority="WARNING")
                 raise
         return wrapper
     return decorator

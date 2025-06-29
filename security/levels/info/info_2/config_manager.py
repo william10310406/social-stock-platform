@@ -1,11 +1,13 @@
 """
-資安配置管理模組 (INFO 層級)
+資安配置管理模組 - INFO-2 層級
 提供配置文件加載、環境變數管理、安全配置驗證等功能
+依賴 INFO-0 基礎元件和 INFO-1 日誌服務
 """
 
 import os
-import yaml
+import yaml  # 現在可以使用，已安裝 PyYAML
 import json
+import logging
 import configparser
 from pathlib import Path
 from typing import Dict, Any, Optional, Union, List
@@ -13,9 +15,17 @@ from dataclasses import dataclass, field
 import re
 from copy import deepcopy
 
-from .security_constants import *
-from .security_logger import SecurityLogger
-from .security_exceptions import SecurityException, ConfigurationError
+# 依賴 INFO-0 常數和例外
+from ..info_0.security_constants import *
+from ..info_0.security_exceptions import SecurityException
+
+# 依賴 INFO-1 日誌服務
+from ..info_1.security_logger import SecurityLogger
+
+
+class ConfigurationError(Exception):
+    """配置錯誤例外"""
+    pass
 
 
 @dataclass
@@ -32,7 +42,8 @@ class ConfigManager:
     """配置管理器"""
     
     def __init__(self, config_dir: Optional[str] = None):
-        self.logger = SecurityLogger()
+        # 使用統一的資安日誌服務
+        self.logger = SecurityLogger("config_manager")
         
         # 配置目錄
         self.config_dir = Path(config_dir or self._get_default_config_dir())
@@ -60,7 +71,7 @@ class ConfigManager:
         # 初始化默認配置來源
         self._init_default_sources()
         
-        self.logger.info(f"配置管理器初始化完成，配置目錄: {self.config_dir}")
+        self.logger.log_security_event("CONFIG_INIT", f"配置管理器初始化完成，配置目錄: {self.config_dir}")
     
     def _get_default_config_dir(self) -> str:
         """獲取默認配置目錄"""
@@ -214,12 +225,12 @@ class ConfigManager:
         # 按優先級排序
         self.config_sources.sort(key=lambda x: x.priority, reverse=True)
         
-        self.logger.info(f"已添加配置來源: {source.name} (優先級: {source.priority})")
+        self.logger.log_security_event("CONFIG_SOURCE_ADDED", f"已添加配置來源: {source.name} (優先級: {source.priority})")
     
     def remove_config_source(self, source_name: str):
         """移除配置來源"""
         self.config_sources = [s for s in self.config_sources if s.name != source_name]
-        self.logger.info(f"已移除配置來源: {source_name}")
+        self.logger.log_security_event("CONFIG_SOURCE_REMOVED", f"已移除配置來源: {source_name}")
     
     def load_config_file(self, file_path: str) -> Dict[str, Any]:
         """加載配置文件"""
@@ -231,7 +242,7 @@ class ConfigManager:
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 if path.suffix.lower() in ('.yaml', '.yml'):
-                    return yaml.safe_load(f) or {}
+                    return yaml.safe_load(f)
                 elif path.suffix.lower() == '.json':
                     return json.load(f)
                 elif path.suffix.lower() in ('.ini', '.cfg'):
@@ -242,11 +253,11 @@ class ConfigManager:
                     raise ConfigurationError(f"不支援的配置文件格式: {path.suffix}")
                     
         except Exception as e:
-            raise ConfigurationError(f"加載配置文件失敗 {file_path}: {e}")
+            raise SecurityException(f"加載配置文件失敗 {file_path}: {e}")
     
     def reload_config(self):
         """重新加載所有配置"""
-        self.logger.info("開始重新加載配置")
+        self.logger.log_security_event("CONFIG_RELOAD_START", "開始重新加載配置")
         
         # 收集所有配置數據
         all_configs = []
@@ -263,10 +274,10 @@ class ConfigManager:
                     continue
                 
                 all_configs.append((source.priority, config_data))
-                self.logger.debug(f"已加載配置來源: {source.name}")
+                self.logger.log_security_event("CONFIG_SOURCE_LOADED", f"已加載配置來源: {source.name}", priority="DEBUG")
                 
             except Exception as e:
-                self.logger.error(f"加載配置來源失敗 {source.name}: {e}")
+                self.logger.log_security_event("CONFIG_SOURCE_ERROR", f"加載配置來源失敗 {source.name}: {e}", priority="ERROR")
                 continue
         
         # 按優先級合併配置
@@ -280,7 +291,7 @@ class ConfigManager:
         # 通知配置變更
         self._notify_config_change()
         
-        self.logger.info("配置重新加載完成")
+        self.logger.log_security_event("CONFIG_RELOAD_COMPLETE", "配置重新加載完成")
     
     def _deep_merge(self, base: Dict[str, Any], update: Dict[str, Any]) -> Dict[str, Any]:
         """深度合併字典"""
@@ -305,22 +316,22 @@ class ConfigManager:
             
             for key in required_keys:
                 if not self.has_config(key):
-                    raise ConfigurationError(f"缺少必需的配置項: {key}")
+                    raise SecurityException(f"缺少必需的配置項: {key}")
             
             # 驗證日誌級別
             log_level = self.get_config('security.logging.level', 'INFO')
             if log_level not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
-                raise ConfigurationError(f"無效的日誌級別: {log_level}")
+                raise SecurityException(f"無效的日誌級別: {log_level}")
             
             # 驗證監控間隔
             monitoring_interval = self.get_config('security.monitoring.interval', 60)
             if not isinstance(monitoring_interval, (int, float)) or monitoring_interval <= 0:
-                raise ConfigurationError(f"無效的監控間隔: {monitoring_interval}")
+                raise SecurityException(f"無效的監控間隔: {monitoring_interval}")
             
-            self.logger.debug("配置驗證通過")
+            self.logger.log_security_event("CONFIG_VALIDATION_SUCCESS", "配置驗證通過", priority="DEBUG")
             
         except Exception as e:
-            self.logger.error(f"配置驗證失敗: {e}")
+            self.logger.log_security_event("CONFIG_VALIDATION_ERROR", f"配置驗證失敗: {e}", priority="ERROR")
             raise
     
     def _notify_config_change(self):
@@ -329,7 +340,7 @@ class ConfigManager:
             try:
                 callback(self.merged_config)
             except Exception as e:
-                self.logger.error(f"配置變更回調失敗: {e}")
+                self.logger.log_security_event("CONFIG_CALLBACK_ERROR", f"配置變更回調失敗: {e}", priority="ERROR")
     
     def get_config(self, key: str, default: Any = None) -> Any:
         """獲取配置值"""
@@ -346,7 +357,7 @@ class ConfigManager:
             return current
             
         except Exception as e:
-            self.logger.error(f"獲取配置失敗 {key}: {e}")
+            self.logger.log_security_event("CONFIG_GET_ERROR", f"獲取配置失敗 {key}: {e}", priority="ERROR")
             return default
     
     def set_config(self, key: str, value: Any, source_name: str = 'runtime'):
@@ -376,11 +387,11 @@ class ConfigManager:
             # 重新加載配置
             self.reload_config()
             
-            self.logger.info(f"配置已設置: {key} = {self._mask_sensitive_value(key, value)}")
+            self.logger.log_security_event("CONFIG_SET", f"配置已設置: {key} = {self._mask_sensitive_value(key, value)}")
             
         except Exception as e:
-            self.logger.error(f"設置配置失敗 {key}: {e}")
-            raise ConfigurationError(f"設置配置失敗: {e}")
+            self.logger.log_security_event("CONFIG_SET_ERROR", f"設置配置失敗 {key}: {e}", priority="ERROR")
+            raise SecurityException(f"設置配置失敗: {e}")
     
     def has_config(self, key: str) -> bool:
         """檢查配置是否存在"""
@@ -425,15 +436,14 @@ class ConfigManager:
                 config_to_export = self._mask_sensitive_config(config_to_export)
             
             if format_type == 'yaml':
-                return yaml.dump(config_to_export, default_flow_style=False, 
-                               allow_unicode=True, sort_keys=True)
+                return yaml.dump(config_to_export, default_flow_style=False, allow_unicode=True)
             elif format_type == 'json':
                 return json.dumps(config_to_export, indent=2, ensure_ascii=False)
             else:
                 return str(config_to_export)
                 
         except Exception as e:
-            raise ConfigurationError(f"導出配置失敗: {e}")
+            raise SecurityException(f"導出配置失敗: {e}")
     
     def _mask_sensitive_config(self, config: Dict[str, Any], prefix: str = '') -> Dict[str, Any]:
         """遮蔽敏感配置"""
@@ -470,17 +480,16 @@ class ConfigManager:
             
             with open(path, 'w', encoding='utf-8') as f:
                 if format_type == 'yaml':
-                    yaml.dump(config_to_save, f, default_flow_style=False, 
-                             allow_unicode=True, sort_keys=True)
+                    yaml.dump(config_to_save, f, default_flow_style=False, allow_unicode=True)
                 elif format_type == 'json':
                     json.dump(config_to_save, f, indent=2, ensure_ascii=False)
                 else:
                     f.write(str(config_to_save))
             
-            self.logger.info(f"配置已保存到: {file_path}")
+            self.logger.log_security_event("CONFIG_SAVED", f"配置已保存到: {file_path}")
             
         except Exception as e:
-            raise ConfigurationError(f"保存配置文件失敗: {e}")
+            raise SecurityException(f"保存配置文件失敗: {e}")
     
     def add_change_callback(self, callback: callable):
         """添加配置變更回調"""
@@ -532,7 +541,7 @@ class ConfigManager:
         template_config.pop('# 資安配置模板')
         
         self.save_config_file(template_path, template_config)
-        self.logger.info(f"配置模板已創建: {template_path}")
+        self.logger.log_security_event("CONFIG_TEMPLATE_CREATED", f"配置模板已創建: {template_path}")
 
 
 # 全域配置管理器
@@ -571,8 +580,8 @@ if __name__ == "__main__":
     test_value = config_manager.get_config('test.value')
     print(f"測試值: {test_value}")
     
-    # 測試配置導出
-    yaml_config = config_manager.export_config('yaml')
-    print(f"YAML 配置:\n{yaml_config}")
+    # 測試配置導出（使用 JSON 格式，避免 yaml 依賴）
+    json_config = config_manager.export_config('json')
+    print(f"JSON 配置:\n{json_config}")
     
     print("配置管理器測試完成")

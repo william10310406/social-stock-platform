@@ -1,13 +1,16 @@
 """
-安全日誌系統 - Info 層級 (Priority: 0)
-不依賴任何其他層級，提供基礎日誌功能
+安全日誌系統 - INFO-1 層級
+提供基礎日誌功能，依賴 INFO-0 常數和例外
 """
 import logging
 import json
 import os
 from datetime import datetime
 from typing import Dict, Any, Optional
-from .security_constants import LOG_LEVELS, SECURITY_EVENT_TYPES, SECURITY_PRIORITY
+
+# 只依賴 INFO-0 層級
+from ..info_0.security_constants import LOG_LEVELS, SECURITY_EVENT_TYPES, SECURITY_PRIORITY
+from ..info_0.security_exceptions import SecurityException
 
 
 class SecurityLogger:
@@ -15,6 +18,7 @@ class SecurityLogger:
     
     def __init__(self, name: str = "security", log_file: str = "security.log", 
                  log_level: str = "INFO", enable_console: bool = True):
+        
         self.logger = logging.getLogger(name)
         self.logger.setLevel(getattr(logging, log_level.upper()))
         

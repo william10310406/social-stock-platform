@@ -41,6 +41,7 @@ services:
       - stock-insight-net
     volumes:
       - ./backend:/app
+      - ./security:/app/security
       - ./exports:/app/exports
       - ./scripts:/app/scripts
 
