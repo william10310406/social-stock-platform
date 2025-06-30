@@ -1,6 +1,6 @@
 """
-安全日誌系統 - INFO-1 層級
-提供基礎日誌功能，依賴 INFO-0 常數和例外
+安全日誌系統 - INFO-2 層級
+提供基礎日誌功能，依賴 INFO-0 常數和 INFO-1 例外
 """
 import logging
 import json
@@ -8,9 +8,9 @@ import os
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-# 只依賴 INFO-0 層級
+# 依賴 INFO-0 和 INFO-1 層級
 from ..info_0.security_constants import LOG_LEVELS, SECURITY_EVENT_TYPES, SECURITY_PRIORITY
-from ..info_0.security_exceptions import SecurityException
+from ..info_1.security_exceptions import SecurityException
 
 
 class SecurityLogger:

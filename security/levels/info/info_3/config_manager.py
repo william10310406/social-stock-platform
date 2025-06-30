@@ -1,7 +1,7 @@
 """
-資安配置管理模組 - INFO-2 層級
+資安配置管理模組 - INFO-3 層級
 提供配置文件加載、環境變數管理、安全配置驗證等功能
-依賴 INFO-0 基礎元件和 INFO-1 日誌服務
+依賴 INFO-0 常數、INFO-1 例外和 INFO-2 日誌服務
 """
 
 import os
@@ -15,12 +15,13 @@ from dataclasses import dataclass, field
 import re
 from copy import deepcopy
 
-# 依賴 INFO-0 常數和例外
+# 依賴下層級
 from ..info_0.security_constants import *
-from ..info_0.security_exceptions import SecurityException
+from ..info_1.security_exceptions import SecurityException
+from ..info_2.security_logger import log_security_event
 
 # 依賴 INFO-1 日誌服務
-from ..info_1.security_logger import SecurityLogger
+from ..info_2.security_logger import SecurityLogger
 
 
 class ConfigurationError(Exception):

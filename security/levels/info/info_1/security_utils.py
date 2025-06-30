@@ -1,6 +1,6 @@
 """
-基礎安全工具函數 - INFO-0 層級
-純工具函數，只依賴常數，無其他依賴
+基礎安全工具函數 - INFO-1 層級
+工具函數，只依賴 INFO-0 常數，無其他依賴
 """
 import re
 import hashlib
@@ -196,7 +196,7 @@ class InputValidator:
     @staticmethod
     def validate_password_strength(password: str) -> Dict[str, bool]:
         """驗證密碼強度"""
-        from .security_constants import (
+        from ..info_0.security_constants import (
             PASSWORD_MIN_LENGTH, PASSWORD_REQUIRE_UPPERCASE,
             PASSWORD_REQUIRE_LOWERCASE, PASSWORD_REQUIRE_NUMBERS,
             PASSWORD_REQUIRE_SPECIAL_CHARS, PASSWORD_SPECIAL_CHARS
@@ -264,7 +264,7 @@ class FileUtils:
     @staticmethod
     def is_dangerous_file_type(filename: str) -> bool:
         """檢查是否為危險檔案類型"""
-        from .security_constants import DANGEROUS_FILE_EXTENSIONS
+        from ..info_0.security_constants import DANGEROUS_FILE_EXTENSIONS
         extension = FileUtils.get_file_extension(filename)
         return extension in [ext.lower() for ext in DANGEROUS_FILE_EXTENSIONS]
     

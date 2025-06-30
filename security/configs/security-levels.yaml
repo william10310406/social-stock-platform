@@ -72,39 +72,48 @@ security_levels:
       - "path_traversal_guard"
       - "endpoint_security"
   info_0:
-    name: "基礎元件層級"
-    description: "最基礎元件 - 常數、工具、例外處理"
+    name: "基礎常數層級"
+    description: "最基礎元件 - 安全常數定義"
     risk_level: "ℹ️ INFO-0"
     priority: 0.1  # 最低優先級，純基礎元件
     components:
       - "安全常數定義"
-      - "工具函數"
-      - "例外處理"
     modules:
       - "security_constants"
-      - "security_utils"
-      - "security_exceptions"
     dependencies: []  # 無依賴
   
   info_1:
-    name: "基礎服務層級"
-    description: "日誌和配置管理服務 - 只依賴基礎元件"
+    name: "基礎工具層級"
+    description: "工具函數和例外處理 - 只依賴基礎常數"
     risk_level: "ℹ️ INFO-1"
     priority: 0.2
     components:
-      - "日誌系統"
-      - "配置管理"
+      - "工具函數"
+      - "例外處理"
     modules:
-      - "security_logger"
-      - "config_manager"
+      - "security_utils"
+      - "security_exceptions"
     dependencies:
-      - "info_0"  # 只依賴基礎元件
+      - "info_0"  # 只依賴基礎常數
   
   info_2:
-    name: "系統監控層級"
-    description: "監控和配置服務 - 依賴基礎元件和日誌服務"
+    name: "日誌服務層級"
+    description: "日誌記錄服務 - 依賴基礎常數和工具"
     risk_level: "ℹ️ INFO-2"
     priority: 0.3
+    components:
+      - "日誌系統"
+    modules:
+      - "security_logger"
+    dependencies:
+      - "info_0"  # 依賴基礎常數
+      - "info_1"  # 依賴工具函數
+
+  info_3:
+    name: "系統監控和配置層級"
+    description: "監控和配置管理服務 - 依賴所有下層級"
+    risk_level: "ℹ️ INFO-3"
+    priority: 0.4
     components:
       - "系統監控"
       - "配置管理"
@@ -112,8 +121,9 @@ security_levels:
       - "security_monitoring"
       - "config_manager"
     dependencies:
-      - "info_0"  # 依賴基礎元件
-      - "info_1"  # 依賴日誌服務
+      - "info_0"  # 依賴基礎常數
+      - "info_1"  # 依賴工具函數
+      - "info_2"  # 依賴日誌服務
 
 # XSS 防護配置 (屬於 HIGH 等級)
 xss_protection_config:

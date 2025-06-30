@@ -10,8 +10,8 @@ import time
 import json
 from datetime import datetime, timedelta
 
-# 添加項目路徑
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 添加項目路徑 - 從 security/test/ 到項目根目錄
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
 def test_info_0_constants():

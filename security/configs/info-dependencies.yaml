@@ -1,0 +1,217 @@
+# INFO 層級依賴關係詳細配置 - 更新版本
+# 每個模組的具體依賴和使用關係，避免同層級依賴
+
+metadata:
+  version: "2.0.0"
+  updated_date: "2025-06-30"
+  changes: "重新設計為四層結構，避免同層級依賴"
+
+info_levels:
+  info_0:
+    name: "基礎常數層級"
+    description: "最底層的常數定義，不依賴任何其他模組"
+    level: 0
+    modules:
+      security_constants:
+        file_path: "security/levels/info/info_0/security_constants.py"
+        description: "安全常數定義"
+        external_dependencies:
+          - "typing"  # Python 內建
+        internal_dependencies: []  # 無內部依賴
+        exports:
+          - "XSS_DANGEROUS_TAGS"
+          - "XSS_ALLOWED_TAGS"
+          - "SECURITY_EVENT_TYPES"
+          - "LOG_LEVELS"
+          - "PASSWORD_MIN_LENGTH"
+          - "RATE_LIMIT_DEFAULTS"
+          - "SECURITY_HEADERS"
+          - "ERROR_CODES"
+        used_by:
+          - "info_1/security_utils"
+          - "info_1/security_exceptions"
+          - "info_2/security_logger"
+          - "info_3/config_manager"
+          - "info_3/security_monitoring"
+
+  info_1:
+    name: "基礎工具層級"
+    description: "工具函數和例外處理，只依賴 INFO-0"
+    level: 1
+    modules:
+      security_utils:
+        file_path: "security/levels/info/info_1/security_utils.py"
+        description: "基礎安全工具函數"
+        external_dependencies:
+          - "re"
+          - "hashlib"
+          - "secrets"
+          - "hmac"
+          - "ipaddress"
+          - "datetime"
+          - "typing"
+          - "urllib.parse"
+        internal_dependencies:
+          - "../info_0/security_constants"  # 只依賴下層級
+        exports:
+          - "SecurityUtils"
+        class_methods:
+          - "generate_secure_token"
+          - "generate_csrf_token"
+          - "hash_password"
+          - "verify_password"
+          - "sanitize_filename"
+          - "is_valid_email"
+          - "is_valid_ip"
+        used_by:
+          - "info_2/security_logger"
+          - "info_3/config_manager"
+
+      security_exceptions:
+        file_path: "security/levels/info/info_1/security_exceptions.py"
+        description: "安全相關例外類別"
+        external_dependencies:
+          - "typing"
+        internal_dependencies:
+          - "../info_0/security_constants"  # 只依賴下層級
+        exports:
+          - "SecurityException"
+          - "InputValidationError"
+          - "AuthenticationError"
+          - "AuthorizationError"
+          - "RateLimitExceededError"
+          - "FileSecurityError"
+          - "CryptographyError"
+          - "XSSException"
+          - "SQLInjectionException"
+          - "CSRFException"
+        used_by:
+          - "info_2/security_logger"
+          - "info_3/config_manager"
+          - "info_3/security_monitoring"
+
+  info_2:
+    name: "日誌服務層級"
+    description: "日誌記錄系統，依賴 INFO-0 和 INFO-1"
+    level: 2
+    modules:
+      security_logger:
+        file_path: "security/levels/info/info_2/security_logger.py"
+        description: "安全日誌記錄系統"
+        external_dependencies:
+          - "logging"
+          - "json"
+          - "datetime"
+          - "typing"
+          - "os"
+          - "sys"
+          - "traceback"
+        internal_dependencies:
+          - "../info_0/security_constants"
+          - "../info_1/security_exceptions"
+        exports:
+          - "SecurityLogger"
+          - "get_security_logger"
+          - "log_security_event"
+        class_methods:
+          - "log_security_event"
+          - "log_xss_attempt"
+          - "log_authentication_failure"
+          - "log_rate_limit_violation"
+        used_by:
+          - "info_3/config_manager"
+          - "info_3/security_monitoring"
+
+  info_3:
+    name: "系統監控和配置層級"
+    description: "配置管理和系統監控，依賴所有下層級"
+    level: 3
+    modules:
+      config_manager:
+        file_path: "security/levels/info/info_3/config_manager.py"
+        description: "配置管理系統"
+        external_dependencies:
+          - "os"
+          - "json"
+          - "yaml"
+          - "typing"
+          - "pathlib"
+          - "datetime"
+        internal_dependencies:
+          - "../info_0/security_constants"
+          - "../info_1/security_exceptions"
+          - "../info_2/security_logger"
+        exports:
+          - "ConfigManager"
+          - "get_config_manager"
+          - "get_config"
+          - "set_config"
+        class_methods:
+          - "get_config"
+          - "set_config"
+          - "has_config"
+          - "reload_config"
+          - "export_config"
+
+      security_monitoring:
+        file_path: "security/levels/info/info_3/security_monitoring.py"
+        description: "安全監控系統"
+        external_dependencies:
+          - "threading"
+          - "time"
+          - "datetime"
+          - "typing"
+          - "json"
+          - "psutil"
+          - "collections"
+          - "functools"
+        internal_dependencies:
+          - "../info_0/security_constants"
+          - "../info_1/security_exceptions"
+          - "../info_2/security_logger"
+        exports:
+          - "SecurityMonitoring"
+          - "MetricValue"
+          - "HealthCheckResult"
+          - "get_monitor"
+          - "monitor_performance"
+        class_methods:
+          - "record_metric"
+          - "increment_counter"
+          - "set_gauge"
+          - "record_timer"
+          - "start_monitoring"
+          - "stop_monitoring"
+          - "get_dashboard_data"
+
+# 依賴規則
+dependency_rules:
+  - name: "無循環依賴"
+    description: "確保沒有循環依賴"
+    rule: "A -> B -> C -> A 是禁止的"
+    
+  - name: "只能依賴下層級"
+    description: "高層級只能依賴低層級"
+    rule: "info_N 只能依賴 info_(N-1), info_(N-2), ..."
+    
+  - name: "同層級禁止依賴"
+    description: "同層級模組間不能互相依賴"
+    rule: "info_N/module_A 不能依賴 info_N/module_B"
+    
+  - name: "向上依賴禁止"
+    description: "低層級不能依賴高層級"
+    rule: "info_N 不能依賴 info_(N+1)"
+
+# 違規檢查
+violation_checks:
+  - type: "circular_dependency"
+    description: "檢查循環依賴"
+    severity: "critical"
+    
+  - type: "same_level_dependency"
+    description: "檢查同層級依賴"
+    severity: "high"
+    
+  - type: "upward_dependency"
+    description: "檢查向上依賴"
+    severity: "high"

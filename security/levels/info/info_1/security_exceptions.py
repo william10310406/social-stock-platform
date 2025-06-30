@@ -119,6 +119,42 @@ class SessionSecurityError(SecurityException):
             self.details['user_id'] = user_id
 
 
+class XSSException(SecurityException):
+    """XSS 攻擊例外"""
+    
+    def __init__(self, message: str = "檢測到 XSS 攻擊嘗試", content: str = None, 
+                 user_ip: str = None, **kwargs):
+        super().__init__(message, error_code="XSS_ATTACK", priority="HIGH", **kwargs)
+        if content:
+            self.details['content'] = content[:100]
+        if user_ip:
+            self.details['user_ip'] = user_ip
+
+
+class SQLInjectionException(SecurityException):
+    """SQL 注入攻擊例外"""
+    
+    def __init__(self, message: str = "檢測到 SQL 注入攻擊嘗試", query: str = None, 
+                 user_ip: str = None, **kwargs):
+        super().__init__(message, error_code="SQL_INJECTION", priority="HIGH", **kwargs)
+        if query:
+            self.details['query'] = query[:200]
+        if user_ip:
+            self.details['user_ip'] = user_ip
+
+
+class CSRFException(SecurityException):
+    """CSRF 攻擊例外"""
+    
+    def __init__(self, message: str = "檢測到 CSRF 攻擊嘗試", token: str = None, 
+                 referer: str = None, **kwargs):
+        super().__init__(message, error_code="CSRF_ATTACK", priority="HIGH", **kwargs)
+        if token:
+            self.details['token'] = token[:50]
+        if referer:
+            self.details['referer'] = referer
+
+
 # 便利函數
 def handle_security_exceptions(logger=None):
     """資安例外處理裝飾器"""

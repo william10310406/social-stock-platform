@@ -1,7 +1,7 @@
 """
-資安監控模組 - INFO-2 層級
+資安監控模組 - INFO-3 層級
 提供基礎監控指標、健康檢查、性能監控等功能
-依賴 INFO-0 基礎工具和 INFO-1 日誌服務
+依賴 INFO-0 常數、INFO-1 例外和 INFO-2 日誌服務
 """
 
 import time
@@ -14,12 +14,12 @@ from collections import defaultdict, deque
 import json
 import os
 
-# 依賴 INFO-0 層級
+# 依賴下層級
 from ..info_0.security_constants import *
-from ..info_0.security_exceptions import SecurityException
+from ..info_1.security_exceptions import SecurityException
 
-# 依賴 INFO-1 日誌服務
-from ..info_1.security_logger import SecurityLogger
+# 依賴 INFO-2 日誌服務
+from ..info_2.security_logger import SecurityLogger
 
 
 @dataclass
