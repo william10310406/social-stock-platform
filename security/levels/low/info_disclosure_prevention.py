@@ -10,11 +10,11 @@ from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 from pathlib import Path
 
-# 引入 INFO 層級的基礎模組
-from ..info import (
-    SecurityLogger, SecurityException, ValidationError,
-    get_config, SECURITY_EVENT_TYPES
-)
+# 引入 INFO 層級的基礎模組 - 按四層架構依賴
+from ..info.info_0.security_constants import SECURITY_EVENT_TYPES, LOG_LEVELS
+from ..info.info_1.security_exceptions import SecurityException, InputValidationError
+from ..info.info_2.security_logger import SecurityLogger, log_security_event
+from ..info.info_3.config_manager import get_config
 
 
 class InfoDisclosurePrevention:
@@ -146,7 +146,7 @@ class InfoDisclosurePrevention:
             filename_risk = self._check_sensitive_filename(path.name)
             
             if not path.exists():
-                raise ValidationError(f"文件不存在: {file_path}")
+                raise InputValidationError(f"文件不存在: {file_path}")
             
             # 讀取文件內容
             try:
@@ -172,7 +172,7 @@ class InfoDisclosurePrevention:
         try:
             dir_path = Path(directory_path)
             if not dir_path.exists():
-                raise ValidationError(f"目錄不存在: {directory_path}")
+                raise InputValidationError(f"目錄不存在: {directory_path}")
             
             results = {
                 'total_files': 0,
@@ -362,6 +362,14 @@ class InfoDisclosurePrevention:
             
             # 移除用戶名
             sanitized = re.sub(r'user[=:][\s]*[\'"]?([^\'"\s]+)[\'"]?', 'user=[USER]', sanitized, flags=re.IGNORECASE)
+            
+            # 移除密碼
+            sanitized = re.sub(r'password[=:][\s]*[\'"]?([^\'"\s]+)[\'"]?', 'password=[HIDDEN]', sanitized, flags=re.IGNORECASE)
+            sanitized = re.sub(r'pwd[=:][\s]*[\'"]?([^\'"\s]+)[\'"]?', 'pwd=[HIDDEN]', sanitized, flags=re.IGNORECASE)
+            sanitized = re.sub(r'passwd[=:][\s]*[\'"]?([^\'"\s]+)[\'"]?', 'passwd=[HIDDEN]', sanitized, flags=re.IGNORECASE)
+            
+            # 移除 API 金鑰和令牌
+            sanitized = re.sub(r'(api[_-]?key|token|secret)[=:][\s]*[\'"]?([^\'"\s]+)[\'"]?', r'\1=[HIDDEN]', sanitized, flags=re.IGNORECASE)
             
             # 移除詳細的堆疊追蹤
             if 'Traceback' in sanitized:

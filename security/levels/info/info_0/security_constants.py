@@ -114,3 +114,28 @@ INTERNAL_IP_RANGES = [
     '172.16.0.0/12',   # private class B
     '192.168.0.0/16'   # private class C
 ]
+
+# HTTP 安全標頭配置
+SECURITY_HEADERS = {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY', 
+    'X-XSS-Protection': '1; mode=block',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'Content-Security-Policy': "default-src 'self'",
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+}
+
+# 安全標頭風險等級
+SECURITY_HEADER_RISK_LEVELS = {
+    'X-Content-Type-Options': 'medium',
+    'X-Frame-Options': 'high',
+    'X-XSS-Protection': 'high',
+    'Strict-Transport-Security': 'high',
+    'Content-Security-Policy': 'critical',
+    'Referrer-Policy': 'low',
+    'Permissions-Policy': 'medium'
+}

@@ -10,11 +10,11 @@ from typing import Dict, Any, List, Optional, Union, Tuple
 from urllib.parse import unquote, quote
 import mimetypes
 
-# 引入 INFO 層級的基礎模組
-from ..info import (
-    SecurityLogger, SecurityException, ValidationError,
-    get_config, SECURITY_EVENT_TYPES
-)
+# 引入 INFO 層級的基礎模組 - 按四層架構依賴
+from ..info.info_0.security_constants import SECURITY_EVENT_TYPES, LOG_LEVELS
+from ..info.info_1.security_exceptions import SecurityException, InputValidationError, FileSecurityError
+from ..info.info_2.security_logger import SecurityLogger, log_security_event
+from ..info.info_3.config_manager import get_config
 
 
 class PathTraversalGuard:

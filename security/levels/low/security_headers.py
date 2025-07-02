@@ -7,11 +7,11 @@ from typing import Dict, Any, List, Optional, Union
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
-# 引入 INFO 層級的基礎模組
-from ..info import (
-    SecurityLogger, SecurityException, ValidationError,
-    get_config, SECURITY_HEADERS
-)
+# 引入 INFO 層級的基礎模組 - 按四層架構依賴
+from ..info.info_0.security_constants import SECURITY_HEADERS, LOG_LEVELS
+from ..info.info_1.security_exceptions import SecurityException, InputValidationError
+from ..info.info_2.security_logger import SecurityLogger, log_security_event
+from ..info.info_3.config_manager import get_config
 
 
 class SecurityHeaders:

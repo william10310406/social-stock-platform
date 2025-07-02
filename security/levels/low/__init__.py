@@ -1,6 +1,6 @@
 """
 Low 層級安全模組初始化 - Priority: 1
-一般安全風險防護，依賴 INFO 層級的基礎功能
+一般安全風險防護，依賴 INFO 四層級的基礎功能
 """
 
 # 匯入所有 LOW 層級模組
@@ -59,5 +59,5 @@ __priority__ = 1
 __level__ = "low"
 __description__ = "一般安全風險防護模組，處理輕微的安全問題"
 
-# 依賴關係
-__dependencies__ = ["info"]  # 依賴 INFO 層級
+# 依賴關係 - 根據四層 INFO 架構
+__dependencies__ = ["info_0", "info_1", "info_2", "info_3"]  # 依賴所有 INFO 層級

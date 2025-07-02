@@ -1,0 +1,423 @@
+# INFO 層級依賴關係詳細配置 - 更新版本
+# 每個模組的具體依賴和使用關係，避免同層級依賴
+
+metadata:
+  version: "3.0.0"
+  updated_date: "2025-07-02"
+  changes: "新增 LOW 層級依賴關係配置"
+
+info_levels:
+  info_0:
+    name: "基礎常數層級"
+    description: "最底層的常數定義，不依賴任何其他模組"
+    level: 0
+    modules:
+      security_constants:
+        file_path: "security/levels/info/info_0/security_constants.py"
+        description: "安全常數定義"
+        external_dependencies: []  # 無外部依賴
+        internal_dependencies: []  # 無內部依賴
+        exports:
+          - "XSS_DANGEROUS_TAGS"
+          - "XSS_ALLOWED_TAGS"
+          - "SECURITY_EVENT_TYPES"
+          - "LOG_LEVELS"
+          - "PASSWORD_MIN_LENGTH"
+          - "RATE_LIMIT_DEFAULTS"
+          - "SECURITY_HEADERS"
+          - "ERROR_CODES"
+        used_by:
+          - "info_1/security_utils"
+          - "info_1/security_exceptions"
+          - "info_2/security_logger"
+          - "info_3/config_manager"
+          - "info_3/security_monitoring"
+          - "low/info_disclosure_prevention"
+          - "low/password_policy"
+          - "low/security_headers"
+          - "low/path_traversal_guard"
+          - "low/endpoint_security"
+
+  info_1:
+    name: "基礎工具層級"
+    description: "工具函數和例外處理，只依賴 INFO-0"
+    level: 1
+    modules:
+      security_utils:
+        file_path: "security/levels/info/info_1/security_utils.py"
+        description: "基礎安全工具函數"
+        external_dependencies:
+          - "re"
+          - "hashlib"
+          - "secrets"
+          - "hmac"
+          - "ipaddress"
+          - "datetime"
+          - "typing"
+          - "base64"
+          - "urllib"
+          - "html"
+        internal_dependencies:
+          - "../info_0/security_constants"  # 只依賴下層級
+        exports:
+          - "SecurityUtils"
+        class_methods:
+          - "generate_secure_token"
+          - "generate_csrf_token"
+          - "hash_password"
+          - "verify_password"
+          - "sanitize_filename"
+          - "is_valid_email"
+          - "is_valid_ip"
+        used_by:
+          - "info_2/security_logger"
+          - "info_3/config_manager"
+          - "low/password_policy"
+          - "low/endpoint_security"
+
+      security_exceptions:
+        file_path: "security/levels/info/info_1/security_exceptions.py"
+        description: "安全相關例外類別"
+        external_dependencies:
+          - "typing"
+        internal_dependencies:
+          - "../info_0/security_constants"  # 只依賴下層級
+        exports:
+          - "SecurityException"
+          - "InputValidationError"
+          - "AuthenticationError"
+          - "AuthorizationError"
+          - "RateLimitExceededError"
+          - "FileSecurityError"
+          - "CryptographyError"
+          - "XSSException"
+          - "SQLInjectionException"
+          - "CSRFException"
+        used_by:
+          - "info_2/security_logger"
+          - "info_3/config_manager"
+          - "info_3/security_monitoring"
+          - "low/info_disclosure_prevention"
+          - "low/password_policy"
+          - "low/security_headers"
+          - "low/path_traversal_guard"
+          - "low/endpoint_security"
+
+  info_2:
+    name: "日誌服務層級"
+    description: "日誌記錄系統，依賴 INFO-0 和 INFO-1"
+    level: 2
+    modules:
+      security_logger:
+        file_path: "security/levels/info/info_2/security_logger.py"
+        description: "安全日誌記錄系統"
+        external_dependencies:
+          - "logging"
+          - "json"
+          - "datetime"
+          - "typing"
+          - "os"
+        internal_dependencies:
+          - "../info_0/security_constants"
+          - "../info_1/security_exceptions"
+        exports:
+          - "SecurityLogger"
+          - "get_security_logger"
+          - "log_security_event"
+        class_methods:
+          - "log_security_event"
+          - "log_xss_attempt"
+          - "log_authentication_failure"
+          - "log_rate_limit_violation"
+        used_by:
+          - "info_3/config_manager"
+          - "info_3/security_monitoring"
+          - "low/info_disclosure_prevention"
+          - "low/password_policy"
+          - "low/security_headers"
+          - "low/path_traversal_guard"
+          - "low/endpoint_security"
+
+  info_3:
+    name: "系統監控和配置層級"
+    description: "配置管理和系統監控，依賴所有下層級"
+    level: 3
+    modules:
+      config_manager:
+        file_path: "security/levels/info/info_3/config_manager.py"
+        description: "配置管理系統"
+        external_dependencies:
+          - "os"
+          - "json"
+          - "yaml"
+          - "typing"
+          - "pathlib"
+          - "configparser"
+          - "logging"
+          - "re"
+          - "dataclasses"
+          - "copy"
+        internal_dependencies:
+          - "../info_0/security_constants"
+          - "../info_1/security_exceptions"
+          - "../info_2/security_logger"
+        exports:
+          - "ConfigManager"
+          - "get_config_manager"
+          - "get_config"
+          - "set_config"
+        class_methods:
+          - "get_config"
+          - "set_config"
+          - "has_config"
+          - "reload_config"
+          - "export_config"
+        used_by:
+          - "low/info_disclosure_prevention"
+          - "low/password_policy"
+          - "low/security_headers"
+          - "low/path_traversal_guard"
+          - "low/endpoint_security"
+
+      security_monitoring:
+        file_path: "security/levels/info/info_3/security_monitoring.py"
+        description: "安全監控系統"
+        external_dependencies:
+          - "threading"
+          - "time"
+          - "datetime"
+          - "typing"
+          - "json"
+          - "psutil"
+          - "collections"
+          - "dataclasses"
+          - "os"
+        internal_dependencies:
+          - "../info_0/security_constants"
+          - "../info_1/security_exceptions"
+          - "../info_2/security_logger"
+        exports:
+          - "SecurityMonitoring"
+          - "MetricValue"
+          - "HealthCheckResult"
+          - "get_monitor"
+          - "monitor_performance"
+        class_methods:
+          - "record_metric"
+          - "increment_counter"
+          - "set_gauge"
+          - "record_timer"
+          - "start_monitoring"
+          - "stop_monitoring"
+          - "get_dashboard_data"
+
+# LOW 層級 - 一般安全風險防護
+low_level:
+  name: "一般安全風險防護層級"
+  description: "LOW 層級安全模組，依賴所有 INFO 層級"
+  level: 10  # 高於 INFO 層級
+  modules:
+    info_disclosure_prevention:
+      file_path: "security/levels/low/info_disclosure_prevention.py"
+      description: "信息洩露防護模組"
+      external_dependencies:
+        - "re"
+        - "json"
+        - "traceback"
+        - "typing"
+        - "datetime"
+        - "pathlib"
+      internal_dependencies:
+        - "../info/info_0/security_constants"
+        - "../info/info_1/security_exceptions"
+        - "../info/info_2/security_logger"
+        - "../info/info_3/config_manager"
+      exports:
+        - "InfoDisclosurePrevention"
+        - "scan_for_info_leaks"
+        - "sanitize_error"
+        - "create_safe_error"
+      class_methods:
+        - "scan_text_for_leaks"
+        - "scan_file_for_leaks"
+        - "scan_directory_for_leaks"
+        - "sanitize_error_message"
+        - "create_safe_error_response"
+      used_by: []  # 將被 MEDIUM/HIGH 層級使用
+
+    password_policy:
+      file_path: "security/levels/low/password_policy.py"
+      description: "密碼策略模組"
+      external_dependencies:
+        - "re"
+        - "secrets"
+        - "string"
+        - "hashlib"
+        - "typing"
+        - "datetime"
+        - "enum"
+        - "math"
+      internal_dependencies:
+        - "../info/info_0/security_constants"
+        - "../info/info_1/security_exceptions"
+        - "../info/info_1/security_utils"
+        - "../info/info_2/security_logger"
+        - "../info/info_3/config_manager"
+      exports:
+        - "PasswordPolicy"
+        - "PasswordStrength"
+        - "validate_password_strength"
+        - "generate_secure_password"
+        - "generate_passphrase"
+      class_methods:
+        - "validate_password"
+        - "generate_password"
+        - "check_password_history"
+        - "estimate_crack_time"
+      used_by: []
+
+    security_headers:
+      file_path: "security/levels/low/security_headers.py"
+      description: "HTTP 安全標頭模組"
+      external_dependencies:
+        - "typing"
+        - "datetime"
+        - "urllib"
+        - "re"
+      internal_dependencies:
+        - "../info/info_0/security_constants"
+        - "../info/info_1/security_exceptions"
+        - "../info/info_2/security_logger"
+        - "../info/info_3/config_manager"
+      exports:
+        - "SecurityHeaders"
+        - "get_security_headers"
+        - "validate_security_headers"
+      class_methods:
+        - "generate_headers"
+        - "validate_headers"
+        - "apply_headers"
+        - "get_csp_header"
+        - "get_hsts_header"
+      used_by: []
+
+    path_traversal_guard:
+      file_path: "security/levels/low/path_traversal_guard.py"
+      description: "路徑遍歷防護模組"
+      external_dependencies:
+        - "os"
+        - "re"
+        - "pathlib"
+        - "typing"
+        - "urllib"
+        - "mimetypes"
+      internal_dependencies:
+        - "../info/info_0/security_constants"
+        - "../info/info_1/security_exceptions"
+        - "../info/info_2/security_logger"
+        - "../info/info_3/config_manager"
+      exports:
+        - "PathTraversalGuard"
+        - "validate_file_path"
+        - "get_safe_filename"
+        - "create_safe_file_opener"
+      class_methods:
+        - "validate_path"
+        - "sanitize_filename"
+        - "create_secure_file_handler"
+        - "check_file_permissions"
+      used_by: []
+
+    endpoint_security:
+      file_path: "security/levels/low/endpoint_security.py"
+      description: "端點安全模組"
+      external_dependencies:
+        - "re"
+        - "json"
+        - "typing"
+        - "datetime"
+        - "urllib"
+        - "collections"
+      internal_dependencies:
+        - "../info/info_0/security_constants"
+        - "../info/info_1/security_exceptions"
+        - "../info/info_1/security_utils"
+        - "../info/info_2/security_logger"
+        - "../info/info_3/config_manager"
+      exports:
+        - "EndpointSecurity"
+        - "validate_endpoint_request"
+        - "check_rate_limit"
+        - "analyze_user_agent"
+      class_methods:
+        - "validate_request"
+        - "check_suspicious_patterns"
+        - "analyze_request_patterns"
+        - "block_malicious_requests"
+      used_by: []
+
+# 依賴規則
+dependency_rules:
+  - name: "無循環依賴"
+    description: "確保沒有循環依賴"
+    rule: "A -> B -> C -> A 是禁止的"
+    
+  - name: "只能依賴下層級"
+    description: "高層級只能依賴低層級"
+    rule: "info_N 只能依賴 info_(N-1), info_(N-2), ...; LOW 只能依賴 INFO 層級"
+    
+  - name: "同層級禁止依賴"
+    description: "同層級模組間不能互相依賴"
+    rule: "info_N/module_A 不能依賴 info_N/module_B; LOW/module_A 不能依賴 LOW/module_B"
+    
+  - name: "向上依賴禁止"
+    description: "低層級不能依賴高層級"
+    rule: "info_N 不能依賴 info_(N+1); INFO 不能依賴 LOW/MEDIUM/HIGH"
+
+  - name: "LOW 層級依賴規則"
+    description: "LOW 層級只能依賴 INFO 層級"
+    rule: "LOW 層級可以依賴 info_0, info_1, info_2, info_3，但不能依賴其他 LOW 模組"
+
+# 違規檢查
+violation_checks:
+  - type: "circular_dependency"
+    description: "檢查循環依賴"
+    severity: "critical"
+    
+  - type: "same_level_dependency"
+    description: "檢查同層級依賴"
+    severity: "high"
+    
+  - type: "upward_dependency"
+    description: "檢查向上依賴"
+    severity: "high"
+
+  - type: "low_level_cross_dependency"
+    description: "檢查 LOW 層級模組間的交叉依賴"
+    severity: "high"
+    
+  - type: "invalid_info_dependency"
+    description: "檢查是否依賴不存在的 INFO 層級模組"
+    severity: "medium"
+
+# 模組使用關係追蹤
+usage_tracking:
+  info_0_usage:
+    - "所有 INFO 和 LOW 層級模組都依賴 info_0"
+    - "提供基礎常數和配置"
+    
+  info_1_usage:
+    - "info_2, info_3 和所有 LOW 層級模組使用"
+    - "提供基礎工具函數和例外處理"
+    
+  info_2_usage:
+    - "info_3 和所有 LOW 層級模組使用"
+    - "提供日誌記錄功能"
+    
+  info_3_usage:
+    - "所有 LOW 層級模組使用"
+    - "提供配置管理和監控"
+    
+  low_level_usage:
+    - "將被 MEDIUM 和 HIGH 層級模組使用"
+    - "提供基礎安全防護功能"

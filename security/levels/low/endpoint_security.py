@@ -10,11 +10,12 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
 from collections import defaultdict, deque
 
-# 引入 INFO 層級的基礎模組
-from ..info import (
-    SecurityLogger, SecurityException, ValidationError,
-    get_config, SECURITY_EVENT_TYPES, RateLimiter
-)
+# 引入 INFO 層級的基礎模組 - 按四層架構依賴
+from ..info.info_0.security_constants import SECURITY_EVENT_TYPES, LOG_LEVELS
+from ..info.info_1.security_exceptions import SecurityException, InputValidationError, RateLimitExceededError
+from ..info.info_1.security_utils import SecurityUtils
+from ..info.info_2.security_logger import SecurityLogger, log_security_event
+from ..info.info_3.config_manager import get_config
 
 
 class EndpointSecurity:
@@ -327,16 +328,17 @@ class EndpointSecurity:
             limiter_key = f"{remote_ip}:{path}"
             
             if limiter_key not in self.rate_limiters:
-                self.rate_limiters[limiter_key] = RateLimiter(
-                    max_requests=self.config['rate_limit_requests'],
-                    time_window=self.config['rate_limit_window']
-                )
+                self.rate_limiters[limiter_key] = SecurityUtils.RateLimiter()
             
             limiter = self.rate_limiters[limiter_key]
-            is_allowed = limiter.is_allowed(remote_ip)
+            is_rate_limited = limiter.is_rate_limited(
+                remote_ip, 
+                self.config['rate_limit_requests'], 
+                self.config['rate_limit_window']
+            )
             
             return {
-                'is_allowed': is_allowed,
+                'is_allowed': not is_rate_limited,
                 'remaining': limiter.get_remaining_requests(remote_ip),
                 'reset_time': limiter.get_reset_time(remote_ip)
             }

@@ -134,6 +134,27 @@ class SecurityLogger:
             'CRITICAL': logging.CRITICAL
         }
         return priority_to_log_level.get(priority.upper(), logging.INFO)
+    
+    def info(self, message: str, **kwargs):
+        """記錄 INFO 級別日誌"""
+        self.logger.info(message, extra=kwargs)
+    
+    def warning(self, message: str, **kwargs):
+        """記錄 WARNING 級別日誌"""
+        self.logger.warning(message, extra=kwargs)
+    
+    def error(self, message: str, **kwargs):
+        """記錄 ERROR 級別日誌"""
+        self.logger.error(message, extra=kwargs)
+    
+    def critical(self, message: str, **kwargs):
+        """記錄 CRITICAL 級別日誌"""
+        self.logger.critical(message, extra=kwargs)
+    
+    def debug(self, message: str, **kwargs):
+        """記錄 DEBUG 級別日誌"""
+        self.logger.debug(message, extra=kwargs)
+    
 
 
 class SecurityLogFormatter(logging.Formatter):
